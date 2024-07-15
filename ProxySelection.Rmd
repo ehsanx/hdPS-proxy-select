@@ -7,14 +7,6 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-**Codechuck 0. Loading data -- Generating Recurrence Covariates**
-
-_Step 0: Analytic data, Step 1: Proxy sources, Step 2: Emperical, Step 3: Recurrence_
-```{r loading-data, warning=FALSE}
-# ------------------- Select proxy based on the results from out2
-# ------------------- change the code after Step 3: Recurrence
 require(autoCovariateSelection)
 require(dplyr)
 require(cobalt)
@@ -29,9 +21,15 @@ library(mclust)
 library(penalizedSVM)
 library(xgboost)
 library(caret)
+require(autoCovariateSelection)
+```
 
+**Codechuck 0. Loading data -- Generating Recurrence Covariates**
 
-
+_Step 0: Analytic data, Step 1: Proxy sources, Step 2: Emperical, Step 3: Recurrence_
+```{r loading-data, warning=FALSE, cache=TRUE}
+# ------------------- Select proxy based on the results from out2
+# ------------------- change the code after Step 3: Recurrence
 load("data/analytic3cycles.RData")
 
 analytic <- data.complete
@@ -64,7 +62,6 @@ length(patientIds)
 save(dfx, patientIds, basetable, file = "data/dfx.RData")
 load(file = "data/dfx.RData")
 
-require(autoCovariateSelection)
 step1 <- get_candidate_covariates(df = dfx,  
                                   domainVarname = "domain",
                                   eventCodeVarname = "icd10", 
@@ -102,7 +99,7 @@ investigator.specified.covariates <-
 ```
 
 **Method 1: Bross Formula**
-```{r, warning=FALSE}
+```{r, warning=FALSE, cache=TRUE}
 out3 <- get_prioritised_covariates(df = out2,
                                    patientIdVarname = "idx", 
                                    exposureVector = basetable$exposure,
@@ -129,7 +126,7 @@ covform <- paste0(investigator.specified.covariates, collapse = "+")
 rhsformula <- paste0(c(covform, proxyform), collapse = "+")
 ps.formula <- as.formula(paste0("exposure", "~", rhsformula))
 
-require(WeightIt)
+
 W.out <- weightit(ps.formula, 
                   data = hdps.data, 
                   estimand = "ATE",
@@ -163,7 +160,7 @@ round(sum_ci.bross, 3)
 ```
 
 **Method 2: Hybrid Bross Formula & Lasso**
-```{r, warning=FALSE}
+```{r, warning=FALSE, cache=TRUE}
 set.seed(42)
 proxy.list <- names(out3$autoselected_covariate_df[,-1])
 covarsTfull <- c(investigator.specified.covariates, proxy.list)
@@ -213,7 +210,7 @@ round(sum_ci.hybrid, 3)
 ```
 
 _Before implementing other methods, drop the information from method 1 (Bross formula). Continue with the results from Step 3: Recurrence (table `out2`)._
-```{r, warning=FALSE}
+```{r, warning=FALSE, cache=TRUE}
 hdps.dim <- out2
 
 load("data/analytic3cycles.RData")
@@ -242,7 +239,7 @@ Y.form <- as.formula(paste0(c("outcome~ exposure",
 ```
 
 **Method 3: Pure Lasso**
-```{r, warning=FALSE}
+```{r, warning=FALSE, cache=TRUE}
 set.seed(42) # different seed -> different length for the selected proxy list
 covar.mat <- model.matrix(Y.form, data = hdps.data)[,-1]
 lasso.fit <- glmnet::cv.glmnet(y = hdps.data$outcome, 
@@ -260,7 +257,6 @@ proxy.lasso <- paste0(fs.lasso, collapse = "+")
 form.lasso <- paste0(c(covform, proxy.lasso), collapse = "+")
 formula.lasso <- as.formula(paste0("exposure", "~", form.lasso))
 
-require(WeightIt)
 W.out.lasso <- weightit(formula.lasso, 
                         data = hdps.data, 
                         estimand = "ATE",
@@ -300,7 +296,7 @@ sum_ci.lasso
 ```
 
 **Method 4: Elastic Net**
-```{r, warning=FALSE}
+```{r, warning=FALSE, cache=TRUE}
 set.seed(42)
 covar.mat <- model.matrix(Y.form, data = hdps.data)[,-1]
 elas.fit <- glmnet::cv.glmnet(y = hdps.data$outcome, 
@@ -319,7 +315,6 @@ proxy.elastic <- paste0(fs.elastic, collapse = "+")
 form.elastic <- paste0(c(covform, proxy.elastic), collapse = "+")
 formula.elastic <- as.formula(paste0("exposure", "~", form.elastic))
 
-require(WeightIt)
 W.out.elastic <- weightit(formula.elastic, 
                        data = hdps.data, 
                        estimand = "ATE",
@@ -359,7 +354,7 @@ sum_ci.elastic
 ```
 
 **Method 5: XGBoost**
-```{r, warning=FALSE}
+```{r, warning=FALSE, cache=TRUE}
 xgb_fit <- xgboost(data = covar.mat, label = hdps.data$outcome, 
                     max.depth = 20, eta = 1, nthread = 2, nrounds = 5, 
                     objective = "binary:logistic")
@@ -372,7 +367,6 @@ proxy.xgboost <- paste0(fs.xgboost, collapse = "+")
 form.xgboost <- paste0(c(covform, proxy.xgboost), collapse = "+")
 formula.xgboost <- as.formula(paste0("exposure", "~", form.xgboost))
 
-require(WeightIt)
 W.out.xgboost <- weightit(formula.xgboost, 
                           data = hdps.data, 
                           estimand = "ATE",
@@ -414,7 +408,7 @@ sum_ci.xgboost
 **Method 6: GA**
 
 _GA (Genetic Algorithm) has no specific internal model building mechanism and would wrap around whatever model the user specifies_
-```{r, warning=FALSE}
+```{r, warning=FALSE, cache=TRUE}
 gaOpt <- function(vars, IV.train, DV.train) {
 	varNames <- colnames(IV.train) #getting names of all variables
 	selectedVarNames <- varNames[vars == "1"] # getting names of selected vars from GA
@@ -446,7 +440,6 @@ proxy.GA <- paste0(fs.GA, collapse = "+")
 form.GA <- paste0(c(covform, proxy.GA), collapse = "+")
 formula.GA <- as.formula(paste0("exposure", "~", form.GA))
 
-require(WeightIt)
 W.out.GA <- weightit(formula.GA, 
                          data = hdps.data, 
                          estimand = "ATE",
@@ -490,7 +483,7 @@ sum_ci.GA
 _Elastic SCAD SVM uses an approach like LASSO and Elastic Net in that it selects variables via the addition of a penalty._
 
 _(Long Running Time)_
-```{r, results='hide'}
+```{r, warning=FALSE, cache=TRUE}
 svmTrainOutcome <- hdps.data$outcome
 svmTrainOutcome[svmTrainOutcome == 0] <- -1
 svmTrainPreds <- data.frame(covar.mat)
@@ -508,14 +501,13 @@ svm.model <- svmfs(x=covar.mat,
 				   seed=42)
 ```
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, cache=TRUE}
 fs.svm <- colnames(covar.mat)[svm.model$model$fit.info$model.list$model$xind]
 fs.svm <- proxy.list[proxy.list %in% fs.svm]
 proxy.svm <- paste0(fs.svm, collapse = "+")
 form.svm <- paste0(c(covform, proxy.svm), collapse = "+")
 formula.svm <- as.formula(paste0("exposure", "~", form.svm))
 
-require(WeightIt)
 W.out.svm <- weightit(formula.svm, 
                         data = hdps.data, 
                         estimand = "ATE",
@@ -560,7 +552,7 @@ sum_ci.svm
 _Boruta Selection would give the feature importance ranking based on the Random Forests algorithm which are able to capture some non-linear trends but not easy to interpret._
 
 _(Long Running Time)_
-```{r, warning=FALSE}
+```{r, warning=FALSE, cache=TRUE}
 set.seed(42)
 boruta_output <- Boruta(Y.form, data = hdps.data, doTrace = 1)
 sel.variables.bor <- names(boruta_output$finalDecision)[which(boruta_output$finalDecision != "Rejected")]
@@ -569,7 +561,6 @@ proxy.boruta <- paste0(fs.boruta, collapse = "+")
 form.boruta <- paste0(c(covform, proxy.boruta), collapse = "+")
 formula.boruta <- as.formula(paste0("exposure", "~", form.boruta))
 
-require(WeightIt)
 W.out.boruta <- weightit(formula.boruta, 
                          data = hdps.data, 
                          estimand = "ATE",
@@ -610,7 +601,7 @@ sum_ci.boruta
 
 
 **Method 9.1: Stepwise Regression (Forward)**
-```{r}
+```{r, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 initial_formula <- as.formula(paste0("outcome~exposure+",
@@ -633,7 +624,6 @@ proxy.forward <- paste0(fs.forward, collapse = "+")
 form.forward <- paste0(c(covform, proxy.forward), collapse = "+")
 formula.forward <- as.formula(paste0("exposure", "~", form.forward))
 
-require(WeightIt)
 W.out.forward <- weightit(formula.forward, 
                           data = hdps.data, 
                           estimand = "ATE",
@@ -674,7 +664,7 @@ sum_ci.forward
 
 
 **Method 9.2: Stepwise Regression (Backward)**
-```{r}
+```{r, warning=FALSE, cache=TRUE}
 stepwise_backward <- stepAIC(full_model, direction = "backward")
 fs.backward <- proxy.list[proxy.list %in% fs.backward]
 fs.backward <- fs.backward[fs.backward != "exposure"]
@@ -682,7 +672,6 @@ proxy.backward <- paste0(fs.backward, collapse = "+")
 form.backward <- paste0(c(covform, proxy.backward), collapse = "+")
 formula.backward <- as.formula(paste0("exposure", "~", form.backward))
 
-require(WeightIt)
 W.out.backward <- weightit(formula.backward, 
                           data = hdps.data, 
                           estimand = "ATE",
@@ -722,7 +711,7 @@ sum_ci.backward
 ```
 
 **Method 9.3: Stepwise Regression (Both)**
-```{r}
+```{r, warning=FALSE, cache=TRUE}
 stepwise_both <- stepAIC(initial_model, 
                             scope = list(lower = initial_model, 
                                          upper = full_model), 
@@ -733,7 +722,6 @@ proxy.both <- paste0(fs.both, collapse = "+")
 form.both <- paste0(c(covform, proxy.both), collapse = "+")
 formula.both <- as.formula(paste0("exposure", "~", form.both))
 
-require(WeightIt)
 W.out.both <- weightit(formula.both, 
                           data = hdps.data, 
                           estimand = "ATE",
@@ -773,7 +761,7 @@ sum_ci.both
 ```
 
 Comparing the Results:
-```{r}
+```{r, warning=FALSE, cache=TRUE}
 sum_ci.all <- rbind(sum_ci.bross, sum_ci.hybrid, sum_ci.lasso, sum_ci.elastic, 
                     sum_ci.xgboost, sum_ci.GA, sum_ci.svm, sum_ci.boruta,
                     sum_ci.forward, sum_ci.backward, sum_ci.both)
