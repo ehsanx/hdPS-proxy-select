@@ -1,0 +1,877 @@
+---
+title: "Step1_LoadData"
+author: "Yang Lei"
+date: "2024-07-11"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Codechuck 0. Loading data -- Generating Recurrence Covariates**
+
+_Step 0: Analytic data, Step 1: Proxy sources, Step 2: Emperical, Step 3: Recurrence_
+```{r loading-data, warning=FALSE}
+# ------------------- Select proxy based on the results from out2
+# ------------------- change the code after Step 3: Recurrence
+require(autoCovariateSelection)
+require(dplyr)
+require(cobalt)
+require(WeightIt)
+library(tidyverse)
+library(ggplot2)
+library(lmtest)
+library(MASS)
+library(Boruta)
+library(GA)
+library(mclust)
+library(penalizedSVM)
+library(xgboost)
+library(caret)
+
+
+
+load("data/analytic3cycles.RData")
+
+analytic <- data.complete
+idx <- analytic$id
+outcome <- as.numeric(analytic$diabetes == "Yes") 
+exposure <- as.numeric(analytic$obese == "Yes")
+
+domain <- "dx"
+analytic.dfx <- as.data.frame(cbind(idx, exposure, outcome, domain))
+dat.proxy.long <- subset(dat.proxy.long, 
+                         icd10 != "E66") # Overweight and obesity
+dat.proxy.long <- subset(dat.proxy.long, 
+                         icd10 != "O24") # Gestational diabetes mellitus
+dat.proxy.long <- subset(dat.proxy.long, 
+                         icd10 != "E10") # Type 1 diabetes mellitus
+dat.proxy.long <- subset(dat.proxy.long, 
+                         icd10 != "E11") # Type 2 diabetes mellitus
+proxy.var.long <- dat.proxy.long
+proxy.var.long$idx <- proxy.var.long$id
+proxy.var.long$id <- NULL
+dfx <- merge(analytic.dfx, proxy.var.long, by = "idx")
+# ------------------- now the proxy data was combined to the A and Y
+
+# basetable <- dfx %>% select(idx, exposure, outcome) %>% distinct()
+basetable <- dfx[, c(1:3)] %>% distinct()
+patientIds <- basetable$idx
+length(patientIds)
+# ------------------- number of observations
+
+save(dfx, patientIds, basetable, file = "data/dfx.RData")
+load(file = "data/dfx.RData")
+
+require(autoCovariateSelection)
+step1 <- get_candidate_covariates(df = dfx,  
+                                  domainVarname = "domain",
+                                  eventCodeVarname = "icd10", 
+                                  patientIdVarname = "idx",
+                                  patientIdVector = patientIds,
+                                  n = 200, 
+                                  min_num_patients = 20)
+out1 <- step1$covars_data
+# ------------------- top 200 prevalent icd10 with min 20 patients
+
+step2 <- get_recurrence_covariates(df = out1, 
+                                   patientIdVarname = "idx",
+                                   eventCodeVarname = "icd10", 
+                                   patientIdVector = patientIds)
+out2 <- step2$recurrence_data
+
+exposure <- "obese"
+outcome <- "diabetes" 
+investigator.specified.covariates <- 
+  c(# Demographic
+    "age.cat", "sex", "education", "race", 
+    "marital", "income", "born", "year",
+    
+    # health history related variables/access
+    "diabetes.family.history", "medical.access",
+    
+    # behavioral
+    "smoking", "diet.healthy", "physical.activity", "sleep",
+    
+    # Laboratory 
+    "uric.acid", "protein.total", "bilirubin.total", "phosphorus",
+    "sodium", "potassium", "globulin", "calcium.total", 
+    "systolicBP", "diastolicBP", "high.cholesterol"
+  )
+```
+
+**Method 1: Bross Formula**
+```{r, warning=FALSE}
+out3 <- get_prioritised_covariates(df = out2,
+                                   patientIdVarname = "idx", 
+                                   exposureVector = basetable$exposure,
+                                   outcomeVector = basetable$outcome,
+                                   patientIdVector = patientIds, 
+                                   k = 100)
+hdps.dim <- out3$autoselected_covariate_df
+
+load("data/analytic3cycles.RData")
+hdps.dim$id <- hdps.dim$idx
+hdps.dim$idx <- NULL
+hdps.data <- merge(data.complete[,c("id",
+                                    outcome, 
+                                    exposure, 
+                                    investigator.specified.covariates)], 
+                   hdps.dim, by = "id")
+
+hdps.data$exposure <- as.numeric(I(hdps.data$obese=='Yes'))
+hdps.data$outcome <- as.numeric(I(hdps.data$diabetes=='Yes'))
+
+proxy.list.sel <- names(out3$autoselected_covariate_df[,-1])
+proxyform <- paste0(proxy.list.sel, collapse = "+")
+covform <- paste0(investigator.specified.covariates, collapse = "+")
+rhsformula <- paste0(c(covform, proxyform), collapse = "+")
+ps.formula <- as.formula(paste0("exposure", "~", rhsformula))
+
+require(WeightIt)
+W.out <- weightit(ps.formula, 
+                  data = hdps.data, 
+                  estimand = "ATE",
+                  method = "ps")
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+fit <- glm(out.formula,
+           data = hdps.data,
+           weights = W.out$weights,
+           family= binomial(link = "logit"))
+fit.summary <- summary(fit)$coef["exposure",
+                                 c("Estimate", 
+                                   "Std. Error", 
+                                   "Pr(>|z|)")]
+fit.ci <- confint(fit, level = 0.95)["exposure", ]
+fit.summary_with_ci <- c(fit.summary, fit.ci)
+fit.summary_with_ci 
+
+fs.bross <- proxy.list.sel
+sum_ci.bross <- c(exp(fit.summary_with_ci[1]), fit.summary_with_ci)
+names(sum_ci.bross) <- c("Odds Ratio",
+                          "Estimate",
+                          "Std. Error",
+                          "Pr(>|z|)",
+                          "2.5 %",
+                          "97.5 %")
+
+print("No need to print the number of proxy variables selected, as it is set to be 100.")
+
+print("The Odds Ratio by Bross Formula")
+round(sum_ci.bross, 3)
+```
+
+**Method 2: Hybrid Bross Formula & Lasso**
+```{r, warning=FALSE}
+set.seed(42)
+proxy.list <- names(out3$autoselected_covariate_df[,-1])
+covarsTfull <- c(investigator.specified.covariates, proxy.list)
+Y.form <- as.formula(paste0(c("outcome~ exposure", 
+                              covarsTfull), collapse = "+") )
+covar.mat <- model.matrix(Y.form, data = hdps.data)[,-1]
+lasso.fit<-glmnet::cv.glmnet(y = hdps.data$outcome, 
+                             x = covar.mat, 
+                             type.measure='mse',
+                             family="binomial",
+                             alpha = 1, 
+                             nfolds = 5)
+coef.fit<-coef(lasso.fit,s='lambda.min',exact=TRUE)
+sel.variables<-row.names(coef.fit)[which(as.numeric(coef.fit)!=0)]
+proxy.list.sel.hybrid <- proxy.list[proxy.list %in% sel.variables]
+length(proxy.list.sel.hybrid)
+fs.hybrid <- proxy.list.sel.hybrid
+
+proxyform <- paste0(proxy.list.sel.hybrid, collapse = "+")
+rhsformula <- paste0(c(covform, proxyform), collapse = "+")
+ps.formula <- as.formula(paste0("exposure", "~", rhsformula))
+
+W.out <- weightit(ps.formula, 
+                  data = hdps.data, 
+                  estimand = "ATE",
+                  method = "ps")
+
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+fit <- glm(out.formula,
+           data = hdps.data,
+           weights = W.out$weights,
+           family= binomial(link = "logit"))
+fit.summary <- summary(fit)$coef["exposure",
+                                 c("Estimate", 
+                                   "Std. Error", 
+                                   "Pr(>|z|)")]
+fit.ci <- confint(fit, level = 0.95)["exposure", ]
+fit.summary_with_ci.h <- c(fit.summary, fit.ci)
+sum_ci.hybrid <- c(exp(fit.summary_with_ci.h[1]), fit.summary_with_ci.h)
+
+paste("The number of proxy variables selected:", length(proxy.list.sel.hybrid))
+print("All proxy variables selected are in common as they are all selected from 
+      the proxy variable list by the bross formula")
+
+print("The Odds Ratio by Bross Formula & Lasso")
+round(sum_ci.hybrid, 3)
+```
+
+_Before implementing other methods, drop the information from method 1 (Bross formula). Continue with the results from Step 3: Recurrence (table `out2`)._
+```{r, warning=FALSE}
+hdps.dim <- out2
+
+load("data/analytic3cycles.RData")
+hdps.dim$id <- hdps.dim$idx
+hdps.dim$idx <- NULL
+hdps.data <- merge(data.complete[,c("id",
+                                    outcome, 
+                                    exposure, 
+                                    investigator.specified.covariates)], 
+                   hdps.dim, by = "id")
+
+hdps.data$exposure <- as.numeric(I(hdps.data$obese=='Yes'))
+hdps.data$outcome <- as.numeric(I(hdps.data$diabetes=='Yes'))
+
+proxy.list.sel <- names(out2[,-1])
+proxyform <- paste0(proxy.list.sel, collapse = "+")
+covform <- paste0(investigator.specified.covariates, collapse = "+")
+rhsformula <- paste0(c(covform, proxyform), collapse = "+")
+ps.formula <- as.formula(paste0("exposure", "~", rhsformula))
+
+proxy.list <- names(out2[,-1])    # length(proxy.list) :  142
+covarsTfull <- c(investigator.specified.covariates, proxy.list)
+Y.form <- as.formula(paste0(c("outcome~ exposure", 
+                              covarsTfull), collapse = "+") )
+
+```
+
+**Method 3: Pure Lasso**
+```{r, warning=FALSE}
+set.seed(42) # different seed -> different length for the selected proxy list
+covar.mat <- model.matrix(Y.form, data = hdps.data)[,-1]
+lasso.fit <- glmnet::cv.glmnet(y = hdps.data$outcome, 
+                               x = covar.mat, 
+                               type.measure='mse',
+                               family="binomial",
+                               alpha = 1, 
+                               nfolds = 5)
+coef.fit<-coef(lasso.fit,s='lambda.min',exact=TRUE)
+sel.variables<-row.names(coef.fit)[which(as.numeric(coef.fit)!=0)]
+proxy.list.sel.ml <- proxy.list[proxy.list %in% sel.variables]
+length(proxy.list.sel.ml)
+fs.lasso <- proxy.list.sel.ml
+proxy.lasso <- paste0(fs.lasso, collapse = "+")
+form.lasso <- paste0(c(covform, proxy.lasso), collapse = "+")
+formula.lasso <- as.formula(paste0("exposure", "~", form.lasso))
+
+require(WeightIt)
+W.out.lasso <- weightit(formula.lasso, 
+                        data = hdps.data, 
+                        estimand = "ATE",
+                        method = "ps")
+
+hdps.data$ps.l <- W.out.lasso$ps
+hdps.data$w.l <- W.out.lasso$weights
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+out.formula
+fit.lasso <- glm(out.formula,
+                 data = hdps.data,
+                 weights = W.out.lasso$weights,
+                 family= binomial(link = "logit"))
+summary.lasso <- summary(fit.lasso)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.lasso <- confint(fit.lasso, level = 0.95)["exposure", ]
+sum_ci.lasso <- c(exp(summary.lasso[1]), summary.lasso, ci.lasso)
+names(sum_ci.lasso) <- c("Odds Ratio",
+                         "Estimate",
+                         "Std. Error",
+                         "Pr(>|z|)",
+                         "2.5 %",
+                         "97.5 %")
+
+# Q1: How many proxy variables are in common?
+# length(fs.lasso)  # 60 features selected by lasso
+# length(fs.lasso[fs.lasso %in% fs.bross])  # 47 of 60 also selected by bross
+print("How many proxy variables are in common?")
+paste("There are", length(fs.lasso), "features selected by lasso")
+paste(length(fs.lasso[fs.lasso %in% fs.bross]), "of the", length(fs.lasso), 
+      "are also selected by the bross formula method")
+# See which variables are not in common:
+# fs.lasso[!(fs.lasso %in% fs.bross)]
+
+# Q2: Odds ratio
+print("The Odds Ratio by Method Pure Lasso")
+sum_ci.lasso
+```
+
+**Method 4: Elastic Net**
+```{r, warning=FALSE}
+set.seed(42)
+covar.mat <- model.matrix(Y.form, data = hdps.data)[,-1]
+elas.fit <- glmnet::cv.glmnet(y = hdps.data$outcome, 
+                             x = covar.mat, 
+                             type.measure='mse',
+                             family="binomial",
+                             alpha = 0.5, 
+                             nfolds = 5)
+coef.fit<-coef(elas.fit, s='lambda.min', exact=TRUE)
+sel.variables<-row.names(coef.fit)[which(as.numeric(coef.fit)!=0)]
+proxy.list.sel.elastic <- proxy.list[proxy.list %in% sel.variables]
+length(proxy.list.sel.elastic)
+fs.elastic <- proxy.list.sel.elastic
+
+proxy.elastic <- paste0(fs.elastic, collapse = "+")
+form.elastic <- paste0(c(covform, proxy.elastic), collapse = "+")
+formula.elastic <- as.formula(paste0("exposure", "~", form.elastic))
+
+require(WeightIt)
+W.out.elastic <- weightit(formula.elastic, 
+                       data = hdps.data, 
+                       estimand = "ATE",
+                       method = "ps")
+
+hdps.data$ps.e <- W.out.elastic$ps
+hdps.data$w.e <- W.out.elastic$weights
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+out.formula
+fit.elastic <- glm(out.formula,
+                data = hdps.data,
+                weights = W.out.elastic$weights,
+                family= binomial(link = "logit"))
+summary.elastic <- summary(fit.elastic)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.elastic <- confint(fit.elastic, level = 0.95)["exposure", ]
+sum_ci.elastic <- c(exp(summary.elastic[1]), summary.elastic, ci.elastic)
+names(sum_ci.elastic) <- c("Odds Ratio",
+                         "Estimate",
+                         "Std. Error",
+                         "Pr(>|z|)",
+                         "2.5 %",
+                         "97.5 %")
+
+# Q1: How many proxy variables are in common (Elastic Net vs Bross Formula)?
+# length(fs.elastic)  # 69 features selected by elastic net
+# length(fs.elastic[fs.elastic %in% fs.bross])  # 54 of 69 also selected by bross formula
+print("How many proxy variables are in common?")
+paste("There are", length(fs.elastic), "features selected by elas")
+paste(length(fs.elastic[fs.elastic %in% fs.bross]), "of the", length(fs.elastic), 
+      "are also selected by the bross formula method")
+# See which variables are not in common:
+# fs.elastic[!(fs.elastic %in% fs.bross)]
+
+# Q2: Odds ratio
+print("The Odds Ratio by Elastic Net")
+sum_ci.elastic
+```
+
+**Method 5: XGBoost**
+```{r, warning=FALSE}
+xgb_fit <- xgboost(data = covar.mat, label = hdps.data$outcome, 
+                    max.depth = 20, eta = 1, nthread = 2, nrounds = 5, 
+                    objective = "binary:logistic")
+
+xgb_imp <- xgb.importance(model = xgb_fit)
+xgb.plot.importance(importance_matrix = xgb_imp)
+fs.xgboost <- xgb_imp$Feature
+fs.xgboost <- proxy.list[proxy.list %in% fs.xgboost]
+proxy.xgboost <- paste0(fs.xgboost, collapse = "+")
+form.xgboost <- paste0(c(covform, proxy.xgboost), collapse = "+")
+formula.xgboost <- as.formula(paste0("exposure", "~", form.xgboost))
+
+require(WeightIt)
+W.out.xgboost <- weightit(formula.xgboost, 
+                          data = hdps.data, 
+                          estimand = "ATE",
+                          method = "ps")
+
+hdps.data$ps.xgboost <- W.out.xgboost$ps
+hdps.data$w.xgboost <- W.out.xgboost$weights
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+out.formula
+fit.xgboost <- glm(out.formula,
+                   data = hdps.data,
+                   weights = W.out.xgboost$weights,
+                   family= binomial(link = "logit"))
+summary.xgboost <- summary(fit.xgboost)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.xgboost <- confint(fit.xgboost, level = 0.95)["exposure", ]
+sum_ci.xgboost <- c(exp(summary.xgboost[1]), summary.xgboost, ci.xgboost)
+names(sum_ci.xgboost) <- c("Odds Ratio",
+                           "Estimate",
+                           "Std. Error",
+                           "Pr(>|z|)",
+                           "2.5 %",
+                           "97.5 %")
+
+# Q1: How many proxy variables are in common?
+# length(fs.xgboost) 
+# length(fs.xgboost[fs.xgboost %in% fs.bross])
+print("How many proxy variables are in common?")
+paste("There are", length(fs.xgboost), "features selected by xgboost")
+paste(length(fs.xgboost[fs.xgboost %in% fs.bross]), "of the", length(fs.xgboost), 
+      "are also selected by the bross formula method")
+# See which variables are not in common:
+# fs.xgboost[!(fs.xgboost %in% fs.bross)]
+
+# Q2: Odds ratio
+print("The Odds Ratio by XGBoost")
+sum_ci.xgboost
+```
+
+**Method 6: GA**
+
+_GA (Genetic Algorithm) has no specific internal model building mechanism and would wrap around whatever model the user specifies_
+```{r, warning=FALSE}
+gaOpt <- function(vars, IV.train, DV.train) {
+	varNames <- colnames(IV.train) #getting names of all variables
+	selectedVarNames <- varNames[vars == "1"] # getting names of selected vars from GA
+	gaSolutionData <- IV.train[,selectedVarNames] # keeping only those selected vars
+
+	gaDat <- cbind(gaSolutionData,DV.train) # combining selected variables with outcome variable
+	gaMod <- glm(DV.train ~ ., family = "binomial", data = gaDat) #build model
+	gaProb <- predict(gaMod, IV.train, type = "response") # get probabilities
+	gaPred <- ifelse(gaProb >= .8, 1, 0) # get predicted 0s and 1s
+
+	ari <- adjustedRandIndex(gaPred, DV.train)
+	return(ari)
+}
+
+ga.solution <- ga(fitness = function(vars)
+ gaOpt(vars=vars, 
+       IV.train=data.frame(covar.mat),
+       DV.train=hdps.data$outcome),
+ type = "binary", 
+ nBits = ncol(covar.mat),
+ names = colnames(covar.mat), 
+ seed = 42,
+ run=5)
+
+allVarNames <- colnames(covar.mat)
+sel.variables.GA <- allVarNames[ga.solution@solution[1,]==1]
+fs.GA <- proxy.list[proxy.list %in% sel.variables.GA]
+proxy.GA <- paste0(fs.GA, collapse = "+")
+form.GA <- paste0(c(covform, proxy.GA), collapse = "+")
+formula.GA <- as.formula(paste0("exposure", "~", form.GA))
+
+require(WeightIt)
+W.out.GA <- weightit(formula.GA, 
+                         data = hdps.data, 
+                         estimand = "ATE",
+                         method = "ps")
+
+hdps.data$ps.ga <- W.out.GA$ps
+hdps.data$w.ga <- W.out.GA$weights
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+out.formula
+fit.GA <- glm(out.formula,
+                  data = hdps.data,
+                  weights = W.out.GA$weights,
+                  family= binomial(link = "logit"))
+summary.GA <- summary(fit.GA)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.GA <- confint(fit.GA, level = 0.95)["exposure", ]
+sum_ci.GA <- c(exp(summary.GA[1]), summary.GA, ci.GA)
+names(sum_ci.GA) <- c("Odds Ratio",
+                          "Estimate",
+                          "Std. Error",
+                          "Pr(>|z|)",
+                          "2.5 %",
+                          "97.5 %")
+
+# Q1: How many proxy variables are in common (GA vs Bross Formula)?
+# length(fs.GA)  # 64 features selected by GA
+# length(fs.GA[fs.GA %in% fs.bross])  # 44 of 64 also selected by bross formula
+print("How many proxy variables are in common?")
+paste("There are", length(fs.GA), "features selected by GA")
+paste(length(fs.GA[fs.GA %in% fs.bross]), "of the", length(fs.GA), 
+      "are also selected by the bross formula method")
+# See which variables are not in common:
+# fs.GA[!(fs.GA %in% fs.bross)]
+
+# Q2: Odds ratio
+print("The Odds Ratio by GA:")
+sum_ci.GA
+```
+
+**Method 7: Elastic SCAD SVM**
+
+_Elastic SCAD SVM uses an approach like LASSO and Elastic Net in that it selects variables via the addition of a penalty._
+
+_(Long Running Time)_
+```{r, results='hide'}
+svmTrainOutcome <- hdps.data$outcome
+svmTrainOutcome[svmTrainOutcome == 0] <- -1
+svmTrainPreds <- data.frame(covar.mat)
+
+bounds <- t(data.frame(log2lambda1=c(-10, 10), log2lambda2=c(-10,10)))
+colnames(bounds)<-c("lower", "upper")
+svm.model <- svmfs(x=covar.mat,
+				   y = svmTrainOutcome,
+				   fs.method = "scad+L2",
+				   bounds=bounds,
+				   grid.search = "interval",
+				   inner.val.method = "cv",
+				   show = "none",
+				   parms.coding = "none",
+				   seed=42)
+```
+
+```{r, warning=FALSE}
+fs.svm <- colnames(covar.mat)[svm.model$model$fit.info$model.list$model$xind]
+fs.svm <- proxy.list[proxy.list %in% fs.svm]
+proxy.svm <- paste0(fs.svm, collapse = "+")
+form.svm <- paste0(c(covform, proxy.svm), collapse = "+")
+formula.svm <- as.formula(paste0("exposure", "~", form.svm))
+
+require(WeightIt)
+W.out.svm <- weightit(formula.svm, 
+                        data = hdps.data, 
+                        estimand = "ATE",
+                        method = "ps")
+
+hdps.data$ps.svm <- W.out.svm$ps
+hdps.data$w.svm <- W.out.svm$weights
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+out.formula
+fit.svm <- glm(out.formula,
+                 data = hdps.data,
+                 weights = W.out.svm$weights,
+                 family= binomial(link = "logit"))
+summary.svm <- summary(fit.svm)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.svm <- confint(fit.svm, level = 0.95)["exposure", ]
+sum_ci.svm <- c(exp(summary.svm[1]), summary.svm, ci.svm)
+names(sum_ci.svm) <- c("Odds Ratio",
+                         "Estimate",
+                         "Std. Error",
+                         "Pr(>|z|)",
+                         "2.5 %",
+                         "97.5 %")
+
+# Q1: How many proxy variables are in common?
+# length(fs.svm) 
+# length(fs.svm[fs.svm %in% fs.bross])
+print("How many proxy variables are in common?")
+paste("There are", length(fs.svm), "features selected by svm")
+paste(length(fs.svm[fs.svm %in% fs.bross]), "of the", length(fs.svm), 
+      "are also selected by the bross formula method")
+# See which variables are not in common:
+# fs.svm[!(fs.svm %in% fs.bross)]
+
+# Q2: Odds ratio
+print("The Odds Ratio by Elastic SCAD SVM")
+sum_ci.svm
+```
+
+
+**Method 8: Boruta Selection**
+
+_Boruta Selection would give the feature importance ranking based on the Random Forests algorithm which are able to capture some non-linear trends but not easy to interpret._
+
+_(Long Running Time)_
+```{r, warning=FALSE}
+set.seed(42)
+boruta_output <- Boruta(Y.form, data = hdps.data, doTrace = 1)
+sel.variables.bor <- names(boruta_output$finalDecision)[which(boruta_output$finalDecision != "Rejected")]
+fs.boruta <- proxy.list[proxy.list %in% sel.variables.bor]
+proxy.boruta <- paste0(fs.boruta, collapse = "+")
+form.boruta <- paste0(c(covform, proxy.boruta), collapse = "+")
+formula.boruta <- as.formula(paste0("exposure", "~", form.boruta))
+
+require(WeightIt)
+W.out.boruta <- weightit(formula.boruta, 
+                         data = hdps.data, 
+                         estimand = "ATE",
+                         method = "ps")
+
+hdps.data$ps.b <- W.out.boruta$ps
+hdps.data$w.b <- W.out.boruta$weights
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+out.formula
+fit.boruta <- glm(out.formula,
+                  data = hdps.data,
+                  weights = W.out.boruta$weights,
+                  family= binomial(link = "logit"))
+summary.boruta <- summary(fit.boruta)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.boruta <- confint(fit.boruta, level = 0.95)["exposure", ]
+sum_ci.boruta <- c(exp(summary.boruta[1]), summary.boruta, ci.boruta)
+names(sum_ci.boruta) <- c("Odds Ratio",
+                          "Estimate",
+                          "Std. Error",
+                          "Pr(>|z|)",
+                          "2.5 %",
+                          "97.5 %")
+
+# Q1: How many proxy variables are in common (Boruta vs Bross Formula)?
+# length(fs.boruta)  # 28 features selected by boruta selection
+# length(fs.boruta[fs.boruta %in% fs.bross])  # 24 of 28 also selected by bross formula
+print("How many proxy variables are in common?")
+paste("There are", length(fs.boruta), "features selected by boruta")
+paste(length(fs.boruta[fs.boruta %in% fs.bross]), "of the", length(fs.boruta), 
+      "are also selected by the bross formula method")
+# See which variables are not in common:
+# fs.boruta[!(fs.boruta %in% fs.bross)]
+
+# Q2: Odds ratio
+print("The Odds Ratio by Boruta Selection")
+sum_ci.boruta
+```
+
+
+**Method 9.1: Stepwise Regression (Forward)**
+```{r}
+set.seed(42)
+
+initial_formula <- as.formula(paste0("outcome~exposure+",
+                                     covform,
+                                     collapse = "+"))
+full_formula <- as.formula(paste0("outcome~exposure+",
+                                  rhsformula,
+                                  collapse = "+"))
+
+initial_model <- glm(initial_formula, data = hdps.data, family = binomial)
+full_model <- glm(full_formula, data = hdps.data, family = binomial)
+stepwise_forward <- stepAIC(initial_model, 
+                            scope = list(lower = initial_model, 
+                                         upper = full_model), 
+                            direction = "forward")
+
+fs.forward <- all.vars(formula(stepwise_forward))[-1]
+fs.forward <- proxy.list[proxy.list %in% fs.forward]
+proxy.forward <- paste0(fs.forward, collapse = "+")
+form.forward <- paste0(c(covform, proxy.forward), collapse = "+")
+formula.forward <- as.formula(paste0("exposure", "~", form.forward))
+
+require(WeightIt)
+W.out.forward <- weightit(formula.forward, 
+                          data = hdps.data, 
+                          estimand = "ATE",
+                          method = "ps")
+
+hdps.data$ps.forward <- W.out.forward$ps
+hdps.data$w.forward <- W.out.forward$weights
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+out.formula
+fit.forward <- glm(out.formula,
+                   data = hdps.data,
+                   weights = W.out.forward$weights,
+                   family= binomial(link = "logit"))
+summary.forward <- summary(fit.forward)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.forward <- confint(fit.forward, level = 0.95)["exposure", ]
+sum_ci.forward <- c(exp(summary.forward[1]), summary.forward, ci.forward)
+names(sum_ci.forward) <- c("Odds Ratio",
+                           "Estimate",
+                           "Std. Error",
+                           "Pr(>|z|)",
+                           "2.5 %",
+                           "97.5 %")
+
+# Q1: How many proxy variables are in common?
+# length(fs.forward) 
+# length(fs.forward[fs.forward %in% fs.bross])
+print("How many proxy variables are in common?")
+paste("There are", length(fs.forward), "features selected by forward")
+paste(length(fs.forward[fs.forward %in% fs.bross]), "of the", length(fs.forward), 
+      "are also selected by the bross formula method")
+# See which variables are not in common:
+# fs.forward[!(fs.forward %in% fs.bross)]
+
+# Q2: Odds ratio
+print("The Odds Ratio by Stepwise Forward Selection")
+sum_ci.forward
+```
+
+
+**Method 9.2: Stepwise Regression (Backward)**
+```{r}
+stepwise_backward <- stepAIC(full_model, direction = "backward")
+fs.backward <- proxy.list[proxy.list %in% fs.backward]
+fs.backward <- fs.backward[fs.backward != "exposure"]
+proxy.backward <- paste0(fs.backward, collapse = "+")
+form.backward <- paste0(c(covform, proxy.backward), collapse = "+")
+formula.backward <- as.formula(paste0("exposure", "~", form.backward))
+
+require(WeightIt)
+W.out.backward <- weightit(formula.backward, 
+                          data = hdps.data, 
+                          estimand = "ATE",
+                          method = "ps")
+
+hdps.data$ps.backward <- W.out.backward$ps
+hdps.data$w.backward <- W.out.backward$weights
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+out.formula
+fit.backward <- glm(out.formula,
+                   data = hdps.data,
+                   weights = W.out.backward$weights,
+                   family= binomial(link = "logit"))
+summary.backward <- summary(fit.backward)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.backward <- confint(fit.backward, level = 0.95)["exposure", ]
+sum_ci.backward <- c(exp(summary.backward[1]), summary.backward, ci.backward)
+names(sum_ci.backward) <- c("Odds Ratio",
+                           "Estimate",
+                           "Std. Error",
+                           "Pr(>|z|)",
+                           "2.5 %",
+                           "97.5 %")
+
+# Q1: How many proxy variables are in common?
+# length(fs.backward) 
+# length(fs.backward[fs.backward %in% fs.bross])
+print("How many proxy variables are in common?")
+paste("There are", length(fs.backward), "features selected by backward")
+paste(length(fs.backward[fs.backward %in% fs.bross]), "of the", length(fs.backward), 
+      "are also selected by the bross formula method")
+# See which variables are not in common:
+# fs.backward[!(fs.backward %in% fs.bross)]
+
+# Q2: Odds ratio
+print("The Odds Ratio by Stepwise Backward Selection")
+sum_ci.backward
+```
+
+**Method 9.3: Stepwise Regression (Both)**
+```{r}
+stepwise_both <- stepAIC(initial_model, 
+                            scope = list(lower = initial_model, 
+                                         upper = full_model), 
+                            direction = "both")
+fs.both <- all.vars(formula(stepwise_both))[-1]
+fs.both <- proxy.list[proxy.list %in% fs.both]
+proxy.both <- paste0(fs.both, collapse = "+")
+form.both <- paste0(c(covform, proxy.both), collapse = "+")
+formula.both <- as.formula(paste0("exposure", "~", form.both))
+
+require(WeightIt)
+W.out.both <- weightit(formula.both, 
+                          data = hdps.data, 
+                          estimand = "ATE",
+                          method = "ps")
+
+hdps.data$ps.both <- W.out.both$ps
+hdps.data$w.both <- W.out.both$weights
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+out.formula
+fit.both <- glm(out.formula,
+                   data = hdps.data,
+                   weights = W.out.both$weights,
+                   family= binomial(link = "logit"))
+summary.both <- summary(fit.both)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.both <- confint(fit.both, level = 0.95)["exposure", ]
+sum_ci.both <- c(exp(summary.both[1]), summary.both, ci.both)
+names(sum_ci.both) <- c("Odds Ratio",
+                           "Estimate",
+                           "Std. Error",
+                           "Pr(>|z|)",
+                           "2.5 %",
+                           "97.5 %")
+
+# Q1: How many proxy variables are in common?
+# length(fs.both) 
+# length(fs.both[fs.both %in% fs.bross])
+print("How many proxy variables are in common?")
+paste("There are", length(fs.both), "features selected by both")
+paste(length(fs.both[fs.both %in% fs.bross]), "of the", length(fs.both), 
+      "are also selected by the bross formula method")
+# See which variables are not in common:
+# fs.both[!(fs.both %in% fs.bross)]
+
+# Q2: Odds ratio
+print("The Odds Ratio by Stepwise Both Selection")
+sum_ci.both
+```
+
+Comparing the Results:
+```{r}
+sum_ci.all <- rbind(sum_ci.bross, sum_ci.hybrid, sum_ci.lasso, sum_ci.elastic, 
+                    sum_ci.xgboost, sum_ci.GA, sum_ci.svm, sum_ci.boruta,
+                    sum_ci.forward, sum_ci.backward, sum_ci.both)
+
+OR.data <- data.frame(method = c("bross", "hybrid", "lasso", "elastic", 
+                                 "xgboost", "GA", "SVM", "boruta", 
+                                 "forward", "backward", "both"),
+                      OR = exp(sum_ci.all[,2]),
+                      lower = exp(sum_ci.all[,5]),
+                      upper = exp(sum_ci.all[,6]))
+
+OR.data$method <- factor(OR.data$method, 
+                         levels = c("both", "backward", "forward",
+                                    "boruta", "SVM", "GA", "xgboost", 
+                                    "elastic", "lasso", "hybrid", "bross"))
+
+OR.ci_plot <- ggplot(OR.data, aes(y = method, x = OR)) +
+  geom_point(size = 3) +
+  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.2) + 
+  labs(title = "Odds Ratios with 95% Confidence Intervals",
+       x = "Odds Ratio",
+       y = "Method")
+
+fs.all <- data.frame(numFeature = c(length(fs.bross), 
+                                    length(fs.hybrid),
+                                    length(fs.lasso), 
+                                    length(fs.elastic), 
+                                    length(fs.xgboost),
+                                    length(fs.GA),
+                                    length(fs.svm),
+                                    length(fs.boruta),
+                                    length(fs.forward),
+                                    length(fs.backward),
+                                    length(fs.both)),
+                     numInCommon = c(NA,
+                                     length(fs.hybrid[fs.hybrid %in% fs.bross]),
+                                     length(fs.lasso[fs.lasso %in% fs.bross]),
+                                     length(fs.elastic[fs.elastic %in% fs.bross]),
+                                     length(fs.xgboost[fs.xgboost %in% fs.bross]),
+                                     length(fs.GA[fs.GA %in% fs.bross]),
+                                     length(fs.svm[fs.svm %in% fs.bross]),
+                                     length(fs.boruta[fs.boruta %in% fs.bross]),
+                                     length(fs.forward[fs.forward %in% fs.bross]),
+                                     length(fs.backward[fs.backward %in% fs.bross]),
+                                     length(fs.both[fs.both %in% fs.bross])))
+rownames(fs.all) <-  c("bross", "hybrid", "lasso", "elastic", 
+                       "xgb", "GA", "SVM", "boruta",
+                       "forward", "backward", "both")
+
+fs.all$pctCommon <- fs.all$numInCommon / fs.all$numFeature
+
+fs.commonOneToOne <- data.frame(ini = rep(NA, 11))
+
+for (i in 1:11) {
+  col_name <- OR.data$method[i]
+  if (col_name == "SVM") {
+    col_name <- "svm"
+  }
+  na.i <- 1
+  na <- c()
+  while (na.i < i) {
+    na <- c(na, NA)
+    na.i <- na.i + 1
+  }
+  num_common <- c(length(fs.bross[fs.bross %in% get(paste0("fs.",col_name))]),
+                  length(fs.hybrid[fs.hybrid %in% get(paste0("fs.",col_name))]),
+                  length(fs.lasso[fs.lasso %in% get(paste0("fs.",col_name))]),
+                  length(fs.elastic[fs.elastic %in% get(paste0("fs.",col_name))]),
+                  length(fs.xgboost[fs.xgboost %in% get(paste0("fs.",col_name))]),
+                  length(fs.GA[fs.GA %in% get(paste0("fs.",col_name))]),
+                  length(fs.svm[fs.svm %in% get(paste0("fs.",col_name))]),
+                  length(fs.boruta[fs.boruta %in% get(paste0("fs.",col_name))]),
+                  length(fs.forward[fs.forward %in% get(paste0("fs.",col_name))]),
+                  length(fs.backward[fs.backward %in% get(paste0("fs.",col_name))]),
+                  length(fs.both[fs.both %in% get(paste0("fs.",col_name))]))
+  fs.commonOneToOne[i] <- c(na, num_common[i:11])
+}
+
+colnames(fs.commonOneToOne) <- rownames(fs.all)
+rownames(fs.commonOneToOne) <- rownames(fs.all)
+```
+
+Print the comparing plot & table:
+```{r}
+print("Comparison of odds ratios and the confidence intervals by different proxy selection methods:")
+OR.ci_plot
+```
+
+```{r}
+print("Comparison of the number & percentage of proxy variables selected by different methods in common with that by the bross formula:")
+fs.all
+```
+
+```{r}
+print("One-to-one comparison of the number of proxy variables selected by different methods")
+fs.commonOneToOne
+```
+
+
+
+
