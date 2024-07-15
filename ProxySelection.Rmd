@@ -2,7 +2,9 @@
 title: "Step1_LoadData"
 author: "Yang Lei"
 date: "2024-07-11"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
