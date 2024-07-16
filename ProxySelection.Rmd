@@ -101,7 +101,8 @@ investigator.specified.covariates <-
 ```
 
 **Method 1: Bross Formula**
-```{r, warning=FALSE, cache=TRUE}
+```{r bross, warning=FALSE, cache=TRUE}
+start_time <- Sys.time()
 out3 <- get_prioritised_covariates(df = out2,
                                    patientIdVarname = "idx", 
                                    exposureVector = basetable$exposure,
@@ -159,11 +160,14 @@ print("No need to print the number of proxy variables selected, as it is set to 
 
 print("The Odds Ratio by Bross Formula")
 round(sum_ci.bross, 3)
+end_time <- Sys.time()
+elapsed_time.bross <- as.numeric(difftime(end_time, start_time, units = "secs"))
 ```
 
 **Method 2: Hybrid Bross Formula & Lasso**
-```{r, warning=FALSE, cache=TRUE}
+```{r hybrid, warning=FALSE, cache=TRUE}
 set.seed(42)
+start_time <- Sys.time()
 proxy.list <- names(out3$autoselected_covariate_df[,-1])
 covarsTfull <- c(investigator.specified.covariates, proxy.list)
 Y.form <- as.formula(paste0(c("outcome~ exposure", 
@@ -209,10 +213,13 @@ print("All proxy variables selected are in common as they are all selected from
 
 print("The Odds Ratio by Bross Formula & Lasso")
 round(sum_ci.hybrid, 3)
+end_time <- Sys.time()
+elapsed_time.hybrid <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.hybrid
 ```
 
 _Before implementing other methods, drop the information from method 1 (Bross formula). Continue with the results from Step 3: Recurrence (table `out2`)._
-```{r, warning=FALSE, cache=TRUE}
+```{r prepare, warning=FALSE, cache=TRUE}
 hdps.dim <- out2
 
 load("data/analytic3cycles.RData")
@@ -241,8 +248,9 @@ Y.form <- as.formula(paste0(c("outcome~ exposure",
 ```
 
 **Method 3: Pure Lasso**
-```{r, warning=FALSE, cache=TRUE}
+```{r lasso, warning=FALSE, cache=TRUE}
 set.seed(42) # different seed -> different length for the selected proxy list
+start_time <- Sys.time()
 covar.mat <- model.matrix(Y.form, data = hdps.data)[,-1]
 lasso.fit <- glmnet::cv.glmnet(y = hdps.data$outcome, 
                                x = covar.mat, 
@@ -295,11 +303,15 @@ paste(length(fs.lasso[fs.lasso %in% fs.bross]), "of the", length(fs.lasso),
 # Q2: Odds ratio
 print("The Odds Ratio by Method Pure Lasso")
 sum_ci.lasso
+end_time <- Sys.time()
+elapsed_time.lasso <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.lasso
 ```
 
 **Method 4: Elastic Net**
-```{r, warning=FALSE, cache=TRUE}
+```{r enet, warning=FALSE, cache=TRUE}
 set.seed(42)
+start_time <- Sys.time()
 covar.mat <- model.matrix(Y.form, data = hdps.data)[,-1]
 elas.fit <- glmnet::cv.glmnet(y = hdps.data$outcome, 
                              x = covar.mat, 
@@ -353,10 +365,14 @@ paste(length(fs.elastic[fs.elastic %in% fs.bross]), "of the", length(fs.elastic)
 # Q2: Odds ratio
 print("The Odds Ratio by Elastic Net")
 sum_ci.elastic
+end_time <- Sys.time()
+elapsed_time.enet <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.enet
 ```
 
 **Method 5: XGBoost**
-```{r, warning=FALSE, cache=TRUE}
+```{r xgb, warning=FALSE, cache=TRUE}
+start_time <- Sys.time()
 xgb_fit <- xgboost(data = covar.mat, label = hdps.data$outcome, 
                     max.depth = 20, eta = 1, nthread = 2, nrounds = 5, 
                     objective = "binary:logistic")
@@ -405,12 +421,16 @@ paste(length(fs.xgboost[fs.xgboost %in% fs.bross]), "of the", length(fs.xgboost)
 # Q2: Odds ratio
 print("The Odds Ratio by XGBoost")
 sum_ci.xgboost
+end_time <- Sys.time()
+elapsed_time.xgb <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.xgb
 ```
 
 **Method 6: GA**
 
 _GA (Genetic Algorithm) has no specific internal model building mechanism and would wrap around whatever model the user specifies_
-```{r, warning=FALSE, cache=TRUE}
+```{r ga, warning=FALSE, cache=TRUE}
+start_time <- Sys.time()
 gaOpt <- function(vars, IV.train, DV.train) {
 	varNames <- colnames(IV.train) #getting names of all variables
 	selectedVarNames <- varNames[vars == "1"] # getting names of selected vars from GA
@@ -478,6 +498,9 @@ paste(length(fs.GA[fs.GA %in% fs.bross]), "of the", length(fs.GA),
 # Q2: Odds ratio
 print("The Odds Ratio by GA:")
 sum_ci.GA
+end_time <- Sys.time()
+elapsed_time.ga <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.ga
 ```
 
 **Method 7: Elastic SCAD SVM**
@@ -485,7 +508,8 @@ sum_ci.GA
 _Elastic SCAD SVM uses an approach like LASSO and Elastic Net in that it selects variables via the addition of a penalty._
 
 _(Long Running Time)_
-```{r, warning=FALSE, cache=TRUE}
+```{r svm, warning=FALSE, cache=TRUE}
+start_time <- Sys.time()
 svmTrainOutcome <- hdps.data$outcome
 svmTrainOutcome[svmTrainOutcome == 0] <- -1
 svmTrainPreds <- data.frame(covar.mat)
@@ -546,6 +570,9 @@ paste(length(fs.svm[fs.svm %in% fs.bross]), "of the", length(fs.svm),
 # Q2: Odds ratio
 print("The Odds Ratio by Elastic SCAD SVM")
 sum_ci.svm
+end_time <- Sys.time()
+elapsed_time.svm <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.svm
 ```
 
 
@@ -554,8 +581,9 @@ sum_ci.svm
 _Boruta Selection would give the feature importance ranking based on the Random Forests algorithm which are able to capture some non-linear trends but not easy to interpret._
 
 _(Long Running Time)_
-```{r, warning=FALSE, cache=TRUE}
+```{r Boruta, warning=FALSE, cache=TRUE}
 set.seed(42)
+start_time <- Sys.time()
 boruta_output <- Boruta(Y.form, data = hdps.data, doTrace = 1)
 sel.variables.bor <- names(boruta_output$finalDecision)[which(boruta_output$finalDecision != "Rejected")]
 fs.boruta <- proxy.list[proxy.list %in% sel.variables.bor]
@@ -599,13 +627,16 @@ paste(length(fs.boruta[fs.boruta %in% fs.bross]), "of the", length(fs.boruta),
 # Q2: Odds ratio
 print("The Odds Ratio by Boruta Selection")
 sum_ci.boruta
+end_time <- Sys.time()
+elapsed_time.boruta <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.boruta
 ```
 
 
 **Method 9.1: Stepwise Regression (Forward)**
-```{r, warning=FALSE, cache=TRUE}
+```{r fs, warning=FALSE, cache=TRUE}
 set.seed(42)
-
+start_time <- Sys.time()
 initial_formula <- as.formula(paste0("outcome~exposure+",
                                      covform,
                                      collapse = "+"))
@@ -662,11 +693,15 @@ paste(length(fs.forward[fs.forward %in% fs.bross]), "of the", length(fs.forward)
 # Q2: Odds ratio
 print("The Odds Ratio by Stepwise Forward Selection")
 sum_ci.forward
+end_time <- Sys.time()
+elapsed_time.fs <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.fs
 ```
 
 
 **Method 9.2: Stepwise Regression (Backward)**
-```{r, warning=FALSE, cache=TRUE}
+```{r bs, warning=FALSE, cache=TRUE}
+start_time <- Sys.time()
 stepwise_backward <- stepAIC(full_model, direction = "backward")
 fs.backward <- proxy.list[proxy.list %in% fs.backward]
 fs.backward <- fs.backward[fs.backward != "exposure"]
@@ -710,10 +745,14 @@ paste(length(fs.backward[fs.backward %in% fs.bross]), "of the", length(fs.backwa
 # Q2: Odds ratio
 print("The Odds Ratio by Stepwise Backward Selection")
 sum_ci.backward
+end_time <- Sys.time()
+elapsed_time.bs <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.bs
 ```
 
 **Method 9.3: Stepwise Regression (Both)**
-```{r, warning=FALSE, cache=TRUE}
+```{r sw, warning=FALSE, cache=TRUE}
+start_time <- Sys.time()
 stepwise_both <- stepAIC(initial_model, 
                             scope = list(lower = initial_model, 
                                          upper = full_model), 
@@ -760,10 +799,13 @@ paste(length(fs.both[fs.both %in% fs.bross]), "of the", length(fs.both),
 # Q2: Odds ratio
 print("The Odds Ratio by Stepwise Both Selection")
 sum_ci.both
+end_time <- Sys.time()
+elapsed_time.sw <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.sw
 ```
 
 Comparing the Results:
-```{r, warning=FALSE, cache=TRUE}
+```{r compare, warning=FALSE, cache=TRUE}
 sum_ci.all <- rbind(sum_ci.bross, sum_ci.hybrid, sum_ci.lasso, sum_ci.elastic, 
                     sum_ci.xgboost, sum_ci.GA, sum_ci.svm, sum_ci.boruta,
                     sum_ci.forward, sum_ci.backward, sum_ci.both)
@@ -848,6 +890,19 @@ rownames(fs.commonOneToOne) <- rownames(fs.all)
 
 Print the comparing plot & table:
 ```{r}
+elapsed_times <- list()
+elapsed_times[["bross"]] <- elapsed_time.bross
+elapsed_times[["hybrid"]] <- elapsed_time.hybrid
+elapsed_times[["lasso"]] <- elapsed_time.lasso
+elapsed_times[["enet"]] <- elapsed_time.enet
+elapsed_times[["xgb"]] <- elapsed_time.xgb
+elapsed_times[["ga"]] <- elapsed_time.ga
+elapsed_times[["svm"]] <- elapsed_time.svm
+elapsed_times[["boruta"]] <- elapsed_time.boruta
+elapsed_times[["fs"]] <- elapsed_time.fs
+elapsed_times[["bs"]] <- elapsed_time.bs
+elapsed_times[["sw"]] <- elapsed_time.sw
+print(elapsed_times)
 print("Comparison of odds ratios and the confidence intervals by different proxy selection methods:")
 OR.ci_plot
 ```
