@@ -1026,3 +1026,9 @@ important_features_rfe <- predictors(results)
 # print("Elapsed time for RFE:")
 # elapsed_time_rfe
 ```
+
+```{r save}
+# Save the entire workspace to a file named "workspace.RData"
+save.image(file = "data/workspace.RData")
+```
+
