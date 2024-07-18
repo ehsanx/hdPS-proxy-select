@@ -25,3 +25,4 @@ penalizedSVM
 xgboost
 lattice
 caret
+randomForest

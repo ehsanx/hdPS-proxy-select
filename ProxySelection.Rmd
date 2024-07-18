@@ -927,7 +927,10 @@ rf_model <- randomForest(outcome ~ ., data = hdps.data, importance = TRUE)
 # Get important features
 rf_importance <- importance(rf_model)
 important_features_rf <- rownames(rf_importance)[order(rf_importance[, 1], decreasing = TRUE)]
+```
 
+
+```{r rf2, warning=FALSE, cache=TRUE}
 # Select features
 fs_rf <- important_features_rf[important_features_rf %in% proxy.list]
 proxy_rf <- paste0(fs_rf, collapse = "+")
@@ -978,45 +981,48 @@ results <- rfe(hdps.data[, -which(names(hdps.data) %in% c("outcome", "exposure")
 
 # Get important features
 important_features_rfe <- predictors(results)
+```
 
+
+```{r rfe2, warning=FALSE, cache=TRUE}
 # Select features
-fs_rfe <- important_features_rfe[important_features_rfe %in% proxy.list]
-proxy_rfe <- paste0(fs_rfe, collapse = "+")
-form_rfe <- paste0(c(covform, proxy_rfe), collapse = "+")
-formula_rfe <- as.formula(paste0("exposure", "~", form_rfe))
-
-W.out_rfe <- weightit(formula_rfe, 
-                      data = hdps.data, 
-                      estimand = "ATE",
-                      method = "ps")
-
-hdps.data$ps_rfe <- W.out_rfe$ps
-hdps.data$w_rfe <- W.out_rfe$weights
-out.formula <- as.formula(paste0("outcome", "~", "exposure"))
-fit_rfe <- glm(out.formula,
-               data = hdps.data,
-               weights = W.out_rfe$weights,
-               family= binomial(link = "logit"))
-summary_rfe <- summary(fit_rfe)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
-ci_rfe <- confint(fit_rfe, level = 0.95)["exposure", ]
-sum_ci_rfe <- c(exp(summary_rfe[1]), summary_rfe, ci_rfe)
-names(sum_ci_rfe) <- c("Odds Ratio",
-                       "Estimate",
-                       "Std. Error",
-                       "Pr(>|z|)",
-                       "2.5 %",
-                       "97.5 %")
-
-end_time <- Sys.time()
-elapsed_time_rfe <- as.numeric(difftime(end_time, start_time, units = "secs"))
-
-print("How many proxy variables are in common?")
-paste("There are", length(fs_rfe), "features selected by RFE")
-paste(length(fs_rfe[fs_rfe %in% fs.bross]), "of the", length(fs_rfe), 
-      "are also selected by the bross formula method")
-
-print("The Odds Ratio by RFE")
-sum_ci_rfe
-print("Elapsed time for RFE:")
-elapsed_time_rfe
+# fs_rfe <- important_features_rfe[important_features_rfe %in% proxy.list]
+# proxy_rfe <- paste0(fs_rfe, collapse = "+")
+# form_rfe <- paste0(c(covform, proxy_rfe), collapse = "+")
+# formula_rfe <- as.formula(paste0("exposure", "~", form_rfe))
+# 
+# W.out_rfe <- weightit(formula_rfe, 
+#                       data = hdps.data, 
+#                       estimand = "ATE",
+#                       method = "ps")
+# 
+# hdps.data$ps_rfe <- W.out_rfe$ps
+# hdps.data$w_rfe <- W.out_rfe$weights
+# out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+# fit_rfe <- glm(out.formula,
+#                data = hdps.data,
+#                weights = W.out_rfe$weights,
+#                family= binomial(link = "logit"))
+# summary_rfe <- summary(fit_rfe)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+# ci_rfe <- confint(fit_rfe, level = 0.95)["exposure", ]
+# sum_ci_rfe <- c(exp(summary_rfe[1]), summary_rfe, ci_rfe)
+# names(sum_ci_rfe) <- c("Odds Ratio",
+#                        "Estimate",
+#                        "Std. Error",
+#                        "Pr(>|z|)",
+#                        "2.5 %",
+#                        "97.5 %")
+# 
+# end_time <- Sys.time()
+# elapsed_time_rfe <- as.numeric(difftime(end_time, start_time, units = "secs"))
+# 
+# print("How many proxy variables are in common?")
+# paste("There are", length(fs_rfe), "features selected by RFE")
+# paste(length(fs_rfe[fs_rfe %in% fs.bross]), "of the", length(fs_rfe), 
+#       "are also selected by the bross formula method")
+# 
+# print("The Odds Ratio by RFE")
+# sum_ci_rfe
+# print("Elapsed time for RFE:")
+# elapsed_time_rfe
 ```
