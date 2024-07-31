@@ -1378,11 +1378,6 @@ rownames(sum.rd_all) <- c("bross", "hybrid", "lasso", "elastic",
 ```
 
 
-```{r save RD}
-# Save the entire workspace to a file named "workspaceNew.RData"
-save.image(file = "data/workspaceNew.RData")
-```
-
 ```{r print RD result table}
 round(sum.rd_all, 3)
 ```
