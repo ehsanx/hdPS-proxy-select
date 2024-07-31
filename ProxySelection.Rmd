@@ -1340,6 +1340,7 @@ ERROR: the formula in wrong format (ending with "+")
 save.image(file = "data/workspace.RData")
 ```
 
+<<<<<<< HEAD
 ```{r OR.ci_plot with # of proxy}
 
 OR.ci_plot_new <- ggplot(OR.data, aes(y = method, x = OR)) +
@@ -1389,7 +1390,5 @@ round(sum.rd_all, 3)
 ```{r print OR.ci_plot with # of proxy}
 OR.ci_plot_new
 ```
-
-
 
 
