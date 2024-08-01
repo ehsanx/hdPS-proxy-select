@@ -1,5 +1,5 @@
 ---
-title: "SimResults_Enet"
+title: "SimResults_enet"
 author: "Yang Lei"
 date: "2024-08-01"
 output: html_document
