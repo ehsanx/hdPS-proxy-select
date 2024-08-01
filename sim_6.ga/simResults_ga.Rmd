@@ -272,7 +272,7 @@ for (i in 1:a) {
 }
 ```
 
-```{r}
+```{r read RD & SE results by ga, warning=FALSE, cache=TRUE}
 RD_ga
 ```
 
