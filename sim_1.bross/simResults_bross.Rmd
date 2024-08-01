@@ -26,7 +26,7 @@ library(randomForest)
 require(lmtest)
 ```
 
-```{r load basic information, warning=FALSE, cache=TRUE}}
+```{r load basic information, warning=FALSE, cache=TRUE}
 # global information
 exposure <- "obese"
 outcome <- "diabetes" 
@@ -50,7 +50,7 @@ covform <- paste0(investigator.specified.covariates, collapse = "+")
 out.formula <- as.formula(paste0("outcome", "~", "exposure"))
 ```
 
-```{r initialization before for-loop, warning=FALSE, cache=TRUE}}
+```{r initialization before for-loop, warning=FALSE, cache=TRUE}
 # 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
 a <- 1000
 
@@ -60,7 +60,7 @@ RD_bross <- data.frame(RD = numeric(),
 errors <- c()
 ```
 
-```{r scenario: for-loop generating RD & SE results, warning=FALSE, cache=TRUE}}
+```{r scenario: for-loop generating RD & SE results, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenario"
@@ -148,7 +148,7 @@ for (i in 1:a) {
 }
 ```
 
-```{r scenarioER: for-loop generating RD & SE results, warning=FALSE, cache=TRUE}}
+```{r scenarioER: for-loop generating RD & SE results, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenarioER"
@@ -236,7 +236,7 @@ for (i in 1:a) {
 }
 ```
 
-```{r scenarioOR: for-loop generating RD & SE results, warning=FALSE, cache=TRUE}}
+```{r scenarioOR: for-loop generating RD & SE results, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenarioOR"

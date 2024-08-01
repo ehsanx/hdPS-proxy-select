@@ -26,7 +26,7 @@ library(randomForest)
 require(lmtest)
 ```
 
-```{r load basic information, warning=FALSE, cache=TRUE}}
+```{r load basic information, warning=FALSE, cache=TRUE}
 # global information
 exposure <- "obese"
 outcome <- "diabetes" 
@@ -57,26 +57,15 @@ Y.form <- as.formula(paste0(c("outcome~ exposure",
                               covarsTfull), collapse = "+") )
 ```
 
-```{r initialization before for-loop, warning=FALSE, cache=TRUE}}
+```{r initialization before for-loop, warning=FALSE, cache=TRUE}
 # 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
-a <- 1000
+a <- 5
 
 RD_lasso <- data.frame(RD = numeric(),
                        SE = numeric())
 ```
 
-
-```{r}
-data <- tryCatch({
-  readRDS(url(url))
-}, error = function(e) {
-  closeAllConnections()
-  readRDS(url(url))
-})
-```
-
-
-```{r scenario: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}}
+```{r scenario: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenario"
@@ -135,7 +124,8 @@ for (i in 1:a) {
   assign(sum.RD_lasso.i, sum.RD_lasso)
 }
 ```
-```{r scenarioER: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}}
+
+```{r scenarioER: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenarioER"
@@ -194,7 +184,8 @@ for (i in 1:a) {
   assign(sum.RD_lasso.i, sum.RD_lasso)
 }
 ```
-```{r scenarioOR: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}}
+
+```{r scenarioOR: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenarioOR"
