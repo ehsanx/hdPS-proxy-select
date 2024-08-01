@@ -68,7 +68,12 @@ for (i in 1:a) {
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
                 i, 
                 ".rds")
-  data <- readRDS(url(url))
+  data <- tryCatch({
+    readRDS(url(url))
+  }, error = function(e) {
+    closeAllConnections()
+    readRDS(url(url))
+  })
   
   # found some id != idx
   data$id <- data$idx
@@ -151,7 +156,12 @@ for (i in 1:a) {
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
                 i, 
                 ".rds")
-  data <- readRDS(url(url))
+  data <- tryCatch({
+    readRDS(url(url))
+  }, error = function(e) {
+    closeAllConnections()
+    readRDS(url(url))
+  })
   
   # found some id != idx
   data$id <- data$idx
@@ -234,7 +244,12 @@ for (i in 1:a) {
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
                 i, 
                 ".rds")
-  data <- readRDS(url(url))
+  data <- tryCatch({
+    readRDS(url(url))
+  }, error = function(e) {
+    closeAllConnections()
+    readRDS(url(url))
+  })
   
   # found some id != idx
   data$id <- data$idx
