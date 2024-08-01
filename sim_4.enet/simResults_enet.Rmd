@@ -124,6 +124,7 @@ for (i in 1:a) {
   assign(sum.RD_enet.i, sum.RD_enet)
 }
 ```
+
 ```{r scenarioER: for-loop generating RD & SE results for enet, warning=FALSE, cache=TRUE}
 set.seed(42)
 
@@ -244,7 +245,22 @@ for (i in 1:a) {
 }
 ```
 
-
 ```{r read RD & SE results by enet, warning=FALSE, cache=TRUE}
 RD_enet
+```
+
+```{r check intermediate results for each data by enet, warning=FALSE, cache=TRUE}
+# check RD & SE by enet for each data, print:
+#   sum.RD_enet.n, sum.RD_enet.ER.n, or sum.RD_enet.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+sum.RD_enet.1
+sum.RD_enet.ER.2
+
+# check proxy selected by enet for each data, print:
+#   proxy_enet.n, proxy_enet.ER.n, or proxy_enet.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+proxy_enet.1
+proxy_enet.ER.3
 ```
