@@ -50,16 +50,15 @@ covform <- paste0(investigator.specified.covariates, collapse = "+")
 out.formula <- as.formula(paste0("outcome", "~", "exposure"))
 ```
 
-```{r change a to load upto 1000 datasets, warning=FALSE, cache=TRUE}}
-# change to 1000 later
-a <- 8
+```{r initialization before for-loop, warning=FALSE, cache=TRUE}}
+# 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for loop
+a <- 1000
 
 RD_bross <- data.frame(RD = numeric(),
                        SE = numeric())
 
 errors <- c()
 ```
-
 
 ```{r scenario: for-loop generating RD & SE results, warning=FALSE, cache=TRUE}}
 set.seed(42)
@@ -324,5 +323,21 @@ errors
 ```{r read RD & SE results (without error rows), warning=FALSE, cache=TRUE}
 RD_bross_no.error <- RD_bross[complete.cases(RD_bross),]
 RD_bross_no.error
+```
+
+```{r check intermediate results for each data, warning=FALSE, cache=TRUE}
+# check RD & SE by bross for each data, print:
+#   sum.RD_bross.n, sum.RD_bross.ER.n, or sum.RD_bross.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+sum.RD_bross.1
+sum.RD_bross.ER.2
+
+# check proxy selected by bross for each data, print:
+#   proxy_bross.n, proxy_bross.ER.n, or proxy_bross.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+proxy_bross.1
+proxy_bross.ER.5
 ```
 
