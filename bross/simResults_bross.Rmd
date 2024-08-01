@@ -51,7 +51,7 @@ out.formula <- as.formula(paste0("outcome", "~", "exposure"))
 ```
 
 ```{r initialization before for-loop, warning=FALSE, cache=TRUE}}
-# 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for loop
+# 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
 a <- 1000
 
 RD_bross <- data.frame(RD = numeric(),
