@@ -1,0 +1,295 @@
+---
+title: "simResults_ga"
+author: "Yang Lei"
+date: "2024-08-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(autoCovariateSelection)
+require(dplyr)
+require(cobalt)
+require(WeightIt)
+library(tidyverse)
+library(ggplot2)
+library(lmtest)
+library(MASS)
+library(Boruta)
+library(GA)
+library(mclust)
+library(penalizedSVM)
+library(xgboost)
+library(caret)
+require(autoCovariateSelection)
+library(randomForest)
+require(lmtest)
+```
+
+```{r load basic information, warning=FALSE, cache=TRUE}
+# global information
+exposure <- "obese"
+outcome <- "diabetes" 
+investigator.specified.covariates <- 
+  c(# Demographic
+    "age.cat", "sex", "education", "race", 
+    "marital", "income", "born", "year",
+    
+    # health history related variables/access
+    "diabetes.family.history", "medical.access",
+    
+    # behavioral
+    "smoking", "diet.healthy", "physical.activity", "sleep",
+    
+    # Laboratory 
+    "uric.acid", "protein.total", "bilirubin.total", "phosphorus",
+    "sodium", "potassium", "globulin", "calcium.total", 
+    "systolicBP", "diastolicBP", "high.cholesterol"
+  )
+covform <- paste0(investigator.specified.covariates, collapse = "+")
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+
+url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_1.rds")
+data <- readRDS(url(url))
+proxy.list <- names(data[, c(grep("^rec", names(data), value = TRUE))])
+covarsTfull <- c(investigator.specified.covariates, proxy.list)
+Y.form <- as.formula(paste0(c("outcome~ exposure", 
+                              covarsTfull), collapse = "+") )
+
+# function for GA
+gaOpt <- function(vars, IV.train, DV.train) {
+	varNames <- colnames(IV.train) #getting names of all variables
+	selectedVarNames <- varNames[vars == "1"] # getting names of selected vars from GA
+	gaSolutionData <- IV.train[,selectedVarNames] # keeping only those selected vars
+
+	gaDat <- cbind(gaSolutionData,DV.train) # combining selected variables with outcome variable
+	gaMod <- glm(DV.train ~ ., family = "binomial", data = gaDat) #build model
+	gaProb <- predict(gaMod, IV.train, type = "response") # get probabilities
+	gaPred <- ifelse(gaProb >= .8, 1, 0) # get predicted 0s and 1s
+
+	ari <- adjustedRandIndex(gaPred, DV.train)
+	return(ari)
+}
+```
+
+```{r initialization before for-loop, warning=FALSE, cache=TRUE}
+# 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
+a <- 1000
+
+RD_ga <- data.frame(RD = numeric(),
+                       SE = numeric())
+```
+
+```{r scenario: for-loop generating RD & SE results for ga, warning=FALSE, cache=TRUE}
+set.seed(42)
+
+# Folder "scenario"
+for (i in 1:a) {
+  url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
+                i, 
+                ".rds")
+  data <- tryCatch({
+    readRDS(url(url))
+  }, error = function(e) {
+    closeAllConnections()
+    readRDS(url(url))
+  })
+  
+  # found some id != idx
+  data$id <- data$idx
+  covar.mat <- model.matrix(Y.form, data = data)[,-1]
+  
+  ga.solution <- ga(fitness = function(vars)
+    gaOpt(vars = vars, 
+          IV.train = data.frame(covar.mat),
+          DV.train = data$outcome),
+    type = "binary", 
+    nBits = ncol(covar.mat),
+    names = colnames(covar.mat), 
+    seed = 42,
+    run=5)
+  
+  allVarNames <- colnames(covar.mat)
+  sel.variables <- allVarNames[ga.solution@solution[1,]==1]
+  proxy_ga <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_ga, collapse = "+")
+  rhsform <- paste0(c(covform, proxyform), collapse = "+")
+  ps.formula <- as.formula(paste0("exposure", "~", rhsform))
+  
+  W.out_ga <- weightit(ps.formula, 
+                       data = data, 
+                       estimand = "ATE",
+                       method = "ps")  
+  
+  data$ps.l <- W.out_ga$ps
+  data$w.l <- W.out_ga$weights
+  
+  fit.OR_ga <- glm(out.formula,
+                      data = data,
+                      weights = W.out_ga$weights,
+                      family= binomial(link = "logit"))
+  fit.RD_ga <- glm(out.formula,
+                       data = data,
+                       weights = W.out_ga$weights,
+                       family = gaussian(link= "identity"))
+  sum.RD_ga <- c(summary(fit.RD_ga)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_ga)[2,2]))
+  
+  RD_ga[i,] <- sum.RD_ga
+  rownames(RD_ga)[i] <- paste0("data.", i, "_ga")
+  
+  proxy_ga.i <- paste0("proxy_ga.", i)
+  assign(proxy_ga.i, proxy_ga)
+  sum.RD_ga.i <- paste0("sum.RD_ga.", i)
+  assign(sum.RD_ga.i, sum.RD_ga)
+}
+```
+
+```{r scenarioER: for-loop generating RD & SE results for ga, warning=FALSE, cache=TRUE}
+set.seed(42)
+
+# Folder "scenarioER"
+for (i in 1:a) {
+  url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
+                i, 
+                ".rds")
+  data <- tryCatch({
+    readRDS(url(url))
+  }, error = function(e) {
+    closeAllConnections()
+    readRDS(url(url))
+  })
+  
+  # found some id != idx
+  data$id <- data$idx
+  covar.mat <- model.matrix(Y.form, data = data)[,-1]
+  
+  ga.solution <- ga(fitness = function(vars)
+    gaOpt(vars = vars, 
+          IV.train = data.frame(covar.mat),
+          DV.train = data$outcome),
+    type = "binary", 
+    nBits = ncol(covar.mat),
+    names = colnames(covar.mat), 
+    seed = 42,
+    run=5)
+  
+  allVarNames <- colnames(covar.mat)
+  sel.variables <- allVarNames[ga.solution@solution[1,]==1]
+  proxy_ga <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_ga, collapse = "+")
+  rhsform <- paste0(c(covform, proxyform), collapse = "+")
+  ps.formula <- as.formula(paste0("exposure", "~", rhsform))
+  
+  W.out_ga <- weightit(ps.formula, 
+                       data = data, 
+                       estimand = "ATE",
+                       method = "ps")  
+  
+  data$ps.l <- W.out_ga$ps
+  data$w.l <- W.out_ga$weights
+  
+  fit.OR_ga <- glm(out.formula,
+                      data = data,
+                      weights = W.out_ga$weights,
+                      family= binomial(link = "logit"))
+  fit.RD_ga <- glm(out.formula,
+                       data = data,
+                       weights = W.out_ga$weights,
+                       family = gaussian(link= "identity"))
+  sum.RD_ga <- c(summary(fit.RD_ga)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_ga)[2,2]))
+  
+  RD_ga[i+a,] <- sum.RD_ga
+  rownames(RD_ga)[i+a] <- paste0("ER.data.", i, "_ga")
+  
+  proxy_ga.i <- paste0("proxy_ga.ER.", i)
+  assign(proxy_ga.i, proxy_ga)
+  sum.RD_ga.i <- paste0("sum.RD_ga.ER.", i)
+  assign(sum.RD_ga.i, sum.RD_ga)
+}
+```
+
+```{r scenarioOR: for-loop generating RD & SE results for ga, warning=FALSE, cache=TRUE}
+set.seed(42)
+
+# Folder "scenarioOR"
+for (i in 1:a) {
+  url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
+                i, 
+                ".rds")
+  data <- tryCatch({
+    readRDS(url(url))
+  }, error = function(e) {
+    closeAllConnections()
+    readRDS(url(url))
+  })
+  
+  # found some id != idx
+  data$id <- data$idx
+  covar.mat <- model.matrix(Y.form, data = data)[,-1]
+  
+  ga.solution <- ga(fitness = function(vars)
+    gaOpt(vars = vars, 
+          IV.train = data.frame(covar.mat),
+          DV.train = data$outcome),
+    type = "binary", 
+    nBits = ncol(covar.mat),
+    names = colnames(covar.mat), 
+    seed = 42,
+    run=5)
+  
+  allVarNames <- colnames(covar.mat)
+  sel.variables <- allVarNames[ga.solution@solution[1,]==1]
+  proxy_ga <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_ga, collapse = "+")
+  rhsform <- paste0(c(covform, proxyform), collapse = "+")
+  ps.formula <- as.formula(paste0("exposure", "~", rhsform))
+  
+  W.out_ga <- weightit(ps.formula, 
+                       data = data, 
+                       estimand = "ATE",
+                       method = "ps")  
+  
+  data$ps.l <- W.out_ga$ps
+  data$w.l <- W.out_ga$weights
+  
+  fit.OR_ga <- glm(out.formula,
+                      data = data,
+                      weights = W.out_ga$weights,
+                      family= binomial(link = "logit"))
+  fit.RD_ga <- glm(out.formula,
+                       data = data,
+                       weights = W.out_ga$weights,
+                       family = gaussian(link= "identity"))
+  sum.RD_ga <- c(summary(fit.RD_ga)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_ga)[2,2]))
+  
+  RD_ga[i+2*a,] <- sum.RD_ga
+  rownames(RD_ga)[i+2*a] <- paste0("OR.data.", i, "_ga")
+  
+  proxy_ga.i <- paste0("proxy_ga.OR.", i)
+  assign(proxy_ga.i, proxy_ga)
+  sum.RD_ga.i <- paste0("sum.RD_ga.OR.", i)
+  assign(sum.RD_ga.i, sum.RD_ga)
+}
+```
+
+```{r}
+RD_ga
+```
+
+```{r check intermediate results for each data by ga, warning=FALSE, cache=TRUE}
+# check RD & SE by ga for each data, print:
+#   sum.RD_ga.n, sum.RD_ga.ER.n, or sum.RD_ga.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+sum.RD_ga.1
+sum.RD_ga.ER.2
+
+# check proxy selected by ga for each data, print:
+#   proxy_ga.n, proxy_ga.ER.n, or proxy_ga.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+proxy_ga.1
+proxy_ga.ER.3
+```
+
+
