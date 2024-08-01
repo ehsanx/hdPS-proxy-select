@@ -1,5 +1,5 @@
 ---
-title: "simResults_lasso"
+title: "simResults_xgboost"
 author: "Yang Lei"
 date: "2024-08-01"
 output: html_document
@@ -61,11 +61,10 @@ Y.form <- as.formula(paste0(c("outcome~ exposure",
 # 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
 a <- 1000
 
-RD_lasso <- data.frame(RD = numeric(),
-                       SE = numeric())
+RD_xgboost <- data.frame(RD = numeric(), SE = numeric())
 ```
 
-```{r scenario: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}
+```{r scenario: for-loop generating RD & SE results for xgboost, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenario"
@@ -84,48 +83,45 @@ for (i in 1:a) {
   data$id <- data$idx
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
-  lasso.fit <- glmnet::cv.glmnet(y = data$outcome, 
-                                 x = covar.mat, 
-                                 type.measure='mse',
-                                 family="binomial",
-                                 alpha = 1, 
-                                 nfolds = 5)
-  coef.fit <- coef(lasso.fit,s='lambda.min',exact=TRUE)
-  sel.variables <- row.names(coef.fit)[which(as.numeric(coef.fit)!=0)]
-  proxy_lasso <- proxy.list[proxy.list %in% sel.variables]
-  proxyform <- paste0(proxy_lasso, collapse = "+")
+  xgb.fit <- xgboost(data = covar.mat, label = data$outcome, 
+                     max.depth = 20, eta = 1, nthread = 2, nrounds = 5, 
+                     objective = "binary:logistic")
+  xgb.imp <- xgb.importance(model = xgb.fit)
+  sel.variables <- xgb.imp$Feature
+  proxy_xgboost <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_xgboost, collapse = "+")
   rhsform <- paste0(c(covform, proxyform), collapse = "+")
   ps.formula <- as.formula(paste0("exposure", "~", rhsform))
   
-  W.out_lasso <- weightit(ps.formula, 
+  W.out_xgboost <- weightit(ps.formula, 
                           data = data, 
                           estimand = "ATE",
                           method = "ps")
   #
-  data$ps.l <- W.out_lasso$ps
-  data$w.l <- W.out_lasso$weights
+  data$ps.l <- W.out_xgboost$ps
+  data$w.l <- W.out_xgboost$weights
   
-  fit.OR_lasso <- glm(out.formula,
+  fit.OR_xgboost <- glm(out.formula,
                       data = data,
-                      weights = W.out_lasso$weights,
+                      weights = W.out_xgboost$weights,
                       family= binomial(link = "logit"))
-  fit.RD_lasso <- glm(out.formula,
+  fit.RD_xgboost <- glm(out.formula,
                        data = data,
-                       weights = W.out_lasso$weights,
+                       weights = W.out_xgboost$weights,
                        family = gaussian(link= "identity"))
-  sum.RD_lasso <- c(summary(fit.RD_lasso)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_lasso)[2,2]))
+  sum.RD_xgboost <- c(summary(fit.RD_xgboost)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_xgboost)[2,2]))
   
-  RD_lasso[i,] <- sum.RD_lasso
-  rownames(RD_lasso)[i] <- paste0("data.", i, "_lasso")
+  RD_xgboost[i,] <- sum.RD_xgboost
+  rownames(RD_xgboost)[i] <- paste0("data.", i, "_xgboost")
   
-  proxy_lasso.i <- paste0("proxy_lasso.", i)
-  assign(proxy_lasso.i, proxy_lasso)
-  sum.RD_lasso.i <- paste0("sum.RD_lasso.", i)
-  assign(sum.RD_lasso.i, sum.RD_lasso)
+  proxy_xgboost.i <- paste0("proxy_xgboost.", i)
+  assign(proxy_xgboost.i, proxy_xgboost)
+  sum.RD_xgboost.i <- paste0("sum.RD_xgboost.", i)
+  assign(sum.RD_xgboost.i, sum.RD_xgboost)
 }
 ```
 
-```{r scenarioER: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}
+```{r scenarioER: for-loop generating RD & SE results for xgboost, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenarioER"
@@ -144,48 +140,47 @@ for (i in 1:a) {
   data$id <- data$idx
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
-  lasso.fit <- glmnet::cv.glmnet(y = data$outcome, 
-                                 x = covar.mat, 
-                                 type.measure='mse',
-                                 family="binomial",
-                                 alpha = 1, 
-                                 nfolds = 5)
-  coef.fit <- coef(lasso.fit,s='lambda.min',exact=TRUE)
-  sel.variables <- row.names(coef.fit)[which(as.numeric(coef.fit)!=0)]
-  proxy_lasso <- proxy.list[proxy.list %in% sel.variables]
-  proxyform <- paste0(proxy_lasso, collapse = "+")
+  xgb.fit <- xgboost(data = covar.mat, label = data$outcome, 
+                     max.depth = 20, eta = 1, nthread = 2, nrounds = 5, 
+                     objective = "binary:logistic")
+  xgb.imp <- xgb.importance(model = xgb.fit)
+  sel.variables <- xgb.imp$Feature
+  proxy_xgboost <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_xgboost, collapse = "+")
   rhsform <- paste0(c(covform, proxyform), collapse = "+")
   ps.formula <- as.formula(paste0("exposure", "~", rhsform))
   
-  W.out_lasso <- weightit(ps.formula, 
+  W.out_xgboost <- weightit(ps.formula, 
                           data = data, 
                           estimand = "ATE",
                           method = "ps")
   #
-  data$ps.l <- W.out_lasso$ps
-  data$w.l <- W.out_lasso$weights
+  data$ps.l <- W.out_xgboost$ps
+  data$w.l <- W.out_xgboost$weights
   
-  fit.OR_lasso <- glm(out.formula,
+  fit.OR_xgboost <- glm(out.formula,
                       data = data,
-                      weights = W.out_lasso$weights,
+                      weights = W.out_xgboost$weights,
                       family= binomial(link = "logit"))
-  fit.RD_lasso <- glm(out.formula,
+  fit.RD_xgboost <- glm(out.formula,
                        data = data,
-                       weights = W.out_lasso$weights,
+                       weights = W.out_xgboost$weights,
                        family = gaussian(link= "identity"))
-  sum.RD_lasso <- c(summary(fit.RD_lasso)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_lasso)[2,2]))
+  sum.RD_xgboost <- c(summary(fit.RD_xgboost)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_xgboost)[2,2]))
   
-  RD_lasso[i+a,] <- sum.RD_lasso
-  rownames(RD_lasso)[i+a] <- paste0("ER.data.", i, "_lasso")
+  RD_xgboost[i+a,] <- sum.RD_xgboost
+  rownames(RD_xgboost)[i+a] <- paste0("ER.data.", i, "_xgboost")
   
-  proxy_lasso.i <- paste0("proxy_lasso.ER.", i)
-  assign(proxy_lasso.i, proxy_lasso)
-  sum.RD_lasso.i <- paste0("sum.RD_lasso.ER.", i)
-  assign(sum.RD_lasso.i, sum.RD_lasso)
+  proxy_xgboost.i <- paste0("proxy_xgboost.ER.", i)
+  assign(proxy_xgboost.i, proxy_xgboost)
+  sum.RD_xgboost.i <- paste0("sum.RD_xgboost.ER.", i)
+  assign(sum.RD_xgboost.i, sum.RD_xgboost)
 }
 ```
 
-```{r scenarioOR: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}
+
+
+```{r scenarioOR: for-loop generating RD & SE results for xgboost, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenarioOR"
@@ -204,65 +199,61 @@ for (i in 1:a) {
   data$id <- data$idx
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
-  lasso.fit <- glmnet::cv.glmnet(y = data$outcome, 
-                                 x = covar.mat, 
-                                 type.measure='mse',
-                                 family="binomial",
-                                 alpha = 1, 
-                                 nfolds = 5)
-  coef.fit <- coef(lasso.fit,s='lambda.min',exact=TRUE)
-  sel.variables <- row.names(coef.fit)[which(as.numeric(coef.fit)!=0)]
-  proxy_lasso <- proxy.list[proxy.list %in% sel.variables]
-  proxyform <- paste0(proxy_lasso, collapse = "+")
+  xgb.fit <- xgboost(data = covar.mat, label = data$outcome, 
+                     max.depth = 20, eta = 1, nthread = 2, nrounds = 5, 
+                     objective = "binary:logistic")
+  xgb.imp <- xgb.importance(model = xgb.fit)
+  sel.variables <- xgb.imp$Feature
+  proxy_xgboost <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_xgboost, collapse = "+")
   rhsform <- paste0(c(covform, proxyform), collapse = "+")
   ps.formula <- as.formula(paste0("exposure", "~", rhsform))
   
-  W.out_lasso <- weightit(ps.formula, 
+  W.out_xgboost <- weightit(ps.formula, 
                           data = data, 
                           estimand = "ATE",
                           method = "ps")
   #
-  data$ps.l <- W.out_lasso$ps
-  data$w.l <- W.out_lasso$weights
+  data$ps.l <- W.out_xgboost$ps
+  data$w.l <- W.out_xgboost$weights
   
-  fit.OR_lasso <- glm(out.formula,
+  fit.OR_xgboost <- glm(out.formula,
                       data = data,
-                      weights = W.out_lasso$weights,
+                      weights = W.out_xgboost$weights,
                       family= binomial(link = "logit"))
-  fit.RD_lasso <- glm(out.formula,
+  fit.RD_xgboost <- glm(out.formula,
                        data = data,
-                       weights = W.out_lasso$weights,
+                       weights = W.out_xgboost$weights,
                        family = gaussian(link= "identity"))
-  sum.RD_lasso <- c(summary(fit.RD_lasso)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_lasso)[2,2]))
+  sum.RD_xgboost <- c(summary(fit.RD_xgboost)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_xgboost)[2,2]))
   
-  RD_lasso[i+2*a,] <- sum.RD_lasso
-  rownames(RD_lasso)[i+2*a] <- paste0("OR.data.", i, "_lasso")
+  RD_xgboost[i+2*a,] <- sum.RD_xgboost
+  rownames(RD_xgboost)[i+2*a] <- paste0("OR.data.", i, "_xgboost")
   
-  proxy_lasso.i <- paste0("proxy_lasso.OR.", i)
-  assign(proxy_lasso.i, proxy_lasso)
-  sum.RD_lasso.i <- paste0("sum.RD_lasso.OR.", i)
-  assign(sum.RD_lasso.i, sum.RD_lasso)
+  proxy_xgboost.i <- paste0("proxy_xgboost.OR.", i)
+  assign(proxy_xgboost.i, proxy_xgboost)
+  sum.RD_xgboost.i <- paste0("sum.RD_xgboost.OR.", i)
+  assign(sum.RD_xgboost.i, sum.RD_xgboost)
 }
 ```
 
-
-```{r read RD & SE results by lasso, warning=FALSE, cache=TRUE}
-RD_lasso
+```{r read RD & SE results by xgboost, warning=FALSE, cache=TRUE}
+RD_xgboost
 ```
 
-```{r check intermediate results for each data by lasso, warning=FALSE, cache=TRUE}
-# check RD & SE by lasso for each data, print:
-#   sum.RD_lasso.n, sum.RD_lasso.ER.n, or sum.RD_lasso.OR.n
-#   where "n" is a number ranges from 1 to 1000
-#   e.g.
-sum.RD_lasso.1
-sum.RD_lasso.ER.2
 
-# check proxy selected by lasso for each data, print:
-#   proxy_lasso.n, proxy_lasso.ER.n, or proxy_lasso.OR.n
+```{r check intermediate results for each data by xgboost, warning=FALSE, cache=TRUE}
+# check RD & SE by xgboost for each data, print:
+#   sum.RD_xgboost.n, sum.RD_xgboost.ER.n, or sum.RD_xgboost.OR.n
 #   where "n" is a number ranges from 1 to 1000
 #   e.g.
-proxy_lasso.1
-proxy_lasso.ER.3
+sum.RD_xgboost.1
+sum.RD_xgboost.ER.2
+
+# check proxy selected by xgboost for each data, print:
+#   proxy_xgboost.n, proxy_xgboost.ER.n, or proxy_xgboost.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+proxy_xgboost.1
+proxy_xgboost.ER.3
 ```
-
