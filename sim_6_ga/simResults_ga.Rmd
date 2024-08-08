@@ -1,7 +1,5 @@
 ---
 title: "simResults_ga"
-author: "Yang Lei"
-date: "2024-08-01"
 output: html_document
 ---
 
@@ -76,8 +74,9 @@ gaOpt <- function(vars, IV.train, DV.train) {
 # 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
 a <- 1000
 
-RD_ga <- data.frame(RD = numeric(),
-                       SE = numeric())
+RD_ga <- data.frame(RD = numeric(), SE = numeric())
+
+num.proxy_ga <- c()
 ```
 
 ```{r scenario: for-loop generating RD & SE results for ga, warning=FALSE, cache=TRUE}
@@ -85,18 +84,14 @@ set.seed(42)
 
 # Folder "scenario"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
-  
+  data <- readRDS(url(url))
+
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   ga.solution <- ga(fitness = function(vars)
@@ -136,9 +131,13 @@ for (i in 1:a) {
   
   RD_ga[i,] <- sum.RD_ga
   rownames(RD_ga)[i] <- paste0("data.", i, "_ga")
+  num.proxy_ga <- c(num.proxy_ga, length(proxy_ga))
+  names(num.proxy_ga)[i] <- paste0("data.", i, "_ga")
   
   proxy_ga.i <- paste0("proxy_ga.", i)
   assign(proxy_ga.i, proxy_ga)
+  num.proxy_ga.i <- paste0("num.proxy_ga.", i)
+  assign(num.proxy_ga.i, length(proxy_ga))
   sum.RD_ga.i <- paste0("sum.RD_ga.", i)
   assign(sum.RD_ga.i, sum.RD_ga)
 }
@@ -149,18 +148,14 @@ set.seed(42)
 
 # Folder "scenarioER"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   ga.solution <- ga(fitness = function(vars)
@@ -200,9 +195,13 @@ for (i in 1:a) {
   
   RD_ga[i+a,] <- sum.RD_ga
   rownames(RD_ga)[i+a] <- paste0("ER.data.", i, "_ga")
+  num.proxy_ga <- c(num.proxy_ga, length(proxy_ga))
+  names(num.proxy_ga)[i+a] <- paste0("ER.data.", i, "_ga")
   
   proxy_ga.i <- paste0("proxy_ga.ER.", i)
   assign(proxy_ga.i, proxy_ga)
+  num.proxy_ga.i <- paste0("num.proxy_ga.ER.", i)
+  assign(num.proxy_ga.i, length(proxy_ga))
   sum.RD_ga.i <- paste0("sum.RD_ga.ER.", i)
   assign(sum.RD_ga.i, sum.RD_ga)
 }
@@ -213,18 +212,14 @@ set.seed(42)
 
 # Folder "scenarioOR"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   ga.solution <- ga(fitness = function(vars)
@@ -264,9 +259,13 @@ for (i in 1:a) {
   
   RD_ga[i+2*a,] <- sum.RD_ga
   rownames(RD_ga)[i+2*a] <- paste0("OR.data.", i, "_ga")
+  num.proxy_ga <- c(num.proxy_ga, length(proxy_ga))
+  names(num.proxy_ga)[i+2*a] <- paste0("OR.data.", i, "_ga")
   
   proxy_ga.i <- paste0("proxy_ga.OR.", i)
   assign(proxy_ga.i, proxy_ga)
+  num.proxy_ga.i <- paste0("num.proxy_ga.OR.", i)
+  assign(num.proxy_ga.i, length(proxy_ga))
   sum.RD_ga.i <- paste0("sum.RD_ga.OR.", i)
   assign(sum.RD_ga.i, sum.RD_ga)
 }
@@ -274,6 +273,11 @@ for (i in 1:a) {
 
 ```{r read RD & SE results by ga, warning=FALSE, cache=TRUE}
 RD_ga
+```
+
+```{r check number of proxies selected, warning=FALSE, cache=TRUE}
+num.proxy_ga
+mean(num.proxy_ga[complete.cases(num.proxy_ga)])
 ```
 
 ```{r check intermediate results for each data by ga, warning=FALSE, cache=TRUE}
@@ -290,6 +294,13 @@ sum.RD_ga.ER.2
 #   e.g.
 proxy_ga.1
 proxy_ga.ER.3
+
+# check number of proxy selected by ga for each data, print:
+#   num.proxy_ga.n, num.proxy_ga.ER.n, or num.proxy_ga.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+num.proxy_ga.1
+num.proxy_ga.OR.3
 ```
 
 

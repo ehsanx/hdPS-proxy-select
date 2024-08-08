@@ -1,7 +1,5 @@
 ---
 title: "simResults_svm"
-author: "Yang Lei"
-date: "2024-08-01"
 output: html_document
 ---
 
@@ -61,8 +59,9 @@ Y.form <- as.formula(paste0(c("outcome~ exposure",
 # 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
 a <- 1000
 
-RD_svm <- data.frame(RD = numeric(),
-                       SE = numeric())
+RD_svm <- data.frame(RD = numeric(), SE = numeric())
+
+num.proxy_svm <- c()
 ```
 
 ```{r scenario: for-loop generating RD & SE results for svm, warning=FALSE, cache=TRUE}
@@ -70,18 +69,14 @@ set.seed(42)
 
 # Folder "scenario"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
-  
+  data <- readRDS(url(url))
+
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   svmTrainOutcome <- data$outcome
@@ -126,9 +121,13 @@ for (i in 1:a) {
   
   RD_svm[i,] <- sum.RD_svm
   rownames(RD_svm)[i] <- paste0("data.", i, "_svm")
+  num.proxy_svm <- c(num.proxy_svm, length(proxy_svm))
+  names(num.proxy_svm)[i] <- paste0("data.", i, "_svm")
   
   proxy_svm.i <- paste0("proxy_svm.", i)
   assign(proxy_svm.i, proxy_svm)
+  num.proxy_svm.i <- paste0("num.proxy_svm.", i)
+  assign(num.proxy_svm.i, length(proxy_svm))
   sum.RD_svm.i <- paste0("sum.RD_svm.", i)
   assign(sum.RD_svm.i, sum.RD_svm)
 }
@@ -139,18 +138,14 @@ set.seed(42)
 
 # Folder "scenarioER"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
-  
+  data <- readRDS(url(url))
+
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   svmTrainOutcome <- data$outcome
@@ -195,9 +190,13 @@ for (i in 1:a) {
   
   RD_svm[i+a,] <- sum.RD_svm
   rownames(RD_svm)[i+a] <- paste0("ER.data.", i, "_svm")
+  num.proxy_svm <- c(num.proxy_svm, length(proxy_svm))
+  names(num.proxy_svm)[i+a] <- paste0("ER.data.", i, "_svm")
   
   proxy_svm.i <- paste0("proxy_svm.ER.", i)
   assign(proxy_svm.i, proxy_svm)
+  num.proxy_svm.i <- paste0("num.proxy_svm.ER.", i)
+  assign(num.proxy_svm.i, length(proxy_svm))
   sum.RD_svm.i <- paste0("sum.RD_svm.ER.", i)
   assign(sum.RD_svm.i, sum.RD_svm)
 }
@@ -208,18 +207,14 @@ set.seed(42)
 
 # Folder "scenarioOR"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
-  
+  data <- readRDS(url(url))
+
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   svmTrainOutcome <- data$outcome
@@ -264,9 +259,13 @@ for (i in 1:a) {
   
   RD_svm[i+2*a,] <- sum.RD_svm
   rownames(RD_svm)[i+2*a] <- paste0("OR.data.", i, "_svm")
+  num.proxy_svm <- c(num.proxy_svm, length(proxy_svm))
+  names(num.proxy_svm)[i+2*a] <- paste0("OR.data.", i, "_svm")
   
   proxy_svm.i <- paste0("proxy_svm.OR.", i)
   assign(proxy_svm.i, proxy_svm)
+  num.proxy_svm.i <- paste0("num.proxy_svm.OR.", i)
+  assign(num.proxy_svm.i, length(proxy_svm))
   sum.RD_svm.i <- paste0("sum.RD_svm.OR.", i)
   assign(sum.RD_svm.i, sum.RD_svm)
 }
@@ -274,6 +273,11 @@ for (i in 1:a) {
 
 ```{r read RD & SE results by svm, warning=FALSE, cache=TRUE}
 RD_svm
+```
+
+```{r check number of proxies selected, warning=FALSE, cache=TRUE}
+num.proxy_svm
+mean(num.proxy_svm[complete.cases(num.proxy_svm)])
 ```
 
 ```{r check intermediate results for each data by svm, warning=FALSE, cache=TRUE}
@@ -290,4 +294,11 @@ sum.RD_svm.ER.2
 #   e.g.
 proxy_svm.1
 proxy_svm.ER.3
+
+# check number of proxy selected by svm for each data, print:
+#   num.proxy_svm.n, num.proxy_svm.ER.n, or num.proxy_svm.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+num.proxy_svm.1
+num.proxy_svm.OR.3
 ```

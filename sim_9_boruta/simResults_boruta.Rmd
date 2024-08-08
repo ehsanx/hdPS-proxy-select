@@ -1,0 +1,260 @@
+---
+title: "simResults_boruta"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(autoCovariateSelection)
+require(dplyr)
+require(cobalt)
+require(WeightIt)
+library(tidyverse)
+library(ggplot2)
+library(lmtest)
+library(MASS)
+library(Boruta)
+library(GA)
+library(mclust)
+library(penalizedSVM)
+library(xgboost)
+library(caret)
+require(autoCovariateSelection)
+library(randomForest)
+require(lmtest)
+```
+
+```{r load basic information, warning=FALSE, cache=TRUE}
+# global information
+exposure <- "obese"
+outcome <- "diabetes" 
+investigator.specified.covariates <- 
+  c(# Demographic
+    "age.cat", "sex", "education", "race", 
+    "marital", "income", "born", "year",
+    
+    # health history related variables/access
+    "diabetes.family.history", "medical.access",
+    
+    # behavioral
+    "smoking", "diet.healthy", "physical.activity", "sleep",
+    
+    # Laboratory 
+    "uric.acid", "protein.total", "bilirubin.total", "phosphorus",
+    "sodium", "potassium", "globulin", "calcium.total", 
+    "systolicBP", "diastolicBP", "high.cholesterol"
+  )
+covform <- paste0(investigator.specified.covariates, collapse = "+")
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+
+url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_1.rds")
+data <- readRDS(url(url))
+proxy.list <- names(data[, c(grep("^rec", names(data), value = TRUE))])
+covarsTfull <- c(investigator.specified.covariates, proxy.list)
+Y.form <- as.formula(paste0(c("outcome~ exposure", 
+                              covarsTfull), collapse = "+") )
+```
+
+```{r initialization before for-loop, warning=FALSE, cache=TRUE}
+# 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
+a <- 1000
+
+RD_boruta <- data.frame(RD = numeric(), SE = numeric())
+
+num.proxy_boruta <- c()
+```
+
+```{r scenario: for-loop generating RD & SE results for boruta, warning=FALSE, cache=TRUE}
+set.seed(42)
+
+# Folder "scenario"
+for (i in 1:a) {
+  closeAllConnections()
+  url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
+                i, 
+                ".rds")
+  data <- readRDS(url(url))
+  
+  # found some id != idx
+  data$idx <- data$id
+  
+  boruta.fit <- Boruta(Y.form, data = data, doTrace = 1)
+  sel.variables <- names(boruta.fit$finalDecision)[which(boruta.fit$finalDecision != "Rejected")]
+  proxy_boruta <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_boruta, collapse = "+")
+  rhsform <- paste0(c(covform, proxyform), collapse = "+")
+  ps.formula <- as.formula(paste0("exposure", "~", rhsform))
+  
+  W.out_boruta <- weightit(ps.formula, 
+                          data = data, 
+                          estimand = "ATE",
+                          method = "ps")
+  #
+  data$ps.l <- W.out_boruta$ps
+  data$w.l <- W.out_boruta$weights
+  
+  fit.OR_boruta <- glm(out.formula,
+                      data = data,
+                      weights = W.out_boruta$weights,
+                      family= binomial(link = "logit"))
+  fit.RD_boruta <- glm(out.formula,
+                       data = data,
+                       weights = W.out_boruta$weights,
+                       family = gaussian(link= "identity"))
+  sum.RD_boruta <- c(summary(fit.RD_boruta)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_boruta)[2,2]))
+  
+  RD_boruta[i,] <- sum.RD_boruta
+  rownames(RD_boruta)[i] <- paste0("data.", i, "_boruta")
+  num.proxy_boruta <- c(num.proxy_boruta, length(proxy_boruta))
+  names(num.proxy_boruta)[i] <- paste0("data.", i, "_boruta")
+  
+  proxy_boruta.i <- paste0("proxy_boruta.", i)
+  assign(proxy_boruta.i, proxy_boruta)
+  num.proxy_boruta.i <- paste0("num.proxy_boruta.", i)
+  assign(num.proxy_boruta.i, length(proxy_boruta))
+  sum.RD_boruta.i <- paste0("sum.RD_boruta.", i)
+  assign(sum.RD_boruta.i, sum.RD_boruta)
+}
+```
+
+```{r scenarioER: for-loop generating RD & SE results for boruta, warning=FALSE, cache=TRUE}
+set.seed(42)
+
+# Folder "scenarioER"
+for (i in 1:a) {
+  closeAllConnections()
+  url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
+                i, 
+                ".rds")
+  data <- readRDS(url(url))
+  
+  # found some id != idx
+  data$idx <- data$id
+  
+  boruta.fit <- Boruta(Y.form, data = data, doTrace = 1)
+  sel.variables <- names(boruta.fit$finalDecision)[which(boruta.fit$finalDecision != "Rejected")]
+  proxy_boruta <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_boruta, collapse = "+")
+  rhsform <- paste0(c(covform, proxyform), collapse = "+")
+  ps.formula <- as.formula(paste0("exposure", "~", rhsform))
+  
+  W.out_boruta <- weightit(ps.formula, 
+                          data = data, 
+                          estimand = "ATE",
+                          method = "ps")
+  #
+  data$ps.l <- W.out_boruta$ps
+  data$w.l <- W.out_boruta$weights
+  
+  fit.OR_boruta <- glm(out.formula,
+                      data = data,
+                      weights = W.out_boruta$weights,
+                      family= binomial(link = "logit"))
+  fit.RD_boruta <- glm(out.formula,
+                       data = data,
+                       weights = W.out_boruta$weights,
+                       family = gaussian(link= "identity"))
+  sum.RD_boruta <- c(summary(fit.RD_boruta)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_boruta)[2,2]))
+  
+  RD_boruta[i+a,] <- sum.RD_boruta
+  rownames(RD_boruta)[i+a] <- paste0("ER.data.", i, "_boruta")
+  num.proxy_boruta <- c(num.proxy_boruta, length(proxy_boruta))
+  names(num.proxy_boruta)[i+a] <- paste0("ER.data.", i, "_boruta")
+  
+  proxy_boruta.i <- paste0("proxy_boruta.ER.", i)
+  assign(proxy_boruta.i, proxy_boruta)
+  num.proxy_boruta.i <- paste0("num.proxy_boruta.ER.", i)
+  assign(num.proxy_boruta.i, length(proxy_boruta))
+  sum.RD_boruta.i <- paste0("sum.RD_boruta.ER.", i)
+  assign(sum.RD_boruta.i, sum.RD_boruta)
+}
+```
+
+```{r scenarioOR: for-loop generating RD & SE results for boruta, warning=FALSE, cache=TRUE}
+set.seed(42)
+
+# Folder "scenarioOR"
+for (i in 1:a) {
+  closeAllConnections()
+  url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
+                i, 
+                ".rds")
+  data <- readRDS(url(url))
+  
+  # found some id != idx
+  data$idx <- data$id
+  
+  boruta.fit <- Boruta(Y.form, data = data, doTrace = 1)
+  sel.variables <- names(boruta.fit$finalDecision)[which(boruta.fit$finalDecision != "Rejected")]
+  proxy_boruta <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_boruta, collapse = "+")
+  rhsform <- paste0(c(covform, proxyform), collapse = "+")
+  ps.formula <- as.formula(paste0("exposure", "~", rhsform))
+  
+  W.out_boruta <- weightit(ps.formula, 
+                          data = data, 
+                          estimand = "ATE",
+                          method = "ps")
+  #
+  data$ps.l <- W.out_boruta$ps
+  data$w.l <- W.out_boruta$weights
+  
+  fit.OR_boruta <- glm(out.formula,
+                      data = data,
+                      weights = W.out_boruta$weights,
+                      family= binomial(link = "logit"))
+  fit.RD_boruta <- glm(out.formula,
+                       data = data,
+                       weights = W.out_boruta$weights,
+                       family = gaussian(link= "identity"))
+  sum.RD_boruta <- c(summary(fit.RD_boruta)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_boruta)[2,2]))
+  
+  RD_boruta[i+2*a,] <- sum.RD_boruta
+  rownames(RD_boruta)[i+2*a] <- paste0("OR.data.", i, "_boruta")
+  num.proxy_boruta <- c(num.proxy_boruta, length(proxy_boruta))
+  names(num.proxy_boruta)[i+2*a] <- paste0("OR.data.", i, "_boruta")
+  
+  proxy_boruta.i <- paste0("proxy_boruta.OR.", i)
+  assign(proxy_boruta.i, proxy_boruta)
+  num.proxy_boruta.i <- paste0("num.proxy_boruta.OR.", i)
+  assign(num.proxy_boruta.i, length(proxy_boruta))
+  sum.RD_boruta.i <- paste0("sum.RD_boruta.OR.", i)
+  assign(sum.RD_boruta.i, sum.RD_boruta)
+}
+```
+
+
+```{r read RD & SE results by boruta, warning=FALSE, cache=TRUE}
+RD_boruta
+```
+
+
+```{r check number of proxies selected, warning=FALSE, cache=TRUE}
+num.proxy_boruta
+mean(num.proxy_boruta[complete.cases(num.proxy_boruta)])
+```
+
+```{r check intermediate results for each data by boruta, warning=FALSE, cache=TRUE}
+# check RD & SE by boruta for each data, print:
+#   sum.RD_boruta.n, sum.RD_boruta.ER.n, or sum.RD_boruta.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+sum.RD_boruta.1
+sum.RD_boruta.ER.2
+
+# check proxy selected by boruta for each data, print:
+#   proxy_boruta.n, proxy_boruta.ER.n, or proxy_boruta.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+proxy_boruta.1
+proxy_boruta.ER.3
+
+# check number of proxy selected by boruta for each data, print:
+#   num.proxy_boruta.n, num.proxy_boruta.ER.n, or num.proxy_boruta.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+num.proxy_boruta.1
+num.proxy_boruta.OR.3
+```
+
+

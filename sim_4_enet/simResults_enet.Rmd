@@ -1,7 +1,5 @@
 ---
 title: "simResults_enet"
-author: "Yang Lei"
-date: "2024-08-01"
 output: html_document
 ---
 
@@ -63,6 +61,8 @@ a <- 1000
 
 RD_enet <- data.frame(RD = numeric(),
                        SE = numeric())
+
+num.proxy_enet <- c()
 ```
 
 ```{r scenario: for-loop generating RD & SE results for enet, warning=FALSE, cache=TRUE}
@@ -70,18 +70,14 @@ set.seed(42)
 
 # Folder "scenario"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
-  
+  data <- readRDS(url(url))
+
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   enet.fit <- glmnet::cv.glmnet(y = data$outcome, 
@@ -117,9 +113,13 @@ for (i in 1:a) {
   
   RD_enet[i,] <- sum.RD_enet
   rownames(RD_enet)[i] <- paste0("data.", i, "_enet")
+  num.proxy_enet <- c(num.proxy_enet, length(proxy_enet))
+  names(num.proxy_enet)[i] <- paste0("data.", i, "_enet")
   
   proxy_enet.i <- paste0("proxy_enet.", i)
   assign(proxy_enet.i, proxy_enet)
+  num.proxy_enet.i <- paste0("num.proxy_enet.", i)
+  assign(num.proxy_enet.i, length(proxy_enet))
   sum.RD_enet.i <- paste0("sum.RD_enet.", i)
   assign(sum.RD_enet.i, sum.RD_enet)
 }
@@ -130,18 +130,14 @@ set.seed(42)
 
 # Folder "scenarioER"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   enet.fit <- glmnet::cv.glmnet(y = data$outcome, 
@@ -158,9 +154,9 @@ for (i in 1:a) {
   ps.formula <- as.formula(paste0("exposure", "~", rhsform))
   
   W.out_enet <- weightit(ps.formula, 
-                          data = data, 
-                          estimand = "ATE",
-                          method = "ps")
+                         data = data, 
+                         estimand = "ATE",
+                         method = "ps")
   #
   data$ps.l <- W.out_enet$ps
   data$w.l <- W.out_enet$weights
@@ -177,9 +173,13 @@ for (i in 1:a) {
   
   RD_enet[i+a,] <- sum.RD_enet
   rownames(RD_enet)[i+a] <- paste0("ER.data.", i, "_enet")
+  num.proxy_enet <- c(num.proxy_enet, length(proxy_enet))
+  names(num.proxy_enet)[i+a] <- paste0("data.", i, "_enet")
   
   proxy_enet.i <- paste0("proxy_enet.ER.", i)
   assign(proxy_enet.i, proxy_enet)
+  num.proxy_enet.i <- paste0("num.proxy_enet.ER.", i)
+  assign(num.proxy_enet.i, length(proxy_enet))
   sum.RD_enet.i <- paste0("sum.RD_enet.ER.", i)
   assign(sum.RD_enet.i, sum.RD_enet)
 }
@@ -190,18 +190,14 @@ set.seed(42)
 
 # Folder "scenarioOR"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   enet.fit <- glmnet::cv.glmnet(y = data$outcome, 
@@ -237,9 +233,13 @@ for (i in 1:a) {
   
   RD_enet[i+2*a,] <- sum.RD_enet
   rownames(RD_enet)[i+2*a] <- paste0("OR.data.", i, "_enet")
+  num.proxy_enet <- c(num.proxy_enet, length(proxy_enet))
+  names(num.proxy_enet)[i+2*a] <- paste0("data.", i, "_enet")
   
   proxy_enet.i <- paste0("proxy_enet.OR.", i)
-  assign(proxy_enet.i, proxy_enet)
+  assign(proxy_enet.i, proxy_enet)  
+  num.proxy_enet.i <- paste0("num.proxy_enet.OR.", i)
+  assign(num.proxy_enet.i, length(proxy_enet))
   sum.RD_enet.i <- paste0("sum.RD_enet.OR.", i)
   assign(sum.RD_enet.i, sum.RD_enet)
 }
@@ -247,6 +247,11 @@ for (i in 1:a) {
 
 ```{r read RD & SE results by enet, warning=FALSE, cache=TRUE}
 RD_enet
+```
+
+```{r check number of proxies selected, warning=FALSE, cache=TRUE}
+num.proxy_enet
+mean(num.proxy_enet[complete.cases(num.proxy_enet)])
 ```
 
 ```{r check intermediate results for each data by enet, warning=FALSE, cache=TRUE}
@@ -263,4 +268,12 @@ sum.RD_enet.ER.2
 #   e.g.
 proxy_enet.1
 proxy_enet.ER.3
+
+# check number of proxy selected by enet for each data, print:
+#   num.proxy_enet.n, num.proxy_enet.ER.n, or num.proxy_enet.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+num.proxy_enet.1
+num.proxy_enet.OR.4
 ```
+

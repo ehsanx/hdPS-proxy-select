@@ -1,7 +1,5 @@
 ---
 title: "simResults_rf"
-author: "Yang Lei"
-date: "2024-08-01"
 output: html_document
 ---
 
@@ -64,14 +62,6 @@ a <- 1000
 RD_rf <- data.frame(RD = numeric(), SE = numeric())
 ```
 
-```{r initialization before for-loop, warning=FALSE, cache=TRUE}
-# 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
-a <- 1
-
-RD_rf <- data.frame(RD = numeric(),
-                       SE = numeric())
-```
-
 ```{r scenario: for-loop generating RD & SE results for rf, warning=FALSE, cache=TRUE}
 set.seed(42)
 
@@ -84,7 +74,7 @@ for (i in 1:a) {
   data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   
   rf.fit <- randomForest(outcome ~ ., data = data, importance = TRUE)
   # Get important features
@@ -135,7 +125,7 @@ for (i in 1:a) {
   data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   
   rf.fit <- randomForest(outcome ~ ., data = data, importance = TRUE)
   # Get important features
@@ -186,7 +176,7 @@ for (i in 1:a) {
   data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   
   rf.fit <- randomForest(outcome ~ ., data = data, importance = TRUE)
   # Get important features

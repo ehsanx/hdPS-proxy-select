@@ -1,7 +1,5 @@
 ---
 title: "simResults_xgboost"
-author: "Yang Lei"
-date: "2024-08-01"
 output: html_document
 ---
 
@@ -62,6 +60,8 @@ Y.form <- as.formula(paste0(c("outcome~ exposure",
 a <- 1000
 
 RD_xgboost <- data.frame(RD = numeric(), SE = numeric())
+
+num.proxy_xgboost <- c()
 ```
 
 ```{r scenario: for-loop generating RD & SE results for xgboost, warning=FALSE, cache=TRUE}
@@ -69,18 +69,14 @@ set.seed(42)
 
 # Folder "scenario"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   xgb.fit <- xgboost(data = covar.mat, label = data$outcome, 
@@ -113,9 +109,13 @@ for (i in 1:a) {
   
   RD_xgboost[i,] <- sum.RD_xgboost
   rownames(RD_xgboost)[i] <- paste0("data.", i, "_xgboost")
+  num.proxy_xgboost <- c(num.proxy_xgboost, length(proxy_xgboost))
+  names(num.proxy_xgboost)[i] <- paste0("data.", i, "_xgboost")
   
   proxy_xgboost.i <- paste0("proxy_xgboost.", i)
   assign(proxy_xgboost.i, proxy_xgboost)
+  num.proxy_xgboost.i <- paste0("num.proxy_xgboost.", i)
+  assign(num.proxy_xgboost.i, length(proxy_xgboost))
   sum.RD_xgboost.i <- paste0("sum.RD_xgboost.", i)
   assign(sum.RD_xgboost.i, sum.RD_xgboost)
 }
@@ -126,18 +126,14 @@ set.seed(42)
 
 # Folder "scenarioER"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   xgb.fit <- xgboost(data = covar.mat, label = data$outcome, 
@@ -170,33 +166,31 @@ for (i in 1:a) {
   
   RD_xgboost[i+a,] <- sum.RD_xgboost
   rownames(RD_xgboost)[i+a] <- paste0("ER.data.", i, "_xgboost")
+  num.proxy_xgboost <- c(num.proxy_xgboost, length(proxy_xgboost))
+  names(num.proxy_xgboost)[i+a] <- paste0("ER.data.", i, "_xgboost")
   
   proxy_xgboost.i <- paste0("proxy_xgboost.ER.", i)
   assign(proxy_xgboost.i, proxy_xgboost)
+  num.proxy_xgboost.i <- paste0("num.proxy_xgboost.ER.", i)
+  assign(num.proxy_xgboost.i, length(proxy_xgboost))
   sum.RD_xgboost.i <- paste0("sum.RD_xgboost.ER.", i)
   assign(sum.RD_xgboost.i, sum.RD_xgboost)
 }
 ```
-
-
 
 ```{r scenarioOR: for-loop generating RD & SE results for xgboost, warning=FALSE, cache=TRUE}
 set.seed(42)
 
 # Folder "scenarioOR"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
-  
+  data <- readRDS(url(url))
+
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   xgb.fit <- xgboost(data = covar.mat, label = data$outcome, 
@@ -229,9 +223,13 @@ for (i in 1:a) {
   
   RD_xgboost[i+2*a,] <- sum.RD_xgboost
   rownames(RD_xgboost)[i+2*a] <- paste0("OR.data.", i, "_xgboost")
+  num.proxy_xgboost <- c(num.proxy_xgboost, length(proxy_xgboost))
+  names(num.proxy_xgboost)[i+2*a] <- paste0("OR.data.", i, "_xgboost")
   
   proxy_xgboost.i <- paste0("proxy_xgboost.OR.", i)
   assign(proxy_xgboost.i, proxy_xgboost)
+  num.proxy_xgboost.i <- paste0("num.proxy_xgboost.OR.", i)
+  assign(num.proxy_xgboost.i, length(proxy_xgboost))
   sum.RD_xgboost.i <- paste0("sum.RD_xgboost.OR.", i)
   assign(sum.RD_xgboost.i, sum.RD_xgboost)
 }
@@ -241,6 +239,10 @@ for (i in 1:a) {
 RD_xgboost
 ```
 
+```{r check number of proxies selected, warning=FALSE, cache=TRUE}
+num.proxy_xgboost
+mean(num.proxy_xgboost[complete.cases(num.proxy_xgboost)])
+```
 
 ```{r check intermediate results for each data by xgboost, warning=FALSE, cache=TRUE}
 # check RD & SE by xgboost for each data, print:
@@ -256,4 +258,11 @@ sum.RD_xgboost.ER.2
 #   e.g.
 proxy_xgboost.1
 proxy_xgboost.ER.3
+
+# check number of proxy selected by xgboost for each data, print:
+#   num.proxy_xgboost.n, num.proxy_xgboost.ER.n, or num.proxy_xgboost.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+num.proxy_xgboost.1
+num.proxy_xgboost.OR.3
 ```

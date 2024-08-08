@@ -1,7 +1,5 @@
 ---
 title: "SimResults_Bross"
-author: "Yang Lei"
-date: "2024-07-31"
 output: html_document
 ---
 
@@ -65,18 +63,14 @@ set.seed(42)
 
 # Folder "scenario"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   
   # Feature Selection Method 1: Bross Formula
   proxy.df <- data[, c("idx", grep("^rec", names(data), value = TRUE))]
@@ -153,18 +147,14 @@ set.seed(42)
 
 # Folder "scenarioER"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   
   # Feature Selection Method 1: Bross Formula
   proxy.df <- data[, c("idx", grep("^rec", names(data), value = TRUE))]
@@ -227,7 +217,7 @@ for (i in 1:a) {
   
     RD_bross[i+a,] <- sum.RD_bross
     rownames(RD_bross)[i+a] <- paste0("ER.data.", i, "_bross")
-  
+    
     proxy_bross.i <- paste0("proxy_bross.ER.", i)
     assign(proxy_bross.i, proxy_bross)
     sum.RD_bross.i <- paste0("sum.RD_bross.ER.", i)
@@ -241,18 +231,14 @@ set.seed(42)
 
 # Folder "scenarioOR"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   
   # Feature Selection Method 1: Bross Formula
   proxy.df <- data[, c("idx", grep("^rec", names(data), value = TRUE))]
@@ -315,7 +301,7 @@ for (i in 1:a) {
   
     RD_bross[i+2*a,] <- sum.RD_bross
     rownames(RD_bross)[i+2*a] <- paste0("OR.data.", i, "_bross")
-  
+    
     proxy_bross.i <- paste0("proxy_bross.OR.", i)
     assign(proxy_bross.i, proxy_bross)
     sum.RD_bross.i <- paste0("sum.RD_bross.OR.", i)
@@ -328,7 +314,6 @@ for (i in 1:a) {
 ```{r read RD & SE results (with error rows), warning=FALSE, cache=TRUE}
 RD_bross
 ```
-
 
 ```{r check index of dataset causing error, warning=FALSE, cache=TRUE}
 # check index of dataset causing error
@@ -356,3 +341,5 @@ proxy_bross.1
 proxy_bross.ER.5
 ```
 
+ 
+ 

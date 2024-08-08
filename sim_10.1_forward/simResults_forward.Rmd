@@ -1,0 +1,284 @@
+---
+title: "simResults_forward"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(autoCovariateSelection)
+require(dplyr)
+require(cobalt)
+require(WeightIt)
+library(tidyverse)
+library(ggplot2)
+library(lmtest)
+library(MASS)
+library(Boruta)
+library(GA)
+library(mclust)
+library(penalizedSVM)
+library(xgboost)
+library(caret)
+require(autoCovariateSelection)
+library(randomForest)
+require(lmtest)
+```
+
+```{r load basic information, warning=FALSE, cache=TRUE}
+# global information
+exposure <- "obese"
+outcome <- "diabetes" 
+investigator.specified.covariates <- 
+  c(# Demographic
+    "age.cat", "sex", "education", "race", 
+    "marital", "income", "born", "year",
+    
+    # health history related variables/access
+    "diabetes.family.history", "medical.access",
+    
+    # behavioral
+    "smoking", "diet.healthy", "physical.activity", "sleep",
+    
+    # Laboratory 
+    "uric.acid", "protein.total", "bilirubin.total", "phosphorus",
+    "sodium", "potassium", "globulin", "calcium.total", 
+    "systolicBP", "diastolicBP", "high.cholesterol"
+  )
+covform <- paste0(investigator.specified.covariates, collapse = "+")
+out.formula <- as.formula(paste0("outcome", "~", "exposure"))
+
+url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_1.rds")
+data <- readRDS(url(url))
+proxy.list <- names(data[, c(grep("^rec", names(data), value = TRUE))])
+covarsTfull <- c(investigator.specified.covariates, proxy.list)
+Y.form <- as.formula(paste0(c("outcome~exposure", 
+                              covarsTfull), collapse = "+") )
+
+initial.formula <- as.formula(paste0("outcome~exposure+",
+                                     covform,
+                                     collapse = "+"))
+full.formula <- as.formula(paste0("outcome~exposure+",
+                                  paste0(covarsTfull, collapse = "+"),
+                                  collapse = "+"))
+```
+
+```{r initialization before for-loop, warning=FALSE, cache=TRUE}
+# 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
+a <- 1000
+
+RD_forward <- data.frame(RD = numeric(), SE = numeric())
+
+num.proxy_forward <- c()
+```
+
+```{r scenario: for-loop generating RD & SE results for forward, warning=FALSE, cache=TRUE}
+set.seed(42)
+
+# Folder "scenario"
+for (i in 1:a) {
+  closeAllConnections()
+  url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
+                i, 
+                ".rds")
+  data <- readRDS(url(url))
+  
+  # found some id != idx
+  data$idx <- data$id
+  
+  initial.model <- glm(initial.formula, data = data, family = binomial)
+  full.model <- glm(full.formula, data = data, family = binomial)
+  stepwise_forward <- stepAIC(initial.model, 
+                              scope = list(lower = initial.model, 
+                                           upper = full.model), 
+                              direction = "forward")
+
+  
+  sel.variables <- all.vars(formula(stepwise_forward))[-1]
+  proxy_forward <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_forward, collapse = "+")
+  rhsform <- paste0(c(covform, proxyform), collapse = "+")
+  ps.formula <- as.formula(paste0("exposure", "~", rhsform))
+  
+  W.out_forward <- weightit(ps.formula, 
+                          data = data, 
+                          estimand = "ATE",
+                          method = "ps")
+  #
+  data$ps.l <- W.out_forward$ps
+  data$w.l <- W.out_forward$weights
+  
+  fit.OR_forward <- glm(out.formula,
+                      data = data,
+                      weights = W.out_forward$weights,
+                      family= binomial(link = "logit"))
+  fit.RD_forward <- glm(out.formula,
+                       data = data,
+                       weights = W.out_forward$weights,
+                       family = gaussian(link= "identity"))
+  sum.RD_forward <- c(summary(fit.RD_forward)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_forward)[2,2]))
+  
+  RD_forward[i,] <- sum.RD_forward
+  rownames(RD_forward)[i] <- paste0("data.", i, "_forward")
+  num.proxy_forward <- c(num.proxy_forward, length(proxy_forward))
+  names(num.proxy_forward)[i] <- paste0("data.", i, "_forward")
+  
+  proxy_forward.i <- paste0("proxy_forward.", i)
+  assign(proxy_forward.i, proxy_forward)
+  num.proxy_forward.i <- paste0("num.proxy_forward.", i)
+  assign(num.proxy_forward.i, length(proxy_forward))
+  sum.RD_forward.i <- paste0("sum.RD_forward.", i)
+  assign(sum.RD_forward.i, sum.RD_forward)
+}
+```
+
+```{r scenarioER: for-loop generating RD & SE results for forward, warning=FALSE, cache=TRUE}
+set.seed(42)
+
+# Folder "scenarioER"
+for (i in 1:a) {
+  closeAllConnections()
+  url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
+                i, 
+                ".rds")
+  data <- readRDS(url(url))
+  
+  # found some id != idx
+  data$idx <- data$id
+  
+  initial.model <- glm(initial.formula, data = data, family = binomial)
+  full.model <- glm(full.formula, data = data, family = binomial)
+  stepwise_forward <- stepAIC(initial.model, 
+                              scope = list(lower = initial.model, 
+                                           upper = full.model), 
+                              direction = "forward")
+
+  sel.variables <- all.vars(formula(stepwise_forward))[-1]
+  proxy_forward <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_forward, collapse = "+")
+  rhsform <- paste0(c(covform, proxyform), collapse = "+")
+  ps.formula <- as.formula(paste0("exposure", "~", rhsform))
+  
+  W.out_forward <- weightit(ps.formula, 
+                          data = data, 
+                          estimand = "ATE",
+                          method = "ps")
+  #
+  data$ps.l <- W.out_forward$ps
+  data$w.l <- W.out_forward$weights
+  
+  fit.OR_forward <- glm(out.formula,
+                      data = data,
+                      weights = W.out_forward$weights,
+                      family= binomial(link = "logit"))
+  fit.RD_forward <- glm(out.formula,
+                       data = data,
+                       weights = W.out_forward$weights,
+                       family = gaussian(link= "identity"))
+  sum.RD_forward <- c(summary(fit.RD_forward)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_forward)[2,2]))
+  
+  RD_forward[i+a,] <- sum.RD_forward
+  rownames(RD_forward)[i+a] <- paste0("ER.data.", i, "_forward")
+  num.proxy_forward <- c(num.proxy_forward, length(proxy_forward))
+  names(num.proxy_forward)[i+a] <- paste0("ER.data.", i, "_forward")
+  
+  proxy_forward.i <- paste0("proxy_forward.ER.", i)
+  assign(proxy_forward.i, proxy_forward)
+  num.proxy_forward.i <- paste0("num.proxy_forward.ER.", i)
+  assign(num.proxy_forward.i, length(proxy_forward))
+  sum.RD_forward.i <- paste0("sum.RD_forward.ER.", i)
+  assign(sum.RD_forward.i, sum.RD_forward)
+}
+```
+
+```{r scenarioOR: for-loop generating RD & SE results for forward, warning=FALSE, cache=TRUE}
+set.seed(42)
+
+# Folder "scenarioOR"
+for (i in 1:a) {
+  closeAllConnections()
+  url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
+                i, 
+                ".rds")
+  data <- readRDS(url(url))
+  
+  # found some id != idx
+  data$idx <- data$id
+  
+  initial.model <- glm(initial.formula, data = data, family = binomial)
+  full.model <- glm(full.formula, data = data, family = binomial)
+  stepwise_forward <- stepAIC(initial.model, 
+                              scope = list(lower = initial.model, 
+                                           upper = full.model), 
+                              direction = "forward")
+
+  sel.variables <- all.vars(formula(stepwise_forward))[-1]
+  proxy_forward <- proxy.list[proxy.list %in% sel.variables]
+  proxyform <- paste0(proxy_forward, collapse = "+")
+  rhsform <- paste0(c(covform, proxyform), collapse = "+")
+  ps.formula <- as.formula(paste0("exposure", "~", rhsform))
+  
+  W.out_forward <- weightit(ps.formula, 
+                          data = data, 
+                          estimand = "ATE",
+                          method = "ps")
+  #
+  data$ps.l <- W.out_forward$ps
+  data$w.l <- W.out_forward$weights
+  
+  fit.OR_forward <- glm(out.formula,
+                      data = data,
+                      weights = W.out_forward$weights,
+                      family= binomial(link = "logit"))
+  fit.RD_forward <- glm(out.formula,
+                       data = data,
+                       weights = W.out_forward$weights,
+                       family = gaussian(link= "identity"))
+  sum.RD_forward <- c(summary(fit.RD_forward)$coef["exposure", c("Estimate")], sqrt(sandwich::sandwich(fit.RD_forward)[2,2]))
+  
+  RD_forward[i+2*a,] <- sum.RD_forward
+  rownames(RD_forward)[i+2*a] <- paste0("OR.data.", i, "_forward")
+  num.proxy_forward <- c(num.proxy_forward, length(proxy_forward))
+  names(num.proxy_forward)[i+2*a] <- paste0("OR.data.", i, "_forward")
+  
+  proxy_forward.i <- paste0("proxy_forward.OR.", i)
+  assign(proxy_forward.i, proxy_forward)
+  num.proxy_forward.i <- paste0("num.proxy_forward.OR.", i)
+  assign(num.proxy_forward.i, length(proxy_forward))
+  sum.RD_forward.i <- paste0("sum.RD_forward.OR.", i)
+  assign(sum.RD_forward.i, sum.RD_forward)
+}
+```
+
+
+```{r read RD & SE results by forward, warning=FALSE, cache=TRUE}
+RD_forward
+```
+
+
+```{r check number of proxies selected, warning=FALSE, cache=TRUE}
+num.proxy_forward
+mean(num.proxy_forward[complete.cases(num.proxy_forward)])
+```
+
+```{r check intermediate results for each data by forward, warning=FALSE, cache=TRUE}
+# check RD & SE by forward for each data, print:
+#   sum.RD_forward.n, sum.RD_forward.ER.n, or sum.RD_forward.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+sum.RD_forward.1
+sum.RD_forward.ER.2
+
+# check proxy selected by forward for each data, print:
+#   proxy_forward.n, proxy_forward.ER.n, or proxy_forward.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+proxy_forward.1
+proxy_forward.ER.3
+
+# check number of proxy selected by forward for each data, print:
+#   num.proxy_forward.n, num.proxy_forward.ER.n, or num.proxy_forward.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+num.proxy_forward.1
+num.proxy_forward.OR.3
+```

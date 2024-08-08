@@ -1,7 +1,5 @@
 ---
 title: "simResults_lasso"
-author: "Yang Lei"
-date: "2024-08-01"
 output: html_document
 ---
 
@@ -61,8 +59,9 @@ Y.form <- as.formula(paste0(c("outcome~ exposure",
 # 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
 a <- 1000
 
-RD_lasso <- data.frame(RD = numeric(),
-                       SE = numeric())
+RD_lasso <- data.frame(RD = numeric(), SE = numeric())
+
+num.proxy_lasso <- c()
 ```
 
 ```{r scenario: for-loop generating RD & SE results for lasso, warning=FALSE, cache=TRUE}
@@ -70,18 +69,14 @@ set.seed(42)
 
 # Folder "scenario"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenario/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   lasso.fit <- glmnet::cv.glmnet(y = data$outcome, 
@@ -117,9 +112,13 @@ for (i in 1:a) {
   
   RD_lasso[i,] <- sum.RD_lasso
   rownames(RD_lasso)[i] <- paste0("data.", i, "_lasso")
+  num.proxy_lasso <- c(num.proxy_lasso, length(proxy_lasso))
+  names(num.proxy_lasso)[i] <- paste0("data.", i, "_lasso")
   
   proxy_lasso.i <- paste0("proxy_lasso.", i)
   assign(proxy_lasso.i, proxy_lasso)
+  num.proxy_lasso.i <- paste0("num.proxy_lasso.", i)
+  assign(num.proxy_lasso.i, length(proxy_lasso))
   sum.RD_lasso.i <- paste0("sum.RD_lasso.", i)
   assign(sum.RD_lasso.i, sum.RD_lasso)
 }
@@ -130,18 +129,14 @@ set.seed(42)
 
 # Folder "scenarioER"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioER/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
+  data <- readRDS(url(url))
   
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   lasso.fit <- glmnet::cv.glmnet(y = data$outcome, 
@@ -177,9 +172,13 @@ for (i in 1:a) {
   
   RD_lasso[i+a,] <- sum.RD_lasso
   rownames(RD_lasso)[i+a] <- paste0("ER.data.", i, "_lasso")
+  num.proxy_lasso <- c(num.proxy_lasso, length(proxy_lasso))
+  names(num.proxy_lasso)[i+a] <- paste0("ER.data.", i, "_lasso")
   
   proxy_lasso.i <- paste0("proxy_lasso.ER.", i)
   assign(proxy_lasso.i, proxy_lasso)
+  num.proxy_lasso.i <- paste0("num.proxy_lasso.ER.", i)
+  assign(num.proxy_lasso.i, length(proxy_lasso))
   sum.RD_lasso.i <- paste0("sum.RD_lasso.ER.", i)
   assign(sum.RD_lasso.i, sum.RD_lasso)
 }
@@ -190,18 +189,14 @@ set.seed(42)
 
 # Folder "scenarioOR"
 for (i in 1:a) {
+  closeAllConnections()
   url <- paste0("https://raw.githubusercontent.com/ehsanx/PlasmodeSim/main/data/hdData/data/scenarioOR/data_", 
                 i, 
                 ".rds")
-  data <- tryCatch({
-    readRDS(url(url))
-  }, error = function(e) {
-    closeAllConnections()
-    readRDS(url(url))
-  })
-  
+  data <- readRDS(url(url))
+
   # found some id != idx
-  data$id <- data$idx
+  data$idx <- data$id
   covar.mat <- model.matrix(Y.form, data = data)[,-1]
   
   lasso.fit <- glmnet::cv.glmnet(y = data$outcome, 
@@ -237,9 +232,13 @@ for (i in 1:a) {
   
   RD_lasso[i+2*a,] <- sum.RD_lasso
   rownames(RD_lasso)[i+2*a] <- paste0("OR.data.", i, "_lasso")
+  num.proxy_lasso <- c(num.proxy_lasso, length(proxy_lasso))
+  names(num.proxy_lasso)[i+2*a] <- paste0("OR.data.", i, "_lasso")
   
   proxy_lasso.i <- paste0("proxy_lasso.OR.", i)
   assign(proxy_lasso.i, proxy_lasso)
+  num.proxy_lasso.i <- paste0("num.proxy_lasso.OR.", i)
+  assign(num.proxy_lasso.i, length(proxy_lasso))
   sum.RD_lasso.i <- paste0("sum.RD_lasso.OR.", i)
   assign(sum.RD_lasso.i, sum.RD_lasso)
 }
@@ -248,6 +247,11 @@ for (i in 1:a) {
 
 ```{r read RD & SE results by lasso, warning=FALSE, cache=TRUE}
 RD_lasso
+```
+
+```{r check number of proxies selected, warning=FALSE, cache=TRUE}
+num.proxy_lasso
+mean(num.proxy_lasso[complete.cases(num.proxy_lasso)])
 ```
 
 ```{r check intermediate results for each data by lasso, warning=FALSE, cache=TRUE}
@@ -264,5 +268,12 @@ sum.RD_lasso.ER.2
 #   e.g.
 proxy_lasso.1
 proxy_lasso.ER.3
+
+# check number of proxy selected by lasso for each data, print:
+#   num.proxy_lasso.n, num.proxy_lasso.ER.n, or num.proxy_lasso.OR.n
+#   where "n" is a number ranges from 1 to 1000
+#   e.g.
+num.proxy_lasso.1
+num.proxy_lasso.OR.3
 ```
 
