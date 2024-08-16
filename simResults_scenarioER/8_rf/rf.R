@@ -46,7 +46,7 @@ Y.form <- as.formula(paste0(c("outcome~ exposure",
 ### initialization before for-loop
 # 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
 a <- 1000
-b <- 0
+b <- 103
 
 RD_rf_ER <- data.frame(numProxy = integer(a), RD = numeric(a), SE = numeric(a))
 num.proxy_rf <- c()

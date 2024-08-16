@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=5G
-#SBATCH --time=10:00:00
+#SBATCH --time=2:00:00
 #SBATCH --mail-user=leiyang1@student.ubc.ca
 #SBATCH --mail-type=ALL
 #SBATCH --output=output_backward.txt

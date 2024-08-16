@@ -40,8 +40,8 @@ investigator.specified.covariates <-
 covform <- paste0(investigator.specified.covariates, collapse = "+")
 out.formula <- as.formula(paste0("outcome", "~", "exposure"))
 path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenarioOR/data_1.rds")
-data <- readRDS(path)
-proxy.list <- names(data[, c(grep("^rec", names(data), value = TRUE))])
+data1 <- readRDS(path)
+proxy.list <- names(data1[, c(grep("^rec", names(data1), value = TRUE))])
 covarsTfull <- c(investigator.specified.covariates, proxy.list)
 Y.form <- as.formula(paste0(c("outcome~ exposure", 
                               covarsTfull), collapse = "+"))
@@ -56,16 +56,16 @@ full.formula <- as.formula(paste0("outcome~exposure+",
 n_cores <- 12  # Match this to the --ntasks value in your Slurm script
 
 proxy_select <- function(i) {
+  browser()
   path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenarioOR/data_", i, ".rds")
-  data <- readRDS(path)
+  ds <<- readRDS(path)
   
   # found some id != idx
-  data$idx <- data$id
+  ds$idx <<- ds$id
+  ds$idx <- ds$id
   
-  data <- as.data.frame(data)
-  
-  initial.model <- glm(initial.formula, data = data, family = binomial)
-  full.model <- glm(full.formula, data = data, family = binomial)
+  initial.model <- glm(initial.formula, data = ds, family = binomial)
+  full.model <- glm(full.formula, data = ds, family = binomial)
   stepwise_both <- stepAIC(initial.model, 
                            scope = list(lower = initial.model, 
                                         upper = full.model), 
@@ -73,22 +73,13 @@ proxy_select <- function(i) {
   sel.variables <- all.vars(formula(stepwise_both))[-1]
   proxy_both <- proxy.list[proxy.list %in% sel.variables]
   proxyform <- paste0(proxy_both, collapse = "+")
-  proxy_both.data.i <- paste0("proxy_both.data.", i)
-  assign(proxy_both.data.i, proxyform)
+  proxy_both.data.OR.i <- paste0("proxy_both.data.OR.", i)
+  assign(proxy_both.data.OR.i, proxyform)
+  return(proxyform)
   
   # Save the result to an .rds file
   save_path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simResults_scenarioOR/10.3_both/proxy_both.data.", i, ".RData")
-  save(list = proxy_both.data.i, file = save_path)
-  
-  rm(data, 
-     initial.model, 
-     full.model, 
-     stepwise_both, 
-     sel.variables, 
-     proxy_both, 
-     proxyform,
-     proxy_both.data.i)
-  gc()
+  save(list = proxy_both.data.OR.i, file = save_path)
 }
 
 results <- mclapply(1:1000, proxy_select, mc.cores = n_cores)

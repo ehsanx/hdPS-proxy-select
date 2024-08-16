@@ -12,6 +12,7 @@ library(penalizedSVM)
 library(xgboost)
 library(caret)
 library(randomForest)
+library(leaps)
 # ---------------------------------------------------------------
 
 ### global information
@@ -41,9 +42,6 @@ proxy.list <- names(data[, c(grep("^rec", names(data), value = TRUE))])
 covarsTfull <- c(investigator.specified.covariates, proxy.list)
 Y.form <- as.formula(paste0(c("outcome~ exposure", 
                               covarsTfull), collapse = "+") )
-initial.formula <- as.formula(paste0("outcome~exposure+",
-                                     covform,
-                                     collapse = "+"))
 full.formula <- as.formula(paste0("outcome~exposure+",
                                   paste0(covarsTfull, collapse = "+"),
                                   collapse = "+"))
@@ -68,14 +66,11 @@ for (i in (b+1):a) {
   
   # found some id != idx
   data$idx <- data$id
-  initial.model <- glm(initial.formula, data = data, family = binomial)
-  full.model <- glm(full.formula, data = data, family = binomial)
-  stepwise_backward <- stepAIC(full.model, 
-                               scope = list(lower = initial.model, 
-                                            upper = full.model), 
-                               direction = "backward")
   
-  sel.variables <- all.vars(formula(stepwise_backward))[-1]
+  stepwise_backward <- regsubsets(full.formula, data = data, method = "backward", nvmax = length(proxy.list), nbest = 10)
+  summary_stepwise <- summary(stepwise_backward)
+  best_model <- which.max(summary_stepwise$adjr2)
+  sel.variables <- names(summary_stepwise$which[best_model,])[summary_stepwise$which[best_model,]]
   proxy_backward <- proxy.list[proxy.list %in% sel.variables]
   proxyform <- paste0(proxy_backward, collapse = "+")
   rhsform <- paste0(c(covform, proxyform), collapse = "+")

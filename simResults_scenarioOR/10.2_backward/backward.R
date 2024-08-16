@@ -12,6 +12,7 @@ library(penalizedSVM)
 library(xgboost)
 library(caret)
 library(randomForest)
+library(leaps)
 # ---------------------------------------------------------------
 
 ### global information
@@ -35,7 +36,7 @@ investigator.specified.covariates <-
   )
 covform <- paste0(investigator.specified.covariates, collapse = "+")
 out.formula <- as.formula(paste0("outcome", "~", "exposure"))
-path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenario/data_1.rds")
+path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenarioOR/data_1.rds")
 data <- readRDS(path)
 proxy.list <- names(data[, c(grep("^rec", names(data), value = TRUE))])
 covarsTfull <- c(investigator.specified.covariates, proxy.list)
@@ -58,24 +59,21 @@ RD_backward <- data.frame(numProxy = integer(a), RD = numeric(a), SE = numeric(a
 num.proxy_backward <- c()
 # ---------------------------------------------------------------
 
-### scenario: for-loop generating RD & SE results
+### scenarioOR: for-loop generating RD & SE results
 set.seed(42)
 
-# Folder "scenario"
+# Folder "scenarioOR"
 for (i in (b+1):a) {
-  path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenario/data_", i, ".rds")
+  path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenarioOR/data_", i, ".rds")
   data <- readRDS(path)
   
   # found some id != idx
   data$idx <- data$id
-  initial.model <- glm(initial.formula, data = data, family = binomial)
-  full.model <- glm(full.formula, data = data, family = binomial)
-  stepwise_backward <- stepAIC(full.model, 
-                               scope = list(lower = initial.model, 
-                                            upper = full.model), 
-                               direction = "backward")
-  
-  sel.variables <- all.vars(formula(stepwise_backward))[-1]
+
+  stepwise_backward <- regsubsets(full.formula, data = data, method = "backward", nvmax = length(proxy.list), nbest = 10)
+  summary_stepwise <- summary(stepwise_backward)
+  best_model <- which.max(summary_stepwise$adjr2)
+  sel.variables <- names(summary_stepwise$which[best_model,])[summary_stepwise$which[best_model,]]
   proxy_backward <- proxy.list[proxy.list %in% sel.variables]
   proxyform <- paste0(proxy_backward, collapse = "+")
   rhsform <- paste0(c(covform, proxyform), collapse = "+")
@@ -107,7 +105,7 @@ for (i in (b+1):a) {
   results_backward.i <- paste0("results_backward.", i)
   assign(results_backward.i, results_backward)
   
-  save_dir <- "/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simResults_scenario/10.2_backward/"
+  save_dir <- "/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simResults_scenarioOR/10.2_backward/"
   save_path <- paste0(save_dir, results_backward.i, ".RData")
   
   save(list = results_backward.i, file = save_path)
@@ -119,5 +117,5 @@ avg.num.proxy_backward <- mean(num.proxy_backward[complete.cases(num.proxy_backw
 # ---------------------------------------------------------------
 
 save(RD_backward, num.proxy_backward, avg.num.proxy_backward,
-     file = "/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simResults_scenario/10.2_backward/backward.RData")
+     file = "/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simResults_scenarioOR/10.2_backward/backward.RData")
 

@@ -12,6 +12,7 @@ library(penalizedSVM)
 library(xgboost)
 library(caret)
 library(randomForest)
+library(leaps)
 # ---------------------------------------------------------------
 
 ### global information
@@ -35,15 +36,12 @@ investigator.specified.covariates <-
   )
 covform <- paste0(investigator.specified.covariates, collapse = "+")
 out.formula <- as.formula(paste0("outcome", "~", "exposure"))
-path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenario/data_1.rds")
+path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenarioER/data_1.rds")
 data <- readRDS(path)
 proxy.list <- names(data[, c(grep("^rec", names(data), value = TRUE))])
 covarsTfull <- c(investigator.specified.covariates, proxy.list)
 Y.form <- as.formula(paste0(c("outcome~ exposure", 
                               covarsTfull), collapse = "+") )
-initial.formula <- as.formula(paste0("outcome~exposure+",
-                                     covform,
-                                     collapse = "+"))
 full.formula <- as.formula(paste0("outcome~exposure+",
                                   paste0(covarsTfull, collapse = "+"),
                                   collapse = "+"))
@@ -58,24 +56,21 @@ RD_forward <- data.frame(numProxy = integer(a), RD = numeric(a), SE = numeric(a)
 num.proxy_forward <- c()
 # ---------------------------------------------------------------
 
-### scenario: for-loop generating RD & SE results
+### scenarioER: for-loop generating RD & SE results
 set.seed(42)
 
-# Folder "scenario"
+# Folder "scenarioER"
 for (i in (b+1):a) {
-  path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenario/data_", i, ".rds")
+  path <- paste0("/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simData/scenarioER/data_", i, ".rds")
   data <- readRDS(path)
   
   # found some id != idx
   data$idx <- data$id
   
-  initial.model <- glm(initial.formula, data = data, family = binomial)
-  full.model <- glm(full.formula, data = data, family = binomial)
-  stepwise_forward <- stepAIC(initial.model, 
-                              scope = list(lower = initial.model, 
-                                           upper = full.model), 
-                              direction = "forward")
-  sel.variables <- all.vars(formula(stepwise_forward))[-1]
+  stepwise_forward <- regsubsets(full.formula, data = data, method = "forward", nvmax = length(proxy.list), nbest = 10)
+  summary_stepwise <- summary(stepwise_forward)
+  best_model <- which.max(summary_stepwise$adjr2)
+  sel.variables <- names(summary_stepwise$which[best_model,])[summary_stepwise$which[best_model,]]
   proxy_forward <- proxy.list[proxy.list %in% sel.variables]
   proxyform <- paste0(proxy_forward, collapse = "+")
   rhsform <- paste0(c(covform, proxyform), collapse = "+")
@@ -107,7 +102,7 @@ for (i in (b+1):a) {
   results_forward.i <- paste0("results_forward.", i)
   assign(results_forward.i, results_forward)
   
-  save_dir <- "/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simResults_scenario/10.1_forward/"
+  save_dir <- "/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simResults_scenarioER/10.1_forward/"
   save_path <- paste0(save_dir, results_forward.i, ".RData")
   
   save(list = results_forward.i, file = save_path)
@@ -119,5 +114,5 @@ avg.num.proxy_forward <- mean(num.proxy_forward[complete.cases(num.proxy_forward
 # ---------------------------------------------------------------
 
 save(RD_forward, num.proxy_forward, avg.num.proxy_forward,
-     file = "/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simResults_scenario/10.1_forward/forward.RData")
+     file = "/scratch/st-mekarim-1/leiyang1/hdPS_ProxySelect/simResults_scenarioER/10.1_forward/forward.RData")
 

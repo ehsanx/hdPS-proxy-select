@@ -2,8 +2,8 @@
 #SBATCH --account=st-mekarim-1
 #SBATCH --nodes=1
 #SBATCH --ntasks=12
-#SBATCH --mem=5G
-#SBATCH --time=5:00:00
+#SBATCH --mem=10G
+#SBATCH --time=9:00:00
 #SBATCH --mail-user=leiyang1@student.ubc.ca
 #SBATCH --mail-type=ALL
 #SBATCH --output=output_parallel_both.txt

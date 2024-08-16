@@ -12,6 +12,7 @@ library(penalizedSVM)
 library(xgboost)
 library(caret)
 library(randomForest)
+library(leaps)
 # ---------------------------------------------------------------
 
 ### global information
@@ -41,9 +42,6 @@ proxy.list <- names(data[, c(grep("^rec", names(data), value = TRUE))])
 covarsTfull <- c(investigator.specified.covariates, proxy.list)
 Y.form <- as.formula(paste0(c("outcome~ exposure", 
                               covarsTfull), collapse = "+") )
-initial.formula <- as.formula(paste0("outcome~exposure+",
-                                     covform,
-                                     collapse = "+"))
 full.formula <- as.formula(paste0("outcome~exposure+",
                                   paste0(covarsTfull, collapse = "+"),
                                   collapse = "+"))
@@ -52,7 +50,7 @@ full.formula <- as.formula(paste0("outcome~exposure+",
 ### initialization before for-loop
 # 'a' ranges from 1 to 1000 to change the number of datasets loaded in each for-loop
 a <- 1000
-b <- 4
+b <- 0
 
 RD_forward <- data.frame(numProxy = integer(a), RD = numeric(a), SE = numeric(a))
 num.proxy_forward <- c()
@@ -69,13 +67,10 @@ for (i in (b+1):a) {
   # found some id != idx
   data$idx <- data$id
   
-  initial.model <- glm(initial.formula, data = data, family = binomial)
-  full.model <- glm(full.formula, data = data, family = binomial)
-  stepwise_forward <- stepAIC(initial.model, 
-                              scope = list(lower = initial.model, 
-                                           upper = full.model), 
-                              direction = "forward")
-  sel.variables <- all.vars(formula(stepwise_forward))[-1]
+  stepwise_forward <- regsubsets(full.formula, data = data, method = "forward", nvmax = length(proxy.list), nbest = 10)
+  summary_stepwise <- summary(stepwise_forward)
+  best_model <- which.max(summary_stepwise$adjr2)
+  sel.variables <- names(summary_stepwise$which[best_model,])[summary_stepwise$which[best_model,]]
   proxy_forward <- proxy.list[proxy.list %in% sel.variables]
   proxyform <- paste0(proxy_forward, collapse = "+")
   rhsform <- paste0(c(covform, proxyform), collapse = "+")
