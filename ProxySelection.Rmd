@@ -1,5 +1,5 @@
 ---
-title: "Step1_LoadData"
+title: "Proxy Selection"
 author: "Yang Lei"
 date: "2024-07-11"
 output:
@@ -25,6 +25,7 @@ library(xgboost)
 library(caret)
 require(autoCovariateSelection)
 library(randomForest)
+library(leaps)
 ```
 
 **Codechuck 0. Loading data -- Generating Recurrence Covariates**
@@ -65,7 +66,7 @@ length(patientIds)
 save(dfx, patientIds, basetable, file = "data/dfx.RData")
 load(file = "data/dfx.RData")
 
-step1 <- get_candidate_covariates(df = dfx,  
+step1 <- get_candidate_covariates(df = dfx, 
                                   domainVarname = "domain",
                                   eventCodeVarname = "icd10", 
                                   patientIdVarname = "idx",
@@ -190,9 +191,9 @@ W.out.bross <- weightit(ps.formula,
                   estimand = "ATE",
                   method = "ps")
 fit_gau.bross <- glm(out.formula,
-               data= hdps.data.bross,
-               weights= W.out.bross$weights,
-               family=gaussian(link= "identity"))
+                     data= hdps.data.bross,
+                     weights= W.out.bross$weights,
+                     family=gaussian(link= "identity"))
 
 summary_rd.bross  <- summary(fit_gau.bross)$coef["exposure",
                                            c("Estimate",
@@ -487,84 +488,9 @@ summary_rd.elastic  <- c(summary_rd.elastic, conf.int)
 round(summary_rd.elastic, 2)
 ```
 
-**Method 5: XGBoost**
-```{r xgb OR, warning=FALSE, cache=TRUE}
-start_time <- Sys.time()
-
-xgb_fit <- xgboost(data = covar.mat, label = hdps.data$outcome, 
-                    max.depth = 20, eta = 1, nthread = 2, nrounds = 5, 
-                    objective = "binary:logistic")
-
-xgb_imp <- xgb.importance(model = xgb_fit)
-xgb.plot.importance(importance_matrix = xgb_imp)
-fs.xgboost <- xgb_imp$Feature
-fs.xgboost <- proxy.list[proxy.list %in% fs.xgboost]
-proxy.xgboost <- paste0(fs.xgboost, collapse = "+")
-form.xgboost <- paste0(c(covform, proxy.xgboost), collapse = "+")
-formula.xgboost <- as.formula(paste0("exposure", "~", form.xgboost))
-
-W.out.xgboost <- weightit(formula.xgboost, 
-                          data = hdps.data, 
-                          estimand = "ATE",
-                          method = "ps")
-
-hdps.data$ps.xgboost <- W.out.xgboost$ps
-hdps.data$w.xgboost <- W.out.xgboost$weights
-out.formula <- as.formula(paste0("outcome", "~", "exposure"))
-out.formula
-fit.xgboost <- glm(out.formula,
-                   data = hdps.data,
-                   weights = W.out.xgboost$weights,
-                   family= binomial(link = "logit"))
-summary.xgboost <- summary(fit.xgboost)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
-ci.xgboost <- confint(fit.xgboost, level = 0.95)["exposure", ]
-sum_ci.xgboost <- c(exp(summary.xgboost[1]), summary.xgboost, ci.xgboost)
-names(sum_ci.xgboost) <- c("Odds Ratio",
-                           "Estimate",
-                           "Std. Error",
-                           "Pr(>|z|)",
-                           "2.5 %",
-                           "97.5 %")
-
-# Q1: How many proxy variables are in common?
-# length(fs.xgboost) 
-# length(fs.xgboost[fs.xgboost %in% fs.bross])
-print("How many proxy variables are in common?")
-paste("There are", length(fs.xgboost), "features selected by xgboost")
-paste(length(fs.xgboost[fs.xgboost %in% fs.bross]), "of the", length(fs.xgboost), 
-      "are also selected by the bross formula method")
-# See which variables are not in common:
-# fs.xgboost[!(fs.xgboost %in% fs.bross)]
-
-# Q2: Odds ratio
-print("The Odds Ratio by XGBoost")
-sum_ci.xgboost
-end_time <- Sys.time()
-elapsed_time.xgb <- as.numeric(difftime(end_time, start_time, units = "secs"))
-elapsed_time.xgb
-```
-
-```{r xgb RD, warning=FALSE, cache=TRUE}
-fit_gau.xgboost <- glm(out.formula,
-                     data = hdps.data,
-                     weights = W.out.xgboost$weights,
-                     family = gaussian(link= "identity"))
-
-summary_rd.xgboost  <- summary(fit_gau.xgboost)$coef["exposure",
-                                                 c("Estimate",
-                                                   "Std. Error",
-                                                   "Pr(>|t|)")]
-summary_rd.xgboost[2]<- sqrt(sandwich::sandwich(fit_gau.xgboost)[2,2])
-
-require(lmtest)
-conf.int <- confint(fit_gau.xgboost, "exposure", level = 0.95,  method = "hc1")
-summary_rd.xgboost  <- c(summary_rd.xgboost, conf.int)
-
-round(summary_rd.xgboost, 2)
-```
 
 
-**Method 6: GA**
+**Method 5: GA**
 
 _GA (Genetic Algorithm) has no specific internal model building mechanism and would wrap around whatever model the user specifies_
 ```{r ga OR, warning=FALSE, cache=TRUE}
@@ -661,202 +587,215 @@ summary_rd.GA  <- c(summary_rd.GA, conf.int)
 round(summary_rd.GA, 2)
 ```
 
-
-**Method 7: Elastic SCAD SVM**
-
-_Elastic SCAD SVM uses an approach like LASSO and Elastic Net in that it selects variables via the addition of a penalty._
-
-_(Long Running Time)_
-```{r svm OR, warning=FALSE, cache=TRUE}
+**Method 6: XGBoost**
+```{r xgb OR, warning=FALSE, cache=TRUE}
 start_time <- Sys.time()
-svmTrainOutcome <- hdps.data$outcome
-svmTrainOutcome[svmTrainOutcome == 0] <- -1
-svmTrainPreds <- data.frame(covar.mat)
 
-bounds <- t(data.frame(log2lambda1=c(-10, 10), log2lambda2=c(-10,10)))
-colnames(bounds)<-c("lower", "upper")
-svm.model <- svmfs(x=covar.mat,
-				   y = svmTrainOutcome,
-				   fs.method = "scad+L2",
-				   bounds=bounds,
-				   grid.search = "interval",
-				   inner.val.method = "cv",
-				   show = "none",
-				   parms.coding = "none",
-				   seed=42)
-```
+xgb_fit <- xgboost(data = covar.mat, label = hdps.data$outcome, 
+                    max.depth = 20, eta = 1, nthread = 2, nrounds = 5, 
+                    objective = "binary:logistic")
 
-```{r svm OR-cont, warning=FALSE, cache=TRUE}
-fs.svm <- colnames(covar.mat)[svm.model$model$fit.info$model.list$model$xind]
-fs.svm <- proxy.list[proxy.list %in% fs.svm]
-proxy.svm <- paste0(fs.svm, collapse = "+")
-form.svm <- paste0(c(covform, proxy.svm), collapse = "+")
-formula.svm <- as.formula(paste0("exposure", "~", form.svm))
+xgb_imp <- xgb.importance(model = xgb_fit)
+xgb.plot.importance(importance_matrix = xgb_imp)
+fs.xgboost <- xgb_imp$Feature
+fs.xgboost <- proxy.list[proxy.list %in% fs.xgboost]
+proxy.xgboost <- paste0(fs.xgboost, collapse = "+")
+form.xgboost <- paste0(c(covform, proxy.xgboost), collapse = "+")
+formula.xgboost <- as.formula(paste0("exposure", "~", form.xgboost))
 
-W.out.svm <- weightit(formula.svm, 
-                        data = hdps.data, 
-                        estimand = "ATE",
-                        method = "ps")
+W.out.xgboost <- weightit(formula.xgboost, 
+                          data = hdps.data, 
+                          estimand = "ATE",
+                          method = "ps")
 
-hdps.data$ps.svm <- W.out.svm$ps
-hdps.data$w.svm <- W.out.svm$weights
+hdps.data$ps.xgboost <- W.out.xgboost$ps
+hdps.data$w.xgboost <- W.out.xgboost$weights
 out.formula <- as.formula(paste0("outcome", "~", "exposure"))
 out.formula
-fit.svm <- glm(out.formula,
-                 data = hdps.data,
-                 weights = W.out.svm$weights,
-                 family= binomial(link = "logit"))
-summary.svm <- summary(fit.svm)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
-ci.svm <- confint(fit.svm, level = 0.95)["exposure", ]
-sum_ci.svm <- c(exp(summary.svm[1]), summary.svm, ci.svm)
-names(sum_ci.svm) <- c("Odds Ratio",
-                         "Estimate",
-                         "Std. Error",
-                         "Pr(>|z|)",
-                         "2.5 %",
-                         "97.5 %")
+fit.xgboost <- glm(out.formula,
+                   data = hdps.data,
+                   weights = W.out.xgboost$weights,
+                   family= binomial(link = "logit"))
+summary.xgboost <- summary(fit.xgboost)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci.xgboost <- confint(fit.xgboost, level = 0.95)["exposure", ]
+sum_ci.xgboost <- c(exp(summary.xgboost[1]), summary.xgboost, ci.xgboost)
+names(sum_ci.xgboost) <- c("Odds Ratio",
+                           "Estimate",
+                           "Std. Error",
+                           "Pr(>|z|)",
+                           "2.5 %",
+                           "97.5 %")
 
 # Q1: How many proxy variables are in common?
-# length(fs.svm) 
-# length(fs.svm[fs.svm %in% fs.bross])
+# length(fs.xgboost) 
+# length(fs.xgboost[fs.xgboost %in% fs.bross])
 print("How many proxy variables are in common?")
-paste("There are", length(fs.svm), "features selected by svm")
-paste(length(fs.svm[fs.svm %in% fs.bross]), "of the", length(fs.svm), 
+paste("There are", length(fs.xgboost), "features selected by xgboost")
+paste(length(fs.xgboost[fs.xgboost %in% fs.bross]), "of the", length(fs.xgboost), 
       "are also selected by the bross formula method")
 # See which variables are not in common:
-# fs.svm[!(fs.svm %in% fs.bross)]
+# fs.xgboost[!(fs.xgboost %in% fs.bross)]
 
 # Q2: Odds ratio
-print("The Odds Ratio by Elastic SCAD SVM")
-sum_ci.svm
+print("The Odds Ratio by XGBoost")
+sum_ci.xgboost
 end_time <- Sys.time()
-elapsed_time.svm <- as.numeric(difftime(end_time, start_time, units = "secs"))
-elapsed_time.svm
+elapsed_time.xgb <- as.numeric(difftime(end_time, start_time, units = "secs"))
+elapsed_time.xgb
 ```
 
-```{r svm RD, warning=FALSE, cache=TRUE}
-fit_gau.svm <- glm(out.formula,
+```{r xgb RD, warning=FALSE, cache=TRUE}
+fit_gau.xgboost <- glm(out.formula,
                      data = hdps.data,
-                     weights = W.out.svm$weights,
+                     weights = W.out.xgboost$weights,
                      family = gaussian(link= "identity"))
 
-summary_rd.svm  <- summary(fit_gau.svm)$coef["exposure",
+summary_rd.xgboost  <- summary(fit_gau.xgboost)$coef["exposure",
                                                  c("Estimate",
                                                    "Std. Error",
                                                    "Pr(>|t|)")]
-summary_rd.svm[2]<- sqrt(sandwich::sandwich(fit_gau.svm)[2,2])
+summary_rd.xgboost[2]<- sqrt(sandwich::sandwich(fit_gau.xgboost)[2,2])
 
 require(lmtest)
-conf.int <- confint(fit_gau.svm, "exposure", level = 0.95,  method = "hc1")
-summary_rd.svm  <- c(summary_rd.svm, conf.int)
+conf.int <- confint(fit_gau.xgboost, "exposure", level = 0.95,  method = "hc1")
+summary_rd.xgboost  <- c(summary_rd.xgboost, conf.int)
 
-round(summary_rd.svm, 2)
+round(summary_rd.xgboost, 2)
 ```
 
+**Method 7: Random Forest**
 
-
-**Method 8: Boruta Selection**
-
-_Boruta Selection would give the feature importance ranking based on the Random Forests algorithm which are able to capture some non-linear trends but not easy to interpret._
-
-_(Long Running Time)_
-```{r Boruta OR, warning=FALSE, cache=TRUE}
-set.seed(42)
+```{r rf OR, warning=FALSE, cache=TRUE}
+# Random Forest Feature Selection
 start_time <- Sys.time()
 
-boruta_output <- Boruta(Y.form, data = hdps.data, doTrace = 1)
+rf_model <- randomForest(outcome ~ ., data = hdps.data, importance = TRUE)
 
-sel.variables.bor <- names(boruta_output$finalDecision)[which(boruta_output$finalDecision != "Rejected")]
-fs.boruta <- proxy.list[proxy.list %in% sel.variables.bor]
-proxy.boruta <- paste0(fs.boruta, collapse = "+")
-form.boruta <- paste0(c(covform, proxy.boruta), collapse = "+")
-formula.boruta <- as.formula(paste0("exposure", "~", form.boruta))
+# Get important features
 
-W.out.boruta <- weightit(formula.boruta, 
-                         data = hdps.data, 
-                         estimand = "ATE",
-                         method = "ps")
+rf_importance <- importance(rf_model)
+important_features_rf <- rownames(rf_importance)[order(rf_importance[, 1], decreasing = TRUE)]
+fs_rf <- important_features_rf[important_features_rf %in% proxy.list][1:100]
 
-hdps.data$ps.b <- W.out.boruta$ps
-hdps.data$w.b <- W.out.boruta$weights
+```
+
+```{r rf OR-cont, warning=FALSE, cache=TRUE}
+# Select features
+fs_rf <- important_features_rf[important_features_rf %in% proxy.list][1:100]
+proxy_rf <- paste0(fs_rf, collapse = "+")
+form_rf <- paste0(c(covform, proxy_rf), collapse = "+")
+formula_rf <- as.formula(paste0("exposure", "~", form_rf))
+
+W.out_rf <- weightit(formula_rf, 
+                     data = hdps.data, 
+                     estimand = "ATE",
+                     method = "ps")
+
+hdps.data$ps_rf <- W.out_rf$ps
+hdps.data$w_rf <- W.out_rf$weights
 out.formula <- as.formula(paste0("outcome", "~", "exposure"))
-out.formula
-fit.boruta <- glm(out.formula,
-                  data = hdps.data,
-                  weights = W.out.boruta$weights,
-                  family= binomial(link = "logit"))
-summary.boruta <- summary(fit.boruta)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
-ci.boruta <- confint(fit.boruta, level = 0.95)["exposure", ]
-sum_ci.boruta <- c(exp(summary.boruta[1]), summary.boruta, ci.boruta)
-names(sum_ci.boruta) <- c("Odds Ratio",
-                          "Estimate",
-                          "Std. Error",
-                          "Pr(>|z|)",
-                          "2.5 %",
-                          "97.5 %")
+fit_rf <- glm(out.formula,
+              data = hdps.data,
+              weights = W.out_rf$weights,
+              family= binomial(link = "logit"))
+summary_rf <- summary(fit_rf)$coef["exposure", c("Estimate", "Std. Error", "Pr(>|z|)")]
+ci_rf <- confint(fit_rf, level = 0.95)["exposure", ]
+sum_ci_rf <- c(exp(summary_rf[1]), summary_rf, ci_rf)
+names(sum_ci_rf) <- c("Odds Ratio",
+                      "Estimate",
+                      "Std. Error",
+                      "Pr(>|z|)",
+                      "2.5 %",
+                      "97.5 %")
 
-# Q1: How many proxy variables are in common (Boruta vs Bross Formula)?
-# length(fs.boruta)  # 28 features selected by boruta selection
-# length(fs.boruta[fs.boruta %in% fs.bross])  # 24 of 28 also selected by bross formula
-print("How many proxy variables are in common?")
-paste("There are", length(fs.boruta), "features selected by boruta")
-paste(length(fs.boruta[fs.boruta %in% fs.bross]), "of the", length(fs.boruta), 
-      "are also selected by the bross formula method")
-# See which variables are not in common:
-# fs.boruta[!(fs.boruta %in% fs.bross)]
-
-# Q2: Odds ratio
-print("The Odds Ratio by Boruta Selection")
-sum_ci.boruta
 end_time <- Sys.time()
-elapsed_time.boruta <- as.numeric(difftime(end_time, start_time, units = "secs"))
-elapsed_time.boruta
+elapsed_time_rf <- as.numeric(difftime(end_time, start_time, units = "secs"))
+
+print("How many proxy variables are in common?")
+paste("There are", length(fs_rf), "features selected by randomForest")
+paste(length(fs_rf[fs_rf %in% fs.bross]), "of the", length(fs_rf), 
+      "are also selected by the bross formula method")
+
+print("The Odds Ratio by Random Forest")
+sum_ci_rf
+print("Elapsed time for Random Forest:")
+elapsed_time_rf
 ```
 
-```{r Boruta RD, warning=FALSE, cache=TRUE}
-fit_gau.boruta <- glm(out.formula,
+```{r rf RD, warning=FALSE, cache=TRUE}
+fit_gau.rf <- glm(out.formula,
                      data = hdps.data,
-                     weights = W.out.boruta$weights,
+                     weights = W.out_rf$weights,
                      family = gaussian(link= "identity"))
 
-summary_rd.boruta  <- summary(fit_gau.boruta)$coef["exposure",
+summary_rd.rf  <- summary(fit_gau.rf)$coef["exposure",
                                                  c("Estimate",
                                                    "Std. Error",
                                                    "Pr(>|t|)")]
-summary_rd.boruta[2]<- sqrt(sandwich::sandwich(fit_gau.boruta)[2,2])
+summary_rd.rf[2]<- sqrt(sandwich::sandwich(fit_gau.rf)[2,2])
 
 require(lmtest)
-conf.int <- confint(fit_gau.boruta, "exposure", level = 0.95,  method = "hc1")
-summary_rd.boruta  <- c(summary_rd.boruta, conf.int)
+conf.int <- confint(fit_gau.rf, "exposure", level = 0.95,  method = "hc1")
+summary_rd.rf  <- c(summary_rd.rf, conf.int)
 
-round(summary_rd.boruta, 2)
+round(summary_rd.rf, 2)
 ```
 
+**Method 8.1: Stepwise Regression (Forward) using function `regsubsets()`**
+```{r prepare for stepwise}
+proxy.list.full <- names(out2[,-1])
+proxyform.full <- paste0(proxy.list.full, collapse = "+")
+covform <- paste0(investigator.specified.covariates, collapse = "+")
+rhsformula.full <- paste0(c(covform, proxyform.full), collapse = "+")
+```
 
-**Method 9.1: Stepwise Regression (Forward)**
-```{r fs OR, warning=FALSE, cache=TRUE}
+```{r forward}
 set.seed(42)
 start_time <- Sys.time()
 
-initial_formula <- as.formula(paste0("outcome~exposure+",
-                                     covform,
-                                     collapse = "+"))
-full_formula <- as.formula(paste0("outcome~exposure+",
-                                  rhsformula,
+full.formula <- as.formula(paste0("outcome~exposure+",
+                                  rhsformula.full,
                                   collapse = "+"))
 
-initial_model <- glm(initial_formula, data = hdps.data, family = binomial)
-full_model <- glm(full_formula, data = hdps.data, family = binomial)
-stepwise_forward <- stepAIC(initial_model, 
-                            scope = list(lower = initial_model, 
-                                         upper = full_model), 
-                            direction = "forward")
+stepwise_forward <- regsubsets(full.formula, 
+                               data = hdps.data, 
+                               method = "forward", 
+                               nvmax = length(proxy.list), 
+                               nbest = 10)
 
-fs.forward <- all.vars(formula(stepwise_forward))[-1]
-fs.forward <- proxy.list[proxy.list %in% fs.forward]
+summary_stepwise <- summary(stepwise_forward)
+best_model <- which.max(summary_stepwise$adjr2)
+sel.variables <- names(summary_stepwise$which[best_model,])[summary_stepwise$which[best_model,]]
+
+fs.forward <- proxy.list[proxy.list %in% sel.variables]
 proxy.forward <- paste0(fs.forward, collapse = "+")
 form.forward <- paste0(c(covform, proxy.forward), collapse = "+")
 formula.forward <- as.formula(paste0("exposure", "~", form.forward))
+```
+
+```{r fs OR, warning=FALSE, cache=TRUE}
+#set.seed(42)
+#start_time <- Sys.time()
+
+#initial_formula <- as.formula(paste0("outcome~exposure+",
+#                                     covform,
+#                                     collapse = "+"))
+#full_formula <- as.formula(paste0("outcome~exposure+",
+#                                  rhsformula,
+#                                  collapse = "+"))
+
+#initial_model <- glm(initial_formula, data = hdps.data, family = binomial)
+#full_model <- glm(full_formula, data = hdps.data, family = binomial)
+#stepwise_forward <- stepAIC(initial_model, 
+#                            scope = list(lower = initial_model, 
+#                                         upper = full_model), 
+#                            direction = "forward")
+
+#fs.forward <- all.vars(formula(stepwise_forward))[-1]
+#fs.forward <- proxy.list[proxy.list %in% fs.forward]
+#proxy.forward <- paste0(fs.forward, collapse = "+")
+#form.forward <- paste0(c(covform, proxy.forward), collapse = "+")
+#formula.forward <- as.formula(paste0("exposure", "~", form.forward))
 
 W.out.forward <- weightit(formula.forward, 
                           data = hdps.data, 
@@ -919,18 +858,41 @@ round(summary_rd.forward, 2)
 ```
 
 
-**Method 9.2: Stepwise Regression (Backward)**
-```{r bs OR, warning=FALSE, cache=TRUE}
+**Method 8.2: Stepwise Regression (Backward) using function `regsubsets()`**
+```{r backward}
+set.seed(42)
 start_time <- Sys.time()
 
-stepwise_backward <- stepAIC(full_model, direction = "backward")
+full.formula <- as.formula(paste0("outcome~exposure+",
+                                  rhsformula.full,
+                                  collapse = "+"))
 
-fs.backward <- all.vars(formula(stepwise_backward))[-1]
-fs.backward <- proxy.list[proxy.list %in% fs.backward]
-fs.backward <- fs.backward[fs.backward != "exposure"]
+stepwise_backward <- regsubsets(full.formula, 
+                                data = hdps.data, 
+                                method = "backward", 
+                                nvmax = length(proxy.list), 
+                                nbest = 10)
+
+summary_stepwise <- summary(stepwise_backward)
+best_model <- which.max(summary_stepwise$adjr2)
+sel.variables <- names(summary_stepwise$which[best_model,])[summary_stepwise$which[best_model,]]
+fs.backward <- proxy.list[proxy.list %in% sel.variables]
 proxy.backward <- paste0(fs.backward, collapse = "+")
 form.backward <- paste0(c(covform, proxy.backward), collapse = "+")
 formula.backward <- as.formula(paste0("exposure", "~", form.backward))
+```
+
+```{r bs OR, warning=FALSE, cache=TRUE}
+start_time <- Sys.time()
+
+#stepwise_backward <- stepAIC(full_model, direction = "backward")
+
+#fs.backward <- all.vars(formula(stepwise_backward))[-1]
+#fs.backward <- proxy.list[proxy.list %in% fs.backward]
+#fs.backward <- fs.backward[fs.backward != "exposure"]
+#proxy.backward <- paste0(fs.backward, collapse = "+")
+#form.backward <- paste0(c(covform, proxy.backward), collapse = "+")
+#formula.backward <- as.formula(paste0("exposure", "~", form.backward))
 
 W.out.backward <- weightit(formula.backward, 
                           data = hdps.data, 
@@ -994,19 +956,42 @@ round(summary_rd.backward, 2)
 
 
 **Method 9.3: Stepwise Regression (Both)**
-```{r sw OR, warning=FALSE, cache=TRUE}
+```{r seqrep}
+set.seed(42)
 start_time <- Sys.time()
 
-stepwise_both <- stepAIC(initial_model, 
-                            scope = list(lower = initial_model, 
-                                         upper = full_model), 
-                            direction = "both")
+full.formula <- as.formula(paste0("outcome~exposure+",
+                                  rhsformula.full,
+                                  collapse = "+"))
 
-fs.both <- all.vars(formula(stepwise_both))[-1]
-fs.both <- proxy.list[proxy.list %in% fs.both]
+stepwise_seqrep <- regsubsets(full.formula, 
+                               data = hdps.data, 
+                               method = "seqrep", 
+                               nvmax = length(proxy.list), 
+                               nbest = 10)
+
+summary_stepwise <- summary(stepwise_seqrep)
+best_model <- which.max(summary_stepwise$adjr2)
+sel.variables <- names(summary_stepwise$which[best_model,])[summary_stepwise$which[best_model,]]
+fs.both <- proxy.list[proxy.list %in% sel.variables]
 proxy.both <- paste0(fs.both, collapse = "+")
 form.both <- paste0(c(covform, proxy.both), collapse = "+")
 formula.both <- as.formula(paste0("exposure", "~", form.both))
+```
+
+```{r sw OR, warning=FALSE, cache=TRUE}
+start_time <- Sys.time()
+
+#stepwise_both <- stepAIC(initial_model, 
+#                            scope = list(lower = initial_model, 
+#                                         upper = full_model), 
+#                            direction = "both")
+
+#fs.both <- all.vars(formula(stepwise_both))[-1]
+#fs.both <- proxy.list[proxy.list %in% fs.both]
+#proxy.both <- paste0(fs.both, collapse = "+")
+#form.both <- paste0(c(covform, proxy.both), collapse = "+")
+#formula.both <- as.formula(paste0("exposure", "~", form.both))
 
 W.out.both <- weightit(formula.both, 
                           data = hdps.data, 
@@ -1146,32 +1131,28 @@ round(summary_rd.rf, 2)
 
 
 Naming consistence:
-```{r}
+```{r naming consistence for rf result}
 sum_ci.rf <- sum_ci_rf
 fs.rf <- fs_rf
 ```
 
-
 Comparing the Results:
 ```{r compare, warning=FALSE, cache=TRUE}
-sum_ci.all <- rbind(sum_ci.bross, sum_ci.lasso, sum_ci.hybrid, sum_ci.elastic, 
-                    sum_ci.svm, sum_ci.GA, 
-                    sum_ci.xgboost, sum_ci.rf, sum_ci.boruta,
-                    sum_ci.forward, sum_ci.backward, sum_ci.both)
+sum_ci.all <- rbind(sum_ci.bross, sum_ci.hybrid, sum_ci.lasso, sum_ci.elastic, 
+                    sum_ci.GA, sum_ci.xgboost, sum_ci.rf,
+                    sum_ci.forward, sum_ci.backward)
 
-OR.data <- data.frame(method = c("bross", "lasso", "hybrid", "elastic", 
-                                 "SVM", "GA",
-                                 "xgboost", "rf", "boruta", 
-                                 "forward", "backward", "both"),
+OR.data <- data.frame(method = c("bross", "hybrid", "lasso", "elastic", 
+                                 "GA", "xgboost", "rf",
+                                 "forward", "backward"),
                       OR = exp(sum_ci.all[,2]),
                       lower = exp(sum_ci.all[,5]),
                       upper = exp(sum_ci.all[,6]))
 
 OR.data$method <- factor(OR.data$method, 
-                         levels = c("both", "backward", "forward",
-                                    "boruta", "rf", "xgboost", 
-                                    "GA", "SVM", 
-                                    "elastic", "hybrid", "lasso", "bross"))
+                         levels = c("backward", "forward",
+                                    "rf", "xgboost", "GA", 
+                                    "elastic", "lasso", "hybrid", "bross"))
 
 OR.ci_plot <- ggplot(OR.data, aes(y = method, x = OR)) +
   geom_point(size = 3) +
@@ -1181,43 +1162,33 @@ OR.ci_plot <- ggplot(OR.data, aes(y = method, x = OR)) +
        y = "Method")
 
 fs.all <- data.frame(numFeature = c(length(fs.bross), 
-                                    length(fs.lasso),
                                     length(fs.hybrid),
+                                    length(fs.lasso),
                                     length(fs.elastic), 
-                                    length(fs.svm),
                                     length(fs.GA),
                                     length(fs.xgboost),
                                     length(fs.rf),
-                                    length(fs.boruta),
                                     length(fs.forward),
-                                    length(fs.backward),
-                                    length(fs.both)),
+                                    length(fs.backward)),
                      numInCommon = c(NA,
-                                     length(fs.lasso[fs.lasso %in% fs.bross]),
                                      length(fs.hybrid[fs.hybrid %in% fs.bross]),
+                                     length(fs.lasso[fs.lasso %in% fs.bross]),
                                      length(fs.elastic[fs.elastic %in% fs.bross]),
-                                     length(fs.svm[fs.svm %in% fs.bross]),
                                      length(fs.GA[fs.GA %in% fs.bross]),
                                      length(fs.xgboost[fs.xgboost %in% fs.bross]),
                                      length(fs.rf[fs.rf %in% fs.bross]),
-                                     length(fs.boruta[fs.boruta %in% fs.bross]),
                                      length(fs.forward[fs.forward %in% fs.bross]),
-                                     length(fs.backward[fs.backward %in% fs.bross]),
-                                     length(fs.both[fs.both %in% fs.bross])))
-rownames(fs.all) <-  c("bross", "lasso", "hybrid", "elastic", 
-                       "SVM", "GA",
-                       "xgboost", "rf", "boruta", 
-                       "forward", "backward", "both")
+                                     length(fs.backward[fs.backward %in% fs.bross])))
+rownames(fs.all) <-  c("bross", "hybrid", "lasso", "elastic", 
+                       "GA", "xgboost", "rf",
+                       "forward", "backward")
 
 fs.all$pctCommon <- fs.all$numInCommon / fs.all$numFeature
 
-fs.commonOneToOne <- data.frame(ini = rep(NA, 12))
+fs.commonOneToOne <- data.frame(ini = rep(NA, 9))
 
-for (i in 1:12) {
+for (i in 1:9) {
   col_name <- OR.data$method[i]
-  if (col_name == "SVM") {
-    col_name <- "svm"
-  }
   na.i <- 1
   na <- c()
   while (na.i < i) {
@@ -1225,18 +1196,15 @@ for (i in 1:12) {
     na.i <- na.i + 1
   }
   num_common <- c(length(fs.bross[fs.bross %in% get(paste0("fs.",col_name))]),
-                  length(fs.lasso[fs.lasso %in% get(paste0("fs.",col_name))]),
                   length(fs.hybrid[fs.hybrid %in% get(paste0("fs.",col_name))]),
+                  length(fs.lasso[fs.lasso %in% get(paste0("fs.",col_name))]),
                   length(fs.elastic[fs.elastic %in% get(paste0("fs.",col_name))]),
-                  length(fs.svm[fs.svm %in% get(paste0("fs.",col_name))]),
                   length(fs.GA[fs.GA %in% get(paste0("fs.",col_name))]),
                   length(fs.xgboost[fs.xgboost %in% get(paste0("fs.",col_name))]),
                   length(fs.rf[fs.rf %in% get(paste0("fs.",col_name))]),
-                  length(fs.boruta[fs.boruta %in% get(paste0("fs.",col_name))]),
                   length(fs.forward[fs.forward %in% get(paste0("fs.",col_name))]),
-                  length(fs.backward[fs.backward %in% get(paste0("fs.",col_name))]),
-                  length(fs.both[fs.both %in% get(paste0("fs.",col_name))]))
-  fs.commonOneToOne[i] <- c(na, num_common[i:12])
+                  length(fs.backward[fs.backward %in% get(paste0("fs.",col_name))]))
+  fs.commonOneToOne[i] <- c(na, num_common[i:9])
 }
 
 colnames(fs.commonOneToOne) <- rownames(fs.all)
@@ -1362,19 +1330,15 @@ sum.rd_all <- rbind(summary_rd.bross,
                     summary_rd.hybrid,
                     summary_rd.lasso,
                     summary_rd.elastic,
-                    summary_rd.svm,
                     summary_rd.GA,
                     summary_rd.xgboost,
                     summary_rd.rf,
-                    summary_rd.boruta,
                     summary_rd.forward,
-                    summary_rd.backward,
-                    summary_rd.both)
+                    summary_rd.backward)
 
 rownames(sum.rd_all) <- c("bross", "hybrid", "lasso", "elastic", 
-                          "SVM", "GA",
-                          "xgboost", "rf", "boruta", 
-                          "forward", "backward", "both")
+                          "GA", "xgboost", "rf",
+                          "forward", "backward")
 ```
 
 
@@ -1384,6 +1348,41 @@ round(sum.rd_all, 3)
 
 ```{r print OR.ci_plot with # of proxy}
 OR.ci_plot_new
+```
+
+
+```{r}
+RD.ci_plot_new <- ggplot(RD.data, aes(y = method, x = RD)) +
+  geom_point(size = 3) +
+  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.2) + 
+  geom_text(aes(label = fs.all[,1], x = OR, y = method),
+            vjust = -0.8,  # Adjust vertical position
+            hjust = -1, # Adjust horizontal position
+            size = 3, 
+            color = "dark green") +
+  labs(title = "Odds Ratios with 95% Confidence Intervals",
+       x = "Odds Ratio",
+       y = "Method")
+```
+
+```{r}
+RD.data <- data.frame(method = rownames(sum.rd_all),
+                      RD = sum.rd_all[,1], 
+                      lower = sum.rd_all[,4],
+                      upper = sum.rd_all[,5])
+```
+
+```{r}
+RD.ci_plot_new <- ggplot(RD.data, aes(y = method, x = RD)) +
+  geom_point(size = 3) +
+  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.2) +
+  labs(title = "RD with 95% Confidence Intervals",
+       x = "RD",
+       y = "Method")
+```
+
+```{r}
+RD.ci_plot_new
 ```
 
 
