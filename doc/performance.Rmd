@@ -23,6 +23,8 @@ library(rsimsum)
 library(dplyr)
 library(tidyr)
 library(kableExtra)
+library(reshape2)
+library(ggplot2)
 
 load("results/scenario/bross.RData")
 load("results/scenario/hybrid.RData")
@@ -68,8 +70,9 @@ est <- rbind(est_bross, est_hybird, est_lasso, est_enet,
              est_forward, est_backward)
 
 est$model <- as.factor(est$model)
-levels(est$model) <- c("bross", "hybrid", "lasso", "enet", "ga", "xgboost", "rf", "forward", "backward")
-levels <- levels(est$model)
+levels<- c("bross", "hybrid", "lasso", "enet", "ga", "xgboost", "rf", "forward", "backward")
+est$model <- factor(est$model, levels = levels)
+levels(est$model)
 ```
 
 
@@ -127,8 +130,6 @@ kable(final_df, format = "html", booktabs = TRUE, linesep = "", col.names = c("P
 All figures also saved in the `images` folder.
 
 ```{r plots, warning=FALSE, message=FALSE}
-require(ggplot2)
-
 custom_theme <- theme_minimal() + 
   theme(
     panel.background = element_rect(fill = "white"),  
@@ -164,9 +165,6 @@ ggsave(filename = "images/scenario/zip.png")
 ## SE comparison
 
 ```{r plotSE, warning=FALSE, message=FALSE}
-library(reshape2)
-library(tidyr)
-
 data <- s1$summ %>%
   filter(stat %in% c("empse", "modelse")) %>%
   select(model, stat, est) %>%

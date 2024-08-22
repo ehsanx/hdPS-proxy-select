@@ -23,6 +23,8 @@ library(rsimsum)
 library(dplyr)
 library(tidyr)
 library(kableExtra)
+library(reshape2)
+library(ggplot2)
 
 load("results/scenarioOR/bross.RData")
 load("results/scenarioOR/hybrid.RData")
@@ -34,15 +36,15 @@ load("results/scenarioOR/rf.RData")
 load("results/scenarioOR/forward.RData")
 load("results/scenarioOR/backward.RData")
 
-ind <- which(!is.na(RD_bross[,1]))
+ind <- which(!is.na(RD_bross.OR[,1]))
 
-est_bross    <- RD_bross[ind,]
-est_hybird   <- RD_hybrid[ind,]
-est_lasso    <- RD_lasso[ind,]
-est_enet     <- RD_enet[ind,]
-est_ga       <- RD_ga[ind,]
-est_xgboost  <- RD_xgboost[ind,]
-est_rf       <- RD_rf[ind,]
+est_bross    <- RD_bross.OR[ind,]
+est_hybird   <- RD_hybrid_OR[ind,]
+est_lasso    <- RD_lasso_OR[ind,]
+est_enet     <- RD_enet_OR[ind,]
+est_ga       <- RD_ga_OR[ind,]
+est_xgboost  <- RD_xgboost_OR[ind,]
+est_rf       <- RD_rf_OR[ind,]
 est_forward  <- RD_forward[ind,]
 est_backward <- RD_backward[ind,]
 
@@ -66,10 +68,10 @@ Make sure table provides same numbers for all model. For full analysis, all shou
 est <- rbind(est_bross, est_hybird, est_lasso, est_enet, 
              est_ga, est_xgboost, est_rf,
              est_forward, est_backward)
-
 est$model <- as.factor(est$model)
-levels(est$model) <- c("bross", "hybrid", "lasso", "enet", "ga", "xgboost", "rf", "forward", "backward")
-levels <- levels(est$model)
+levels<- c("bross", "hybrid", "lasso", "enet", "ga", "xgboost", "rf", "forward", "backward")
+est$model <- factor(est$model, levels = levels)
+levels(est$model)
 ```
 
 
@@ -127,8 +129,6 @@ kable(final_df, format = "html", booktabs = TRUE, linesep = "", col.names = c("P
 All figures also saved in the `images` folder.
 
 ```{r plots, warning=FALSE, message=FALSE}
-require(ggplot2)
-
 custom_theme <- theme_minimal() + 
   theme(
     panel.background = element_rect(fill = "white"),  
@@ -164,9 +164,6 @@ ggsave(filename = "images/scenarioOR/zip.png")
 ## SE comparison
 
 ```{r plotSE, warning=FALSE, message=FALSE}
-library(reshape2)
-library(tidyr)
-
 data <- s1$summ %>%
   filter(stat %in% c("empse", "modelse")) %>%
   select(model, stat, est) %>%
