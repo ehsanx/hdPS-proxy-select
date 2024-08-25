@@ -1,8 +1,33 @@
-setwd("/Users/jidianlewei/Desktop/WL_MachineLearning/hdPS/hdPS_ProxySelect/doc")
+#setwd("/Users/jidianlewei/Desktop/WL_MachineLearning/hdPS/hdPS_ProxySelect/doc")
+setwd("E:/GitHub/hdPS-proxy-select/doc")
 library(shiny)
 library(ggplot2)
 library(rsimsum)
 library(knitr)
+
+metric_names <- c(
+  bias = "Bias",
+  cover = "Coverage",
+  empse = "Empirical SE",
+  modelse = "Model SE",
+  mse = "MSE",
+  relprec = "Relative Precision",
+  relerror = "Relative Error",
+  power = "Power",
+  becover = "Bias-eliminated Coverage"
+)
+
+model_names <- c(
+  backward = "Backward Elimination",
+  bross = "Bross-based hdPS",
+  enet = "Elasticnet",
+  forward = "Forward Selection",
+  ga = "Genetic Algorithm",
+  hybrid = "Hybrid hdPS",
+  lasso = "LASSO",
+  rf = "Random Forest",
+  xgboost = "XGBoost"
+)
 
 # Define UI
 ui <- fluidPage(
@@ -28,8 +53,12 @@ ui <- fluidPage(
     ),
     mainPanel(
       plotOutput("selected_plot"),
-      verbatimTextOutput("numerical_values_output") 
+      verbatimTextOutput("numerical_values_output"),
+      downloadButton("download_png", "Download PNG"),
+      downloadButton("download_pdf", "Download PDF"),
+      downloadButton("download_jpg", "Download JPG")
     )
+    
   )
 )
 
@@ -101,6 +130,7 @@ server <- function(input, output, session) {
       stop("The data frame does not contain the required columns 'RD' and 'SE'.")
     }
     
+    est$model <- model_names[as.character(est$model)]
     est$model <- as.factor(est$model)
     return(est)
   }
@@ -144,11 +174,42 @@ server <- function(input, output, session) {
     
     metric <- input$metric_select
     
-    # Plot using autoplot with the selected metric
+    # Plot using autoplot with the selected metric and full model names
     autoplot(s1, type = "lolly", stats = metric) + 
       custom_theme + 
-      labs(x = metric)
+      labs(x = metric_names[metric])
   })
+  
+  
+  # Download handler for PNG
+  output$download_png <- downloadHandler(
+    filename = function() {
+      paste("plot_", input$metric_select, ".png", sep = "")
+    },
+    content = function(file) {
+      ggsave(file, plot = last_plot(), device = "png", width = 8, height = 6)
+    }
+  )
+  
+  # Download handler for PDF
+  output$download_pdf <- downloadHandler(
+    filename = function() {
+      paste("plot_", input$metric_select, ".pdf", sep = "")
+    },
+    content = function(file) {
+      ggsave(file, plot = last_plot(), device = "pdf", width = 8, height = 6)
+    }
+  )
+  
+  # Download handler for JPG
+  output$download_jpg <- downloadHandler(
+    filename = function() {
+      paste("plot_", input$metric_select, ".jpg", sep = "")
+    },
+    content = function(file) {
+      ggsave(file, plot = last_plot(), device = "jpg", width = 8, height = 6)
+    }
+  )
   
   # Display the numerical values used in the plot
   output$numerical_values_output <- renderPrint({
@@ -157,9 +218,22 @@ server <- function(input, output, session) {
     # Extract the relevant metric data from the summary object
     metric_data <- s1$summ[s1$summ$stat == input$metric_select, ]
     
+    # Debugging: Print out the contents of `metric_data$model`
+    #print("Original model column values:")
+    #print(unique(metric_data$model))
+    
+    # Since the model names are already full names, we don't need to map them
+    # Just ensure 'model' is a factor or character as needed
+    metric_data$model <- as.factor(metric_data$model)
+    
     # Print the metric data without row numbers using knitr::kable()
     knitr::kable(metric_data, row.names = FALSE)
   })
+  
+  
+  
+  
+  
 }
 
 # Run the application 

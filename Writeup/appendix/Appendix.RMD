@@ -1,0 +1,60 @@
+---
+title: Supplementary Content
+subtitle: Challenges of Univariate Proxy Variable Screening in High-Dimensional Propensity Score Analysis - An Argument for Multivariate Approaches
+output:
+  pdf_document:
+    citation_package: natbib
+    fig_caption: yes
+    keep_tex: yes
+    latex_engine: xelatex
+    number_sections: yes
+  html_document:
+    df_print: paged
+    citation_package: natbib
+    fig_caption: yes
+    number_sections: yes
+  word_document: default
+  bookdown::html_document2:
+    citation_package: natbib
+    df_print: paged
+    fig_caption: yes
+    highlight: textmate
+    keep_md: yes
+    number_sections: yes
+    theme: lumen
+bibliography: mergedbibliography.bib
+biblio-style: plainnat
+always_allow_html: yes
+header-includes:
+- \usepackage{graphicx,longtable,booktabs,here,threeparttable}
+- \usepackage{float}
+- \usepackage{pdfpages}
+- \usepackage{setspace}\singlespacing
+- \floatplacement{figure}{H}
+- \floatplacement{table}{H}
+- \usepackage{xcolor,lipsum}
+- \usepackage{caption}
+- \captionsetup[table]{labelfont=bf}
+- \usepackage[round]{natbib}
+- \usepackage{pdflscape}
+- \usepackage{lscape}
+- \usepackage{etoolbox}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+- \usepackage{array}
+  \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+  \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+  \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+link-citations: yes
+fontsize: 10pt
+geometry: margin=.8in
+---
+\appendix
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+
+\edef\tablename{\appendixname~\tablename}
+\edef\figurename{\appendixname~\figurename}
+
+\hypertarget{X}{%
+\section{X}\label{X}}

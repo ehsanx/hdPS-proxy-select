@@ -1,0 +1,298 @@
+%Version 2.1 April 2023
+% See section 11 of the User Manual for version history
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                 %%
+%% Please do not use \input{...} to include other tex files.       %%
+%% Submit your LaTeX manuscript as one .tex document.              %%
+%%                                                                 %%
+%% All additional figures and files should be attached             %%
+%% separately and not embedded in the \TeX\ document itself.       %%
+%%                                                                 %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[sn-vancouver,Numbered,lineno,pdflatex]{sn-jnl}
+
+%%%% Standard Packages
+%%<additional latex packages if required can be included here>
+
+\usepackage{graphicx}%
+\usepackage{multirow}%
+\usepackage{amsmath,amssymb,amsfonts}%
+\usepackage{amsthm}%
+\usepackage{mathrsfs}%
+\usepackage[title]{appendix}%
+\usepackage{xcolor}%
+\usepackage{textcomp}%
+\usepackage{manyfoot}%
+\usepackage{booktabs}%
+\usepackage{algorithm}%
+\usepackage{algorithmicx}%
+\usepackage{algpseudocode}%
+\usepackage{listings}%
+%%%%
+
+%%%%%=============================================================================%%%%
+%%%%  Remarks: This template is provided to aid authors with the preparation
+%%%%  of original research articles intended for submission to journals published
+%%%%  by Springer Nature. The guidance has been prepared in partnership with
+%%%%  production teams to conform to Springer Nature technical requirements.
+%%%%  Editorial and presentation requirements differ among journal portfolios and
+%%%%  research disciplines. You may find sections in this template are irrelevant
+%%%%  to your work and are empowered to omit any such section if allowed by the
+%%%%  journal you intend to submit to. The submission guidelines and policies
+%%%%  of the journal take precedence. A detailed User Manual is available in the
+%%%%  template package for technical guidance.
+%%%%%=============================================================================%%%%
+
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{capt-of}
+\usepackage{booktabs}
+\usepackage{amssymb}
+\usepackage{threeparttable}
+\usepackage{float}
+%\floatplacement{figure}{H}
+%\floatplacement{table}{H}
+\usepackage{lipsum,caption}
+\geometry{
+  a4paper,
+  left=1in,
+  right=1in,
+  top=1in,
+  bottom=1in,
+  includeheadfoot
+}
+\usepackage{setspace}
+%\usepackage{lineno}
+%\linenumbers
+\usepackage{siunitx}
+\sisetup{
+  mode = match,
+  propagate-math-font = true,
+  reset-math-version = false,
+  reset-text-family = false,
+  reset-text-series = false,
+  reset-text-shape = false,
+  text-family-to-math = true,
+  text-series-to-math = true
+}
+\doublespacing
+% Disable explicit page breaks in LaTeX
+\let\clearpage\relax
+
+
+
+\raggedbottom
+
+
+
+
+% tightlist command for lists without linebreak
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+
+
+\begin{document}
+
+
+\title[Deep Learning in Propensity Score Analysis]{Challenges of
+Univariate Proxy Variable Screening in High-Dimensional Propensity Score
+Analysis - An Argument for Multivariate Approaches}
+
+%%=============================================================%%
+%% Prefix	-> \pfx{Dr}
+%% GivenName	-> \fnm{Joergen W.}
+%% Particle	-> \spfx{van der} -> surname prefix
+%% FamilyName	-> \sur{Ploeg}
+%% Suffix	-> \sfx{IV}
+%% NatureName	-> \tanm{Poet Laureate} -> Title after name
+%% Degrees	-> \dgr{MSc, PhD}
+%% \author*[1,2]{\pfx{Dr} \fnm{Joergen W.} \spfx{van der} \sur{Ploeg} \sfx{IV} \tanm{Poet Laureate}
+%%                 \dgr{MSc, PhD}}\email{iauthor@gmail.com}
+%%=============================================================%%
+
+\author*[1,2]{\pfx{Dr.} \fnm{Mohammad Ehsanul} \sur{Karim} \dgr{MSc,
+PhD}}\email{\href{mailto:ehsan.karim@ubc.ca}{\nolinkurl{ehsan.karim@ubc.ca}}}
+
+\author*[3]{\fnm{Yang} \sur{Lei} }
+
+
+
+  \affil*[1]{\orgdiv{School of Population and Public
+Health}, \orgname{University of British
+Columbia}, \orgaddress{\city{Vancouver}, \country{Canada}, \postcode{V6T
+1Z3}, \state{BC}, \street{2206 East Mall}}}
+  \affil[2]{\orgname{St.~Paul's
+Hospital}, \orgaddress{\city{Vancouver}, \country{Canada}, \postcode{V6Z
+1Y6}, \state{BC}, \street{588 - 1081 Burrard Street}}}
+  \affil[3]{\orgdiv{Department of Statistics}, \orgname{University of
+British
+Columbia}, \orgaddress{\city{Vancouver}, \country{Canada}, \postcode{V6T
+1Z4}, \state{BC}, \street{Room 3182 Earth Sciences Building, 2207 Main
+Mall}}}
+
+\abstract{\textbf{Purpose}:
+
+\textbf{Methods:}
+
+\textbf{Results:}
+
+\textbf{Conclusion:}}
+
+\keywords{Machine learning, Propensity score, Deep learning, Causal
+inference}
+
+
+\pacs[JEL Classification]{C18}
+\pacs[MSC Classification]{92D30, 62P10}
+
+\maketitle
+
+\section{Background}\label{background}
+
+\textbf{Aim}:
+
+\section{Methods}\label{methods}
+
+\subsection*{Data and Simulation}\label{data-and-simulation}
+\addcontentsline{toc}{subsection}{Data and Simulation}
+
+\textbf{Right Heart Catheterization dataset}:
+
+\textbf{Plasmode simulation}: See Table \ref{table:scenarios} for the
+description of the scenarios under consideration.
+
+\begin{table}[ht]
+\centering
+\caption{Simulation Scenarios for plasmode simulation based on the Right Heart Catheterization (RHC) study.}
+\label{table:scenarios}
+\begin{tabular}{lcccc}
+  \toprule
+  \textbf{Plasmode Simulation Scenario} & \textbf{Exposure} & \textbf{Outcome} & \textbf{True} & \textbf{Sample}\\
+  \textbf{} & \textbf{Prevalence} & \textbf{Prevalence} & \textbf{Odds Ratio} & \textbf{Size}\\
+  \midrule
+  (i) Frequent Exposure and Outcome (Base) & 30\% & 30\% & 1 & 3,500 \\
+  (ii) Rare Exposure and Frequent Outcome & 5\% & 30\% & 1 & 3,500 \\
+  (iii) Frequent Exposure and Rare Outcome & 30\% & 5\% & 1 & 3,500 \\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{True data generating mechanism used in plasmode simulation}:
+
+\textbf{Performance measures}: From this simulation, we derived several
+performance metrics: (1) bias, (2) average model standard error (SE; the
+average of estimated SEs obtained from a model over repeated samples),
+(3) empirical SE (the standard deviation of estimated treatment effects
+across repeated samples), (4) MSE, (5) coverage probability of 95\%
+confidence intervals, (6) bias-eliminated coverage, and (7) Zip plot
+\citep{morris2019using, white2023check}.
+
+\subsection*{Estimators under
+consideration}\label{estimators-under-consideration}
+\addcontentsline{toc}{subsection}{Estimators under consideration}
+
+\section{Results}\label{results}
+
+\section{Real-world analysis}\label{real-world-analysis}
+
+\textbf{Computing time}:
+
+\section{Discussion}\label{discussion}
+
+\textbf{Contextualizing the literature}:
+
+\textbf{Summary of the simulation findings}:
+
+\textbf{Data analysis findings}:
+
+\textbf{Future Direction}:
+
+\textbf{Conclusion}:
+
+\section*{List of abbreviations}\label{list-of-abbreviations}
+\addcontentsline{toc}{section}{List of abbreviations}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  MSE - Mean Squared Error
+\item
+  SE - Standard Error
+\item
+  PS - Propensity Score
+\item
+  AE - Autoencoders
+\item
+  DL - Deep Learning
+\item
+  MARS - Multivariate Adaptive Regression Splines
+\item
+  SMD - Standardized Mean Difference
+\item
+  TMLE - Targeted Maximum Likelihood Estimation
+\item
+  RHC - Right Heart Catheterization
+\item
+  SUPPORT - Study to Understand Prognoses and Preferences for Outcomes
+  and Risks of Treatments
+\end{enumerate}
+
+\section*{Declarations}\label{declarations}
+\addcontentsline{toc}{section}{Declarations}
+
+\subsection*{Ethics approval and consent to
+participate}\label{ethics-approval-and-consent-to-participate}
+\addcontentsline{toc}{subsection}{Ethics approval and consent to
+participate}
+
+The analysis conducted on secondary and de-identified data is exempt
+from research ethics approval requirements. Ethics for this study was
+covered by item 7.10.3 in University of British Columbia's Policy \#89:
+Research and Other Studies Involving Human Subjects 19 and Article 2.2
+in of the Tri-Council Policy Statement: Ethical Conduct for Research
+Involving Humans (TCPS2).
+
+\subsection*{Consent for publication}\label{consent-for-publication}
+\addcontentsline{toc}{subsection}{Consent for publication}
+
+\subsection*{Availability of data and
+materials}\label{availability-of-data-and-materials}
+\addcontentsline{toc}{subsection}{Availability of data and materials}
+
+\subsection*{Competing interests}\label{competing-interests}
+\addcontentsline{toc}{subsection}{Competing interests}
+
+Over the past three years, MEK has received consulting fees from Biogen
+Inc.~for consulting unrelated to this current work. MEK was previously
+supported by the Michael Smith Foundation for Health Research Scholar
+award.
+
+\subsection*{Funding}\label{funding}
+\addcontentsline{toc}{subsection}{Funding}
+
+This work was supported by MEK's Natural Sciences and Engineering
+Research Council of Canada (NSERC) Discovery Grants and Discovery
+Accelerator Supplements.
+
+\subsection*{Authors' contributions}\label{authors-contributions}
+\addcontentsline{toc}{subsection}{Authors' contributions}
+
+MEK: Conceptualization, Writing -- Original Draft, Review \& Editing YL:
+Formal Analysis, Review \& Editing
+
+\subsection*{Acknowledgements}\label{acknowledgements}
+\addcontentsline{toc}{subsection}{Acknowledgements}
+
+Not applicable.
+
+\renewcommand\refname{References}
+\bibliography{mybibfile.bib}
+
+
+\end{document}

@@ -1,0 +1,261 @@
+---
+# Supported options: 
+#   sn-nature:       Style for submissions to Nature Portfolio journals
+#   sn-basic:        Basic Springer Nature Reference Style/Chemistry Reference Style
+#   sn-mathphys:     Math and Physical Sciences Reference Style
+#   sn-aps:          American Physical Society (APS) Reference Style
+#   sn-vancouver:    Vancouver Reference Style
+#   sn-apa:          APA Reference Style 
+#   sn-chicago:      Chicago-based Humanities Reference Style
+#   default:         Default
+
+classoptions: 
+  - sn-vancouver      
+  - Numbered      # Optional: Use numbered references instead of namedate references (only for sn-nature, sn-basic, sn-vancouver, sn-chicago, sn-mathphys or sn-nature)
+  # - referee       # Optional: Use double line spacing 
+  - lineno        # Optional: Add line numbers
+  # - iicol         # Optional: Double column layout
+
+title: Challenges of Univariate Proxy Variable Screening in High-Dimensional Propensity Score Analysis - An Argument for Multivariate Approaches
+titlerunning: Deep Learning in Propensity Score Analysis
+
+authors: 
+  - prefix: Dr.
+    firstname: Mohammad Ehsanul 
+    particle: 
+    lastname: Karim
+    suffix: 
+    naturename: 
+    degrees: MSc, PhD
+    email: ehsan.karim@ubc.ca
+    affiliation: [1,2]
+    corresponding: TRUE
+    equalcont: 
+  - prefix: 
+    firstname: Yang
+    particle: 
+    lastname: Lei
+    suffix: 
+    naturename: 
+    degrees: 
+    email: 
+    affiliation: [3]
+    corresponding: TRUE
+    equalcont: 
+affiliations:
+  - number: 1
+    corresponding: TRUE
+    info:
+      orgdiv: School of Population and Public Health
+      orgname: University of British Columbia
+    address:
+        street: 2206 East Mall
+        city: Vancouver
+        postcode: V6T 1Z3
+        state: BC
+        country: Canada
+  - number: 2
+    corresponding: FALSE
+    info:
+      orgname: St. Paul’s Hospital
+    address:
+        street: 588 - 1081 Burrard Street
+        city: Vancouver
+        postcode: V6Z 1Y6
+        state: BC
+        country: Canada
+  - number: 3
+    corresponding: FALSE
+    info:
+      orgdiv: Department of Statistics
+      orgname: University of British Columbia
+    address:
+        street: Room 3182 Earth Sciences Building, 2207 Main Mall
+        city: Vancouver
+        postcode: V6T 1Z4
+        state: BC
+        country: Canada      
+        
+
+keywords:
+  - Machine learning
+  - Propensity score 
+  - Deep learning
+  - Causal inference
+  
+pacs: 
+  jel:
+    - "C18"
+  msc:
+    - "92D30"
+    - "62P10"
+
+# Sample for structured abstract
+abstract: |
+  **Purpose**: 
+
+  **Methods:** 
+
+  **Results:** 
+  
+  **Conclusion:** 
+
+bibliography: mergedbibliography.bib
+
+header-includes: |
+  \usepackage{hyperref}
+  \usepackage[utf8]{inputenc}
+  \usepackage{capt-of}
+  \usepackage{booktabs}
+  \usepackage{amssymb}
+  \usepackage{threeparttable}
+  \usepackage{float}
+  %\floatplacement{figure}{H}
+  %\floatplacement{table}{H}
+  \usepackage{lipsum,caption}
+  \geometry{
+    a4paper,
+    left=1in,
+    right=1in,
+    top=1in,
+    bottom=1in,
+    includeheadfoot
+  }
+  \usepackage{setspace}
+  %\usepackage{lineno}
+  %\linenumbers
+  \usepackage{siunitx}
+  \sisetup{
+    mode = match,
+    propagate-math-font = true,
+    reset-math-version = false,
+    reset-text-family = false,
+    reset-text-series = false,
+    reset-text-shape = false,
+    text-family-to-math = true,
+    text-series-to-math = true
+  }
+  \doublespacing
+  % Disable explicit page breaks in LaTeX
+  \let\clearpage\relax
+output: rticles::springer_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, # By default, hide code; set to TRUE to see code
+  fig.pos = 'th', # Places figures at top or here
+  out.width = '100%', dpi = 300, # Figure resolution and size
+  fig.env="figure",
+  out.extra = ""
+) # Latex figure environment
+
+options(knitr.table.format = "latex") # For kable tables to write LaTeX table directly
+```
+
+# Background
+
+
+
+**Aim**: 
+
+# Methods
+
+## Data and Simulation {-}
+
+**Right Heart Catheterization dataset**: 
+
+**Plasmode simulation**: See Table \ref{table:scenarios} for the description of the scenarios under consideration.
+
+\begin{table}[ht]
+\centering
+\caption{Simulation Scenarios for plasmode simulation.}
+\label{table:scenarios}
+\begin{tabular}{lcccc}
+  \toprule
+  \textbf{Plasmode Simulation Scenario} & \textbf{Exposure} & \textbf{Outcome} & \textbf{True} & \textbf{Sample}\\
+  \textbf{} & \textbf{Prevalence} & \textbf{Prevalence} & \textbf{Odds Ratio} & \textbf{Size}\\
+  \midrule
+  (i) Frequent Exposure and Outcome (Base) & 30\% & 30\% & 1 & 3,500 \\
+  (ii) Rare Exposure and Frequent Outcome & 5\% & 30\% & 1 & 3,500 \\
+  (iii) Frequent Exposure and Rare Outcome & 30\% & 5\% & 1 & 3,500 \\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+**True data generating mechanism used in plasmode simulation**: 
+
+**Performance measures**: From this simulation, we derived several performance metrics: (1) bias, (2) average model standard error (SE; the average of estimated SEs obtained from a model over repeated samples), (3) empirical SE (the standard deviation of estimated treatment effects across repeated samples), (4) MSE, (5) coverage probability of 95% confidence intervals, (6) bias-eliminated coverage, and (7) Zip plot [@morris2019using; @white2023check].
+
+## Estimators under consideration {-}
+
+
+
+# Results
+
+
+
+# Real-world analysis
+
+**Computing time**: 
+
+# Discussion
+
+**Contextualizing the literature**: 
+
+**Summary of the simulation findings**: 
+
+**Data analysis findings**: 
+
+**Future Direction**: 
+
+**Conclusion**: 
+
+
+
+# List of abbreviations {-}
+
+1. MSE - Mean Squared Error
+2. SE - Standard Error
+3. PS - Propensity Score
+4. AE - Autoencoders
+5. DL - Deep Learning
+6. MARS - Multivariate Adaptive Regression Splines
+7. SMD - Standardized Mean Difference
+8. TMLE - Targeted Maximum Likelihood Estimation
+9. RHC - Right Heart Catheterization
+10. SUPPORT - Study to Understand Prognoses and Preferences for Outcomes and Risks of Treatments
+
+# Declarations {-}
+
+## Ethics approval and consent to participate {-}
+
+The analysis conducted on secondary and de-identified data is exempt from research ethics approval requirements. Ethics for this study was covered by item 7.10.3 in University of British Columbia's Policy #89: Research and Other Studies Involving Human Subjects 19 and Article 2.2 in of the Tri-Council Policy Statement: Ethical Conduct for Research Involving Humans (TCPS2).
+
+## Consent for publication {-}
+
+
+
+## Availability of data and materials {-}
+
+
+
+## Competing interests {-}
+
+Over the past three years, MEK has received consulting fees from Biogen Inc. for consulting unrelated to this current work. MEK was previously supported by the Michael Smith Foundation for Health Research Scholar award. 
+
+## Funding {-}
+
+This work was supported by MEK's Natural Sciences and Engineering Research Council of Canada (NSERC) Discovery Grants and Discovery Accelerator Supplements. 
+
+## Authors' contributions {-}
+
+MEK: Conceptualization, Writing – Original Draft, Review & Editing
+YL: Formal Analysis, Review & Editing
+
+## Acknowledgements {-}
+
+Not applicable.
+
+# References {-}
+
