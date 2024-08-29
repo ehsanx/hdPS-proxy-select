@@ -35,6 +35,7 @@ load("results/scenario/xgboost.RData")
 load("results/scenario/rf.RData")
 load("results/scenario/forward.RData")
 load("results/scenario/backward.RData")
+load("results/scenario/kitchen.RData")
 
 ind <- which(!is.na(RD_bross[,1]))
 
@@ -47,6 +48,7 @@ est_xgboost  <- RD_xgboost[ind,]
 est_rf       <- RD_rf[ind,]
 est_forward  <- RD_forward[ind,]
 est_backward <- RD_backward[ind,]
+est_kitchen  <- RD_kitchen[ind,]
 
 est_bross$model    <- "bross"
 est_hybird$model   <- "hybrid"
@@ -57,6 +59,7 @@ est_xgboost$model  <- "xgboost"
 est_rf$model       <- "rf"
 est_forward$model  <- "forward"
 est_backward$model <- "backward"
+est_kitchen$model  <- "kitchen"
 ```
 
 
@@ -67,10 +70,10 @@ Make sure table provides same numbers for all model. For full analysis, all shou
 ```{r bind}
 est <- rbind(est_bross, est_hybird, est_lasso, est_enet, 
              est_ga, est_xgboost, est_rf,
-             est_forward, est_backward)
+             est_forward, est_backward, est_kitchen)
 
 est$model <- as.factor(est$model)
-levels<- c("bross", "hybrid", "lasso", "enet", "ga", "xgboost", "rf", "forward", "backward")
+levels<- c("bross", "hybrid", "lasso", "enet", "ga", "xgboost", "rf", "forward", "backward", "kitchen")
 est$model <- factor(est$model, levels = levels)
 levels(est$model)
 ```

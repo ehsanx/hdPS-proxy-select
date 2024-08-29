@@ -94,16 +94,16 @@ for (i in 1:a) {
   } else {
     proxy.df_bross <- bross.list$autoselected_covariate_df
     hdps.data_bross <- merge(data[,c("idx",
-                                     outcome, 
-                                     exposure, 
+                                     "outcome", 
+                                     "exposure", 
                                      investigator.specified.covariates)],
                              proxy.df_bross,
                              by = "idx")
     hdps.data_bross$id <- hdps.data_bross$idx
     hdps.data_bross$idx <- NULL
     
-    hdps.data_bross$exposure <- as.numeric(I(hdps.data_bross$obese=='Yes'))
-    hdps.data_bross$outcome <- as.numeric(I(hdps.data_bross$diabetes=='Yes'))
+    #hdps.data_bross$exposure <- as.numeric(I(hdps.data_bross$obese=='Yes'))
+    #hdps.data_bross$outcome <- as.numeric(I(hdps.data_bross$diabetes=='Yes'))
     
     proxy_bross <- names(proxy.df_bross[,-1])
     proxyform <- paste0(proxy_bross, collapse = "+")

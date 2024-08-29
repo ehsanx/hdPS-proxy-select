@@ -97,17 +97,14 @@ for (i in 1:a) {
   } else {
     proxy.df_hybrid <- hybrid.list$autoselected_covariate_df
     hdps.data_hybrid <- merge(data[,c("idx",
-                                     outcome, 
-                                     exposure, 
+                                     "outcome", 
+                                     "exposure", 
                                      investigator.specified.covariates)],
                              proxy.df_hybrid,
                              by = "idx")
     hdps.data_hybrid$id <- hdps.data_hybrid$idx
     hdps.data_hybrid$idx <- NULL
-    
-    hdps.data_hybrid$exposure <- as.numeric(I(hdps.data_hybrid$obese=='Yes'))
-    hdps.data_hybrid$outcome <- as.numeric(I(hdps.data_hybrid$diabetes=='Yes'))
-    
+
     proxy_hybrid <- names(proxy.df_hybrid[,-1])
     covarsTfull <- c(investigator.specified.covariates, proxy_hybrid)
     Y.form <- as.formula(paste0(c("outcome~ exposure", covarsTfull), 
