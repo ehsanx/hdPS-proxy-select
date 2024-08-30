@@ -1,4 +1,5 @@
-path0 <- "E:/GitHub/hdPS-proxy-select/"
+# path0 <- "E:/GitHub/hdPS-proxy-select/"
+path0 <- "C:/Users/Ehsan/Documents/GitHub/hdPS-proxy-select/"
 
 library(autoCovariateSelection)
 library(dplyr)
@@ -128,8 +129,8 @@ for (i in a0:a) {
     # hdps.data_kitchen$idx <- NULL
     
   hdps.data_kitchen <- data
-  hdps.data_kitchen$exposure <- as.numeric(I(hdps.data_kitchen$obese=='Yes'))
-  hdps.data_kitchen$outcome <- as.numeric(I(hdps.data_kitchen$diabetes=='Yes'))
+  # hdps.data_kitchen$exposure <- as.numeric(I(hdps.data_kitchen$obese=='Yes'))
+  # hdps.data_kitchen$outcome <- as.numeric(I(hdps.data_kitchen$diabetes=='Yes'))
     
   proxy_kitchen <- grep("^rec", names(data), value = TRUE)
   proxyform <- paste0(proxy_kitchen, collapse = "+")
