@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.7.6)  24 AUG 2024 16:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.1)  1 SEP 2024 13:36
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **manuscript.tex
 (./manuscript.tex
 LaTeX2e <2024-06-01> patch level 2
-L3 programming layer <2024-05-27>
+L3 programming layer <2024-08-16>
 (./sn-jnl.cls
 Document Class: sn-jnl 2019/11/18 v0.1: An authoring template for Springer Journal articles
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/base/article.cls
@@ -481,13 +481,13 @@ Package: inputenc 2024/02/08 v1.3d Input encoding file
 ) (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/capt-of/capt-of.sty
 Package: capt-of 2009/12/29 v0.2 standard captions outside of floats
 ) (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/lipsum/lipsum.sty (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2e.sty (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2024-05-27 L3 programming layer (loader) 
+Package: expl3 2024-08-16 L3 programming layer (loader) 
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-05-08 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count343
 \l__pdf_internal_box=\box83
 ))
-Package: l3keys2e 2024-05-08 LaTeX2e option processing using LaTeX3 keys
+Package: l3keys2e 2024-08-16 LaTeX2e option processing using LaTeX3 keys
 )
 Package: lipsum 2021-09-20 v2.7 150 paragraphs of Lorem Ipsum dummy text
 \g__lipsum_par_int=\count344
@@ -534,7 +534,7 @@ Package geometry Warning: Over-specification in `v'-direction.
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/setspace/setspace.sty
 Package: setspace 2022/12/04 v6.7b set line spacing
 ) (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/siunitx/siunitx.sty
-Package: siunitx 2024-06-24 v3.3.19 A comprehensive (SI) units package
+Package: siunitx 2024-08-20 v3.3.21 A comprehensive (SI) units package
 \l__siunitx_number_uncert_offset_int=\count349
 \l__siunitx_number_exponent_fixed_int=\count350
 \l__siunitx_number_min_decimal_int=\count351
@@ -574,24 +574,24 @@ Package: array 2024/06/14 v2.6d Tabular extension package (FMi)
 )) (./manuscript.aux)
 \openout1 = `manuscript.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 99.
-LaTeX Font Info:    ... okay on input line 99.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 99.
-LaTeX Font Info:    ... okay on input line 99.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 99.
-LaTeX Font Info:    ... okay on input line 99.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 99.
-LaTeX Font Info:    ... okay on input line 99.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 99.
-LaTeX Font Info:    ... okay on input line 99.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 99.
-LaTeX Font Info:    ... okay on input line 99.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 99.
-LaTeX Font Info:    ... okay on input line 99.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 99.
-LaTeX Font Info:    ... okay on input line 99.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 99.
-LaTeX Font Info:    ... okay on input line 99.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 100.
+LaTeX Font Info:    ... okay on input line 100.
 \footinsA=\insert252
 \c@footnoteA=\count363
 *geometry* driver: auto-detecting
@@ -635,7 +635,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-Package hyperref Info: Link coloring ON on input line 99.
+Package hyperref Info: Link coloring ON on input line 100.
 (./manuscript.out) (./manuscript.out)
 \@outlinefile=\write3
 \openout3 = `manuscript.out'.
@@ -643,74 +643,57 @@ Package hyperref Info: Link coloring ON on input line 99.
 \c@lstlisting=\count364
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Calculating math sizes for size <12.045> on input line 154.
+LaTeX Font Info:    Calculating math sizes for size <12.045> on input line 150.
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <8.43146> not available
-(Font)              size <8> substituted on input line 154.
+(Font)              size <8> substituted on input line 150.
 
 
 LaTeX Font Warning: Font shape `OML/cmm/b/it' in size <8.43146> not available
-(Font)              size <8> substituted on input line 154.
+(Font)              size <8> substituted on input line 150.
 
 
 LaTeX Font Warning: Font shape `OMS/cmsy/b/n' in size <8.43146> not available
-(Font)              size <8> substituted on input line 154.
+(Font)              size <8> substituted on input line 150.
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 154.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 150.
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 154.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 150.
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Trying to load font information for U+rsfs on input line 154.
+LaTeX Font Info:    Trying to load font information for U+rsfs on input line 150.
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/jknapltx/ursfs.fd
 File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
 )
 
 LaTeX Font Warning: Font shape `U/rsfs/m/n' in size <8.43146> not available
-(Font)              size <8> substituted on input line 154.
+(Font)              size <8> substituted on input line 150.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <8.43146> not available
-(Font)              size <8> substituted on input line 154.
+(Font)              size <8> substituted on input line 150.
 
-LaTeX Font Info:    Calculating math sizes for size <11.04124> on input line 154.
+LaTeX Font Info:    Calculating math sizes for size <11.04124> on input line 150.
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <5.52061> not available
-(Font)              size <6> substituted on input line 154.
+(Font)              size <6> substituted on input line 150.
 
 
 LaTeX Font Warning: Font shape `OML/cmm/b/it' in size <5.52061> not available
-(Font)              size <6> substituted on input line 154.
+(Font)              size <6> substituted on input line 150.
 
 
 LaTeX Font Warning: Font shape `OMS/cmsy/b/n' in size <5.52061> not available
-(Font)              size <6> substituted on input line 154.
+(Font)              size <6> substituted on input line 150.
 
 
 LaTeX Font Warning: Font shape `U/rsfs/m/n' in size <5.52061> not available
-(Font)              size <6> substituted on input line 154.
+(Font)              size <6> substituted on input line 150.
 
-LaTeX Font Info:    Calculating math sizes for size <10.03749> on input line 154.
-LaTeX Font Info:    Calculating math sizes for size <8.03> on input line 173.
-
-LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <4.015> not available
-(Font)              size <5> substituted on input line 173.
-
-
-LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <4.015> not available
-(Font)              size <5> substituted on input line 173.
-
-
-LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <4.015> not available
-(Font)              size <5> substituted on input line 173.
-
-
-LaTeX Font Warning: Font shape `U/rsfs/m/n' in size <4.015> not available
-(Font)              size <5> substituted on input line 173.
-
+LaTeX Font Info:    Calculating math sizes for size <10.03749> on input line 150.
 
 
 
@@ -719,46 +702,145 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 [1{c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 ]
+LaTeX Font Info:    Calculating math sizes for size <8.03> on input line 206.
+
+LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <4.015> not available
+(Font)              size <5> substituted on input line 206.
+
+
+LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <4.015> not available
+(Font)              size <5> substituted on input line 206.
+
+
+LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <4.015> not available
+(Font)              size <5> substituted on input line 206.
+
+
+LaTeX Font Warning: Font shape `U/rsfs/m/n' in size <4.015> not available
+(Font)              size <5> substituted on input line 206.
+
+
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[2] (./manuscript.bbl
+[2]
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[3]) (./manuscript.aux)
+[3]
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[4]
+<figures/metric_comparison_Bias.pdf, id=150, 578.16pt x 433.62pt>
+File: figures/metric_comparison_Bias.pdf Graphic file (type pdf)
+<use figures/metric_comparison_Bias.pdf>
+Package pdftex.def Info: figures/metric_comparison_Bias.pdf  used on input line 350.
+(pdftex.def)             Requested size: 435.89626pt x 326.92125pt.
+<figures/metric_comparison_Coverage.pdf, id=151, 578.16pt x 433.62pt>
+File: figures/metric_comparison_Coverage.pdf Graphic file (type pdf)
+<use figures/metric_comparison_Coverage.pdf>
+Package pdftex.def Info: figures/metric_comparison_Coverage.pdf  used on input line 359.
+(pdftex.def)             Requested size: 435.89626pt x 326.92125pt.
+<manuscript_files/figure-latex/unnamed-chunk-3-1.pdf, id=152, 578.16pt x 433.62pt>
+File: manuscript_files/figure-latex/unnamed-chunk-3-1.pdf Graphic file (type pdf)
+<use manuscript_files/figure-latex/unnamed-chunk-3-1.pdf>
+Package pdftex.def Info: manuscript_files/figure-latex/unnamed-chunk-3-1.pdf  used on input line 376.
+(pdftex.def)             Requested size: 435.89626pt x 326.92125pt.
+
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[5 <./figures/metric_comparison_Bias.pdf>]
+Overfull \hbox (23.84433pt too wide) in paragraph at lines 391--410
+ [] 
+ []
+
+
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[6 <./figures/metric_comparison_Coverage.pdf>]
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[7 <./manuscript_files/figure-latex/unnamed-chunk-3-1.pdf>]
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[8] (./manuscript.bbl
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+[9]) (./manuscript.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
-L3 programming layer <2024-05-27>
+L3 programming layer <2024-08-16>
  ***********
 
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.985pt have occurred.
 
 Package rerunfilecheck Info: File `manuscript.out' has not changed.
-(rerunfilecheck)             Checksum: 6C3CDA40665DF024CACF5CD64ACF0582;2198.
+(rerunfilecheck)             Checksum: 60C67FDFE1C4F5CEC7AE803E9B2D736A;2344.
  ) 
 Here is how much of TeX's memory you used:
- 18866 strings out of 475501
- 345111 string characters out of 5774656
- 1942908 words of memory out of 5000000
- 41210 multiletter control sequences out of 15000+600000
- 574527 words of font info for 104 fonts, out of 8000000 for 9000
+ 19008 strings out of 475496
+ 348935 string characters out of 5774556
+ 1946960 words of memory out of 5000000
+ 41314 multiletter control sequences out of 15000+600000
+ 574873 words of font info for 105 fonts, out of 8000000 for 9000
  46 hyphenation exceptions out of 8191
- 90i,10n,93p,547b,1023s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,10n,93p,547b,1046s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+pdfTeX warning (dest): name{cite.holland1975adaptation} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.xiao2024interpretable} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.chen2016xgboost} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.breiman2001random} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.schneeweiss2017variable} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.franklin2015regularized} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.wyss2018erratum} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.schneeweiss2009high} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.bross1966spurious} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{cite.karim2018can} has been referenced but does not exist, replaced by a fixed one
+
 
 pdfTeX warning (dest): name{cite.white2023check} has been referenced but does not exist, replaced by a fixed one
 
 
 pdfTeX warning (dest): name{cite.morris2019using} has been referenced but does not exist, replaced by a fixed one
 
-<c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb>
-Output written on manuscript.pdf (3 pages, 141869 bytes).
+<c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
+Output written on manuscript.pdf (9 pages, 202297 bytes).
 PDF statistics:
- 153 PDF objects out of 1000 (max. 8388607)
- 128 compressed objects within 2 object streams
- 34 named destinations out of 1000 (max. 500000)
- 121 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 275 PDF objects out of 1000 (max. 8388607)
+ 235 compressed objects within 3 object streams
+ 76 named destinations out of 1000 (max. 500000)
+ 144 words of extra memory for PDF output out of 10000 (max. 10000000)
 
