@@ -72,7 +72,6 @@ ui <- fluidPage(
         ),
         tabPanel("Chosen metric", 
                  tags$p("Numerical values correspond to the selected scenario and the metric."),
-                 checkboxInput("show_all_scenarios", "Show all scenarios side by side", value = FALSE),  # New checkbox
                  uiOutput("numerical_values_output")
         ),
         tabPanel("All metrics", 
@@ -96,8 +95,7 @@ ui <- fluidPage(
                  downloadButton("download_metric_comp_png", "Download Metric PNG"),
                  downloadButton("download_metric_comp_pdf", "Download Metric PDF"),
                  downloadButton("download_metric_comp_jpg", "Download Metric JPG"),
-                 plotOutput("metric_comparison_plot"),
-                 downloadButton("download_combined_summary", "Download Combined Summary Data")
+                 plotOutput("metric_comparison_plot")
         )
       )
     )
@@ -202,7 +200,7 @@ server <- function(input, output, session) {
     effective_num_indices(length(bross_indices))
     
     # Print the final number of rows after all models are processed
-    # print(paste("Final number of rows after filtering:", nrow(est)))
+    print(paste("Final number of rows after filtering:", nrow(est)))
     print(paste("Final effective number of simulations set to:", effective_num_indices()))
     
     return(est)
@@ -225,7 +223,7 @@ server <- function(input, output, session) {
     theta <- 0 # for RD or ATE; this would be 1 for OR
     
     simsum(data = est, estvarname = "RD", true = theta, se = "SE", 
-           methodvar = "model", x = TRUE, ref = "Kitchen sink")
+           methodvar = "model", x = TRUE)
   })
   
   # Plotting functions using the reactive data
@@ -272,55 +270,26 @@ server <- function(input, output, session) {
   
   
   output$numerical_values_output <- renderUI({
-    combined_summary <- all_scenarios_data()
-    
-    if (is.null(combined_summary)) {
-      showNotification("No data available for the selected metric.", type = "error")
-      return(NULL)
-    }
-    
+    s1 <- analysis()
+    # Ensure the correct mapping is used
     metric <- input$metric_select
     internal_metric <- names(metric_names)[metric_names == metric]
     
-    # Filter based on scenario if the checkbox is not checked
-    if (!input$show_all_scenarios) {
-      selected_scenario <- input$scenario_select
-      combined_summary <- combined_summary[combined_summary$Scenario == selected_scenario, ]
-    }
-    
-    metric_data <- combined_summary[combined_summary$stat == internal_metric, c("model", "est", "mcse", "Scenario")]
-    
-    # Increase the number of decimal places
+    # Ensure you are using internal_metric
+    metric_data <- s1$summ[s1$summ$stat == internal_metric, c("model", "est", "mcse")]
     metric_data$est <- sprintf("%.4f", metric_data$est)
     metric_data$mcse <- sprintf("%.4f", metric_data$mcse)
     metric_data$formatted <- paste0(metric_data$est, " (", metric_data$mcse, ")")
     
-    # Pivot wider only if showing all scenarios
-    if (input$show_all_scenarios) {
-      metric_table <- metric_data %>%
-        tidyr::pivot_wider(
-          names_from = Scenario,
-          values_from = formatted,
-          id_cols = model,
-          values_fill = list(formatted = "NA")
-        ) %>%
-        dplyr::rename(
-          "Frequent" = scenario,
-          "Rare Exposure" = scenarioER,
-          "Rare Outcome" = scenarioOR,
-          "Model" = model
-        )
-      } else {
-      metric_table <- data.frame(
-        Model = metric_data$model,
-        `Estimate.MCSE` = metric_data$formatted
-      )
-    }
+    chosen_metric_table <- data.frame(
+      Model = metric_data$model,
+      `Estimate.MCSE` = metric_data$formatted
+    )
     
     table_html <- knitr::kable(
-      metric_table, 
+      chosen_metric_table, 
       format = "html", 
-      digits = 8,  # Adjust digits to match desired precision
+      digits = 4, 
       row.names = FALSE,
       caption = paste("Metric:", metric_names[internal_metric])
     ) %>%
@@ -329,10 +298,14 @@ server <- function(input, output, session) {
     div(HTML(table_html))
   })
   
-  
-
-  
-  
+  output$num_indices_output <- renderText({
+    num_sims <- effective_num_indices()
+    if (!is.null(num_sims)) {
+      paste("The results from", num_sims, "simulations.")
+    } else {
+      "The results from simulations."
+    }
+  })
   
   
   
@@ -379,8 +352,6 @@ server <- function(input, output, session) {
     metrics <- c("bias", "empse", "mse", "modelse", "cover", "becover")
     
     extract_metric <- function(metric) {
-      print("Analysis Data in Plot Tab:")
-      print(s1$summ)
       metric_data <- s1$summ[s1$summ$stat == metric, c("model", "est", "mcse")]
       metric_data$est <- sprintf("%.4f", metric_data$est)
       metric_data$mcse <- sprintf("%.4f", metric_data$mcse)
@@ -564,9 +535,15 @@ server <- function(input, output, session) {
   
   all_scenarios_data <- reactive({
     num_indices <- input$num_indices
-    all_data <- load_all_scenarios_data(num_indices)
+    load_all_scenarios_data(num_indices)
+  })
+  
+  output$metric_comparison_plot <- renderPlot({
+    all_data <- all_scenarios_data()
     
+    # Ensure that data exists before proceeding
     if (is.null(all_data)) {
+      showNotification("No data available for the selected metric across the scenarios.", type = "error")
       return(NULL)
     }
     
@@ -574,7 +551,7 @@ server <- function(input, output, session) {
     scenario_summaries <- lapply(split(all_data, all_data$Scenario), function(est) {
       theta <- 0 # for RD or ATE; this would be 1 for OR
       s1 <- simsum(data = est, estvarname = "RD", true = theta, se = "SE", 
-                   methodvar = "model", x = TRUE, ref = "Kitchen sink")
+                   methodvar = "model", x = TRUE)
       summary(s1)
     })
     
@@ -584,19 +561,6 @@ server <- function(input, output, session) {
       scenario_summary$Scenario <- scenario
       scenario_summary
     }))
-    print("Combined Summary in Chosen Metric Tab:")
-    print(combined_summary)
-    return(combined_summary)
-  })
-  
-  
-  output$metric_comparison_plot <- renderPlot({
-    combined_summary <- all_scenarios_data()
-    
-    if (is.null(combined_summary)) {
-      showNotification("No data available for the selected metric across the scenarios.", type = "error")
-      return(NULL)
-    }
     
     # Map the selected metric to the internal name
     metric <- input$metric_select
@@ -651,9 +615,11 @@ server <- function(input, output, session) {
       }
       
       print(p)
+      
+      
+      
     }
   })
-  
   
   output$download_metric_comp_png <- downloadHandler(
     filename = function() {
@@ -679,27 +645,6 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       ggsave(file, plot = last_plot(), device = "jpg", width = 8, height = 6)
-    }
-  )
-  
-  output$download_combined_summary <- downloadHandler(
-    filename = function() {
-      paste("combined_summary_", input$metric_select, ".rds", sep = "")
-    },
-    content = function(file) {
-      combined_summary <- all_scenarios_data()
-      
-      if (is.null(combined_summary)) {
-        showNotification("No data available for the selected metric across the scenarios.", type = "error")
-        return(NULL)
-      }
-      
-      metric <- input$metric_select
-      internal_metric <- names(metric_names)[metric_names == metric]
-      
-      combined_summary <- combined_summary[combined_summary$stat == internal_metric, ]
-      
-      saveRDS(combined_summary, file)
     }
   )
   

@@ -345,13 +345,161 @@ misspecification and the presence of noise variables.
 
 \section{Results}\label{results}
 
+The results for each method under the different scenarios are summarized
+below. See Figures \ref{fig:bias-comparison} and
+\ref{fig:Coverage-comparison} for an overview of the performance in
+terms of bias and coverage, respectively.
+
+\begin{enumerate}
+\def\labelenumi{(\roman{enumi})}
+\tightlist
+\item
+  \textbf{Frequent Exposure and Outcome (base) scenario}:
+\end{enumerate}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \emph{Bias}: The kitchen sink model, which includes all variables
+  without selection, exhibited the smallest bias (0.0002). In contrast,
+  the Genetic Algorithm (GA) showed the highest bias (0.0287). Among the
+  other methods, Bross (-0.0001), Hybrid (0.0016), and Elasticnet
+  (0.0036) demonstrated low bias, indicating that these methods provide
+  estimates closer to the true effect. XGBoost (0.0074) and Random
+  Forest (RF) (0.0034) had slightly higher bias but remained within
+  acceptable limits.
+\item
+  \emph{Coverage}: Most methods, including Hybrid, Forward, Backward,
+  LASSO, and Elasticnet, achieved high coverage values around 98\(\%\),
+  indicating well-calibrated confidence intervals. However, the GA
+  method had significantly lower coverage (83.8\(\%\)), suggesting that
+  its confidence intervals might be too narrow or biased, potentially
+  missing the true effect. Given the bias in the GA method's results, we
+  also calculated bias-eliminated coverage. This adjustment improved
+  GA's coverage to 96\(\%\), but it still remained lower than that of
+  the other methods.
+\item
+  \emph{Mean Squared Error (MSE)}: XGBoost achieved the lowest MSE
+  (0.0006), indicating it as the most accurate method overall.
+  Conversely, the GA method had the highest MSE (0.0016), reflecting its
+  higher bias and variability. The kitchen sink model (0.0009), Bross
+  (0.0008), Hybrid (0.0008), and Elasticnet (0.0009) all had relatively
+  similar and moderate MSE values.
+\item
+  \emph{Standard Error (SE)}: The lowest Empirical SE was observed with
+  XGBoost (0.0229), indicating high precision in its estimates. The
+  kitchen sink model had the highest Empirical SE (0.0305), suggesting
+  greater variability. Other methods such as GA (0.0274), Hybrid
+  (0.0278), and Bross (0.0287) exhibited moderate variability, while
+  LASSO (0.0299) and Elasticnet (0.0294) had slightly higher
+  variability. Similarly, XGBoost also showed the lowest Model-based SE
+  (0.0268), consistent with its low Empirical SE and indicating high
+  precision. The kitchen sink model had the highest Model-based SE
+  (0.0333), suggesting less precision in its estimates.
+\end{enumerate}
+
+\textbf{(ii) Rare Exposure and Frequent Outcome}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \emph{Bias}: In this scenario, the kitchen sink model showed a
+  relatively low bias (0.0025), but the Genetic Algorithm (GA) had the
+  highest bias (0.0408), indicating a substantial deviation from the
+  true effect. XGBoost (0.0259) also exhibited higher bias compared to
+  other methods. On the other hand, Bross (0.0035), Hybrid (0.0049), and
+  Elasticnet (0.0053) demonstrated moderate bias, while Random Forest
+  (RF) (0.0127) and Forward Selection (0.0108) had slightly higher bias
+  but remained within an acceptable range.
+\item
+  \emph{Coverage}: Most methods maintained high coverage levels, with
+  XGBoost showing the highest coverage (96.2\(\%\)), suggesting that its
+  confidence intervals were well-calibrated despite the higher bias. The
+  GA method, however, had slightly lower coverage (92.2\(\%\)),
+  indicating that its confidence intervals might be narrower,
+  potentially excluding the true effect. Other methods such as RF,
+  Forward, Backward, and Hybrid had coverage values around 95\(\%\),
+  suggesting adequate interval calibration. To account for the bias in
+  GA, bias-eliminated coverage was calculated, which improved the
+  coverage for GA to 94.2\(\%\), still slightly lower than other
+  methods.
+\item
+  \emph{Mean Squared Error (MSE)}: XGBoost and Hybrid methods both
+  demonstrated the lowest MSE (0.0032), indicating that these methods
+  were the most accurate in this scenario. The GA method, with a higher
+  MSE (0.0043), reflected its substantial bias and variability. The
+  kitchen sink model had an MSE of 0.0043, similar to GA, while other
+  methods such as Bross, RF, and Elasticnet exhibited moderate MSE
+  values, indicating reasonable accuracy.
+\item
+  \emph{Standard Error (SE)}: The lowest Empirical SE was observed with
+  XGBoost (0.0507) and GA (0.0510), reflecting the high precision of
+  these methods despite the higher bias. The kitchen sink model
+  exhibited the highest Empirical SE (0.0656), indicating greater
+  variability. Methods like Hybrid (0.0564), Bross (0.0595), and RF
+  (0.0609) showed moderate variability, while Elasticnet (0.0597) and
+  LASSO (0.0587) had slightly higher variability. In terms of
+  Model-based SE, XGBoost (0.0531) and GA (0.0533) also showed low
+  variability, while the kitchen sink model had the highest Model-based
+  SE (0.0623), suggesting less precision in its estimates.
+\end{enumerate}
+
+\textbf{(iii) Frequent Exposure and Rare Outcome}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \emph{Bias}: In this scenario, the kitchen sink model exhibited a
+  moderate negative bias (-0.0093), similar to the Bross method
+  (-0.0088). The Genetic Algorithm (GA) showed a significantly higher
+  bias (0.0362), indicating a substantial deviation from the true
+  effect. Among other methods, XGBoost demonstrated the lowest bias
+  (-0.0061), while methods like Hybrid (-0.0082), Forward (-0.0070), and
+  Backward (-0.0070) had slightly higher but still moderate biases.
+  Elasticnet and LASSO both had biases of -0.0079, reflecting slightly
+  larger deviations compared to XGBoost but still within acceptable
+  limits.
+\item
+  \emph{Coverage}: Most methods achieved good coverage, with XGBoost,
+  Random Forest (RF), and Forward Selection each achieving a coverage
+  rate of 95.4\(\%\), indicating well-calibrated confidence intervals.
+  The GA method, however, had slightly lower coverage (91.8\(\%\)),
+  indicating that its confidence intervals might be narrower,
+  potentially excluding the true effect. Bross and the kitchen sink
+  model had slightly lower coverage values of 93.8\(\%\) and 93.4\(\%\),
+  respectively. After accounting for bias, the bias-eliminated coverage
+  for most methods, except GA, remained high, with values ranging from
+  98.4\(\%\) to 99.0\(\%\), indicating that most methods effectively
+  adjusted for bias in their coverage estimates. GA's bias-eliminated
+  coverage was lower at 93.4\(\%\), reflecting its higher inherent bias.
+\item
+  \emph{Mean Squared Error (MSE)}: XGBoost exhibited the lowest MSE
+  (0.0003), indicating it as the most accurate method overall in this
+  scenario. GA had the highest MSE (0.0040), reflecting its substantial
+  bias and variability. The kitchen sink model (0.0005), Bross (0.0005),
+  and other methods like Hybrid (0.0004) and Elasticnet (0.0005) all had
+  relatively similar MSE values, indicating moderate accuracy.
+\item
+  \emph{Standard Error (SE)}: The lowest Empirical SE was observed with
+  XGBoost (0.0152), reflecting high precision in its estimates. The GA
+  method exhibited the highest Empirical SE (0.0523), indicating greater
+  variability and less precision. Methods like Hybrid (0.0184), Forward
+  (0.0187), and Elasticnet (0.0203) showed moderate variability, while
+  Bross (0.0206) and the kitchen sink model (0.0212) had slightly higher
+  variability. In terms of Model-based SE, XGBoost (0.0179) again showed
+  the lowest variability, consistent with its low Empirical SE,
+  indicating that it provided the most stable estimates. The kitchen
+  sink model had a slightly higher Model-based SE (0.0219), indicating
+  less precision in its estimates.
+\end{enumerate}
+
 \begin{figure}[th]
 
 {\centering \includegraphics[width=1\linewidth,]{figures/metric_comparison_Bias} 
 
 }
 
-\caption{Comparison of Bias Across Different Methods in hdPS Analysis}\label{fig:unnamed-chunk-1}
+\caption{Comparison of Bias Across Different Methods in hdPS Analysis\label{fig:bias-comparison}}\label{fig:unnamed-chunk-1}
 \end{figure}
 
 \begin{figure}[th]
@@ -360,7 +508,7 @@ misspecification and the presence of noise variables.
 
 }
 
-\caption{Comparison of Coverage Probability Across Different Methods in hdPS Analysis}\label{fig:unnamed-chunk-2}
+\caption{Comparison of Coverage Probability Across Different Methods in hdPS Analysis\label{fig:Coverage-comparison}}\label{fig:unnamed-chunk-2}
 \end{figure}
 
 \section{Real-world analysis}\label{real-world-analysis}
@@ -371,13 +519,16 @@ Also mention how many proxies were chosen (add in the picture of RD and
 OR; side by side for each method, ordered my magnitude of RD), and how
 many were in common with hdPS (add table).}
 
+See Figure \ref{fig:comparison-plot} for the results from analyzing the
+NHANES (2013-2018) dataset.
+
 \begin{figure}[th]
 
 {\centering \includegraphics[width=1\linewidth,]{manuscript_files/figure-latex/unnamed-chunk-3-1} 
 
 }
 
-\caption{Figure presenting a comparison of Risk Differences (RD) and Odds Ratios (OR) with 95\% confidence intervals for different methods used to evaluate the association between obesity and diabetes risk. The analysis is based on data from the National Health and Nutrition Examination Survey (NHANES) for the years 2013-2018. Methods are arranged by the number of variables used in the models.}\label{fig:unnamed-chunk-3}
+\caption{Figure presenting a comparison of Risk Differences (RD) and Odds Ratios (OR) with 95\% confidence intervals for different methods used to evaluate the association between obesity and diabetes risk. The analysis is based on data from the National Health and Nutrition Examination Survey (NHANES) for the years 2013-2018. Methods are arranged by the number of variables used in the models.\label{fig:comparison-plot}}\label{fig:unnamed-chunk-3}
 \end{figure}
 
 Table \ref{tab:method-comparison} presents a pairwise comparison of the
@@ -416,6 +567,17 @@ exclusively by each method.
 
 \section{Discussion}\label{discussion}
 
+XGBoost consistently outperformed other methods across all scenarios,
+demonstrating low bias, high coverage, and the lowest MSE. The GA, on
+the other hand, consistently underperformed with higher bias, lower
+coverage, and higher MSE, indicating less reliable estimates. The Bross
+method and the kitchen sink model generally provided moderate
+performance with low to moderate bias and reasonable coverage, but they
+were less accurate than XGBoost. Hybrid, Elasticnet, and LASSO methods
+showed competitive performance with moderate bias, good coverage, and
+acceptable MSE, making them reliable alternatives, though slightly less
+optimal than XGBoost.
+
 \textbf{Contextualizing the literature}:
 
 \textbf{Summary of the simulation findings}:
@@ -429,31 +591,40 @@ exclusively by each method.
 \section*{List of abbreviations}\label{list-of-abbreviations}
 \addcontentsline{toc}{section}{List of abbreviations}
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
+\begin{itemize}
 \tightlist
 \item
-  MSE - Mean Squared Error
+  hdPS: High-dimensional Propensity Score
 \item
-  SE - Standard Error
+  NHANES: National Health and Nutrition Examination Survey
 \item
-  PS - Propensity Score
+  OR: Odds Ratio
 \item
-  AE - Autoencoders
+  RD: Risk Difference
 \item
-  DL - Deep Learning
+  SE: Standard Error
 \item
-  MARS - Multivariate Adaptive Regression Splines
+  MSE: Mean Squared Error
 \item
-  SMD - Standardized Mean Difference
+  LASSO: Least Absolute Shrinkage and Selection Operator
 \item
-  TMLE - Targeted Maximum Likelihood Estimation
+  GA: Genetic Algorithm
 \item
-  RHC - Right Heart Catheterization
+  RF: Random Forest
 \item
-  SUPPORT - Study to Understand Prognoses and Preferences for Outcomes
-  and Risks of Treatments
-\end{enumerate}
+  XGBoost: Extreme Gradient Boosting
+\item
+  FS: Forward Selection
+\item
+  BE: Backward Elimination
+\item
+  CV: Cross-Validation
+\item
+  RR: Relative Risk
+\item
+  Elasticnet: A regularized regression method that combines LASSO and
+  Ridge regression
+\end{itemize}
 
 \section*{Declarations}\label{declarations}
 \addcontentsline{toc}{section}{Declarations}
