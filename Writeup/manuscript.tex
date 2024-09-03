@@ -102,7 +102,7 @@
 
 \title[High-Dimensional Propensity Score]{Understanding the role of
 different proxy selection methods in High-Dimensional Propensity Score
-Analysis}
+Framework - A Plasmode simulation study}
 
 %%=============================================================%%
 %% Prefix	-> \pfx{Dr}
@@ -136,8 +136,43 @@ Columbia}, \orgaddress{\city{Vancouver}, \country{Canada}, \postcode{V6T
 1Z4}, \state{BC}, \street{Room 3182 Earth Sciences Building, 2207 Main
 Mall}}}
 
-\abstract{\textbf{Purpose}: \textbf{Methods:} \textbf{Results:}
-\textbf{Conclusion:}}
+\abstract{\textbf{Purpose}: We aims to evaluate various proxy selection
+methods within the context of high-dimensional propensity score (hdPS)
+analysis. The study focuses on assessing the performance of these
+methods, including alternative variable selection approaches, in
+selecting proxy variables for confounding adjustment compared to the
+traditional hdPS method that is rooted in Bross formula. The goal is to
+understand better the performance of these alternative methods in
+estimating treatment effects, and identify scenarios in which they may
+perform better. \textbf{Methods:} Using data from three cycles of the
+National Health and Nutrition Examination Survey (NHANES) spanning
+2013-2018, we motivated the study by examining the association between
+obesity and diabetes. A plasmode simulation framework based on this data
+was employed to mimic real-world data structures. Simulations were
+conducted under three scenarios: Frequent Exposure and Outcome, Rare
+Exposure and Frequent Outcome, and Frequent Exposure and Rare Outcome.
+The performance of a variety of proxy selection methods---including
+tree-based methods, LASSO-based methods, and the Genetic Algorithm
+(GA)---was evaluated across these scenarios using standard simulation
+metrics. \textbf{Results:} XGBoost consistently demonstrated the lowest
+MSE and high coverage, making it a reliable method overall, although it
+did not always exhibit the lowest bias. In contrast, GA consistently
+showed the highest bias and MSE, with lower coverage and greater
+variability, indicating its unsuitability for accurate effect
+estimation. The kitchen sink model, Bross-based hdPS, and Hybrid hdPS
+methods performed moderately well, with low bias and moderate MSE, but
+varied in coverage across scenarios. Scenario-specific trends revealed
+that rare outcome scenarios yielded lower MSE and better precision,
+while rare exposure scenarios were associated with higher bias and MSE.
+\textbf{Conclusion:} Aside from GA, the performance of most other
+methods in your study appears to be comparable in each scenario, though
+with some variations depending on specific metrics. The findings
+underscore the importance of selecting appropriate methods for hdPS
+analysis based on the characteristics of the data, particularly the
+prevalence of exposure and outcome. While XGBoost excelled in overall
+accuracy and precision, the choice of method should be tailored to the
+specific epidemiological goal to optimize bias, coverage, and precision
+in estimating treatment effects.}
 
 \keywords{Machine learning, Propensity score, Deep learning, Causal
 inference}
@@ -149,6 +184,8 @@ inference}
 \maketitle
 
 \section{Background}\label{background}
+
+\textcolor{red}{*need to write what hdps is, and why alternatives are considered*}
 
 \textbf{Aim}: The aim of this research is to systematically evaluate and
 compare different proxy selection methods within the context of
@@ -220,7 +257,8 @@ primary goal of this study is to evaluate various variable selection
 methods under realistic conditions. To achieve this, we formulated the
 outcome data based on a specific model specification that incorporates
 both exposure and covariates, including investigator-specified and proxy
-variables. The model specification consists of three key components:
+variables. The model specification consists of three key components (See
+Appendices \S A and B for further details):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -264,6 +302,8 @@ and (7) Zip plot \citep{morris2019using, white2023check}.
 \subsection*{Estimators under
 consideration}\label{estimators-under-consideration}
 \addcontentsline{toc}{subsection}{Estimators under consideration}
+
+\textcolor{red}{*check if the description of the methods look okay to you. Make sure the description matches with the analysis codes.*}
 
 The comparison between the data generation process and the analysis
 process reveals two key differences: (i) The data generation used
@@ -345,6 +385,8 @@ misspecification and the presence of noise variables.
 
 \section{Results}\label{results}
 
+\textcolor{red}{*Can you check the app in the doc folder of the repo, and compare of the results description look accurate to you?*}
+
 The results for each method under the different scenarios are summarized
 below. See Figures \ref{fig:bias-comparison} and
 \ref{fig:Coverage-comparison} for an overview of the performance in
@@ -361,41 +403,39 @@ terms of bias and coverage, respectively.
 \def\labelenumi{\arabic{enumi}.}
 \item
   \emph{Bias}: The kitchen sink model, which includes all variables
-  without selection, exhibited the smallest bias (0.0002). In contrast,
-  the Genetic Algorithm (GA) showed the highest bias (0.0287). Among the
-  other methods, Bross (-0.0001), Hybrid (0.0016), and Elasticnet
-  (0.0036) demonstrated low bias, indicating that these methods provide
-  estimates closer to the true effect. XGBoost (0.0074) and Random
-  Forest (RF) (0.0034) had slightly higher bias but remained within
-  acceptable limits.
+  without selection, exhibited the smallest bias (0.0002). GA shows the
+  highest bias (0.0287), indicating a substantial deviation from the
+  true effect. Among the other methods, Bross-based hdPS (-0.0001),
+  Hybrid hdPS (0.0016), and Elasticnet (0.0036) demonstrated low bias.
+  XGBoost (0.0074) and Random Forest (RF) (0.0034) still had slightly
+  higher bias.
 \item
-  \emph{Coverage}: Most methods, including Hybrid, Forward, Backward,
-  LASSO, and Elasticnet, achieved high coverage values around 98\(\%\),
-  indicating well-calibrated confidence intervals. However, the GA
-  method had significantly lower coverage (83.8\(\%\)), suggesting that
-  its confidence intervals might be too narrow or biased, potentially
-  missing the true effect. Given the bias in the GA method's results, we
-  also calculated bias-eliminated coverage. This adjustment improved
-  GA's coverage to 96\(\%\), but it still remained lower than that of
-  the other methods.
+  \emph{Coverage}: The coverage for most methods was high, with Hybrid
+  hdPS, Forward Selection, Backward Elimination, LASSO, and Elasticnet
+  achieving values around 98\%, indicating well-calibrated confidence
+  intervals. However, GA had significantly lower coverage (83.8\%),
+  indicating that its confidence intervals might be too narrow or
+  biased, potentially missing the true effect. After applying bias
+  elimination, GA's coverage improved to 96\%, which is better but still
+  lower than other methods.
 \item
   \emph{Mean Squared Error (MSE)}: XGBoost achieved the lowest MSE
-  (0.0006), indicating it as the most accurate method overall.
-  Conversely, the GA method had the highest MSE (0.0016), reflecting its
-  higher bias and variability. The kitchen sink model (0.0009), Bross
-  (0.0008), Hybrid (0.0008), and Elasticnet (0.0009) all had relatively
-  similar and moderate MSE values.
+  (0.0006), reaffirming it as the most accurate method overall. GA
+  maintained the highest MSE (0.0016), reflecting its higher bias and
+  variability. The kitchen sink model (0.0009), Bross-based hdPS
+  (0.0008), Hybrid hdPS (0.0008), and Elasticnet (0.0009) all had
+  relatively similar and moderate MSE values.
 \item
-  \emph{Standard Error (SE)}: The lowest Empirical SE was observed with
-  XGBoost (0.0229), indicating high precision in its estimates. The
-  kitchen sink model had the highest Empirical SE (0.0305), suggesting
-  greater variability. Other methods such as GA (0.0274), Hybrid
-  (0.0278), and Bross (0.0287) exhibited moderate variability, while
+  \emph{Standard Error (SE)}: XGBoost exhibited the lowest Empirical SE
+  (0.0229), indicating high precision in its estimates. The kitchen sink
+  model had the highest Empirical SE (0.0305), suggesting greater
+  variability. Other methods, including GA (0.0274), Hybrid hdPS
+  (0.0278), and Bross-based hdPS (0.0287), showed moderate variability.
   LASSO (0.0299) and Elasticnet (0.0294) had slightly higher
-  variability. Similarly, XGBoost also showed the lowest Model-based SE
-  (0.0268), consistent with its low Empirical SE and indicating high
-  precision. The kitchen sink model had the highest Model-based SE
-  (0.0333), suggesting less precision in its estimates.
+  variability. The Model-based SE followed a similar pattern, with
+  XGBoost (0.0268) showing the lowest variability and the kitchen sink
+  model (0.0333) the highest, indicating less precision in its
+  estimates. See Appendix \S C for further details.
 \end{enumerate}
 
 \textbf{(ii) Rare Exposure and Frequent Outcome}:
@@ -403,45 +443,45 @@ terms of bias and coverage, respectively.
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  \emph{Bias}: In this scenario, the kitchen sink model showed a
-  relatively low bias (0.0025), but the Genetic Algorithm (GA) had the
-  highest bias (0.0408), indicating a substantial deviation from the
-  true effect. XGBoost (0.0259) also exhibited higher bias compared to
-  other methods. On the other hand, Bross (0.0035), Hybrid (0.0049), and
-  Elasticnet (0.0053) demonstrated moderate bias, while Random Forest
-  (RF) (0.0127) and Forward Selection (0.0108) had slightly higher bias
-  but remained within an acceptable range.
+  \emph{Bias}: The kitchen sink model showed a relatively low bias
+  (0.0025), while GA continued to exhibit the highest bias (0.0408),
+  indicating a significant deviation from the true effect. XGBoost had a
+  bias of 0.0259, which, while still higher than some other methods, was
+  lower than GA. Other methods, such as Bross-based hdPS (0.0035),
+  Hybrid hdPS (0.0049), and Elasticnet (0.0053), demonstrated moderate
+  bias. Random Forest (RF) (0.0127) and Forward Selection (0.0108) had
+  slightly higher bias but remained within an acceptable range.
 \item
-  \emph{Coverage}: Most methods maintained high coverage levels, with
-  XGBoost showing the highest coverage (96.2\(\%\)), suggesting that its
-  confidence intervals were well-calibrated despite the higher bias. The
-  GA method, however, had slightly lower coverage (92.2\(\%\)),
-  indicating that its confidence intervals might be narrower,
-  potentially excluding the true effect. Other methods such as RF,
-  Forward, Backward, and Hybrid had coverage values around 95\(\%\),
-  suggesting adequate interval calibration. To account for the bias in
-  GA, bias-eliminated coverage was calculated, which improved the
-  coverage for GA to 94.2\(\%\), still slightly lower than other
+  \emph{Coverage}: Coverage levels remained high for most methods, with
+  XGBoost achieving the highest coverage at 96.2\%, indicating
+  well-calibrated confidence intervals despite its higher bias. The GA
+  method had lower coverage (92.2\%), suggesting that its confidence
+  intervals might be narrower, potentially missing the true effect.
+  Other methods such as RF, Forward Selection, Backward Elimination, and
+  Hybrid hdPS maintained coverage values around 94-95\%, suggesting
+  adequate interval calibration. Bias-eliminated coverage for GA
+  improved to 94.2\%, but it was still slightly lower than other
   methods.
 \item
-  \emph{Mean Squared Error (MSE)}: XGBoost and Hybrid methods both
+  \emph{Mean Squared Error (MSE)}: Hybrid hdPS and XGBoost both
   demonstrated the lowest MSE (0.0032), indicating that these methods
-  were the most accurate in this scenario. The GA method, with a higher
-  MSE (0.0043), reflected its substantial bias and variability. The
-  kitchen sink model had an MSE of 0.0043, similar to GA, while other
-  methods such as Bross, RF, and Elasticnet exhibited moderate MSE
-  values, indicating reasonable accuracy.
+  were the most accurate in this scenario. The GA method had a higher
+  MSE (0.0043), reflecting its substantial bias and variability. The
+  kitchen sink model also had an MSE of 0.0043, similar to GA, while
+  other methods like Bross-based hdPS (0.0035), RF (0.0039), and
+  Elasticnet (0.0036) exhibited moderate MSE values, indicating
+  reasonable accuracy.
 \item
   \emph{Standard Error (SE)}: The lowest Empirical SE was observed with
-  XGBoost (0.0507) and GA (0.0510), reflecting the high precision of
-  these methods despite the higher bias. The kitchen sink model
-  exhibited the highest Empirical SE (0.0656), indicating greater
-  variability. Methods like Hybrid (0.0564), Bross (0.0595), and RF
-  (0.0609) showed moderate variability, while Elasticnet (0.0597) and
-  LASSO (0.0587) had slightly higher variability. In terms of
-  Model-based SE, XGBoost (0.0531) and GA (0.0533) also showed low
-  variability, while the kitchen sink model had the highest Model-based
-  SE (0.0623), suggesting less precision in its estimates.
+  XGBoost (0.0507) and GA (0.0510), reflecting high precision despite
+  their higher bias. The kitchen sink model had the highest Empirical SE
+  (0.0656), indicating greater variability. Hybrid hdPS (0.0564),
+  Bross-based hdPS (0.0595), and RF (0.0609) showed moderate
+  variability. Forward Selection (0.0537) and Backward Elimination
+  (0.0576) had lower variability compared to the kitchen sink model. In
+  terms of Model-based SE, XGBoost (0.0531) and GA (0.0533) continued to
+  show low variability, while the kitchen sink model had the highest
+  Model-based SE (0.0623), indicating less precision in its estimates.
 \end{enumerate}
 
 \textbf{(iii) Frequent Exposure and Rare Outcome}:
@@ -450,47 +490,48 @@ terms of bias and coverage, respectively.
 \def\labelenumi{\arabic{enumi}.}
 \item
   \emph{Bias}: In this scenario, the kitchen sink model exhibited a
-  moderate negative bias (-0.0093), similar to the Bross method
-  (-0.0088). The Genetic Algorithm (GA) showed a significantly higher
-  bias (0.0362), indicating a substantial deviation from the true
-  effect. Among other methods, XGBoost demonstrated the lowest bias
-  (-0.0061), while methods like Hybrid (-0.0082), Forward (-0.0070), and
-  Backward (-0.0070) had slightly higher but still moderate biases.
+  moderate negative bias (-0.0093), similar to the Bross-based hdPS
+  method (-0.0088). GA showed a significantly higher bias (0.0362),
+  indicating a substantial deviation from the true effect. Among other
+  methods, XGBoost demonstrated the lowest bias (-0.0061), while methods
+  like Hybrid hdPS (-0.0082), Forward Selection (-0.0070), and Backward
+  Elimination (-0.0070) had slightly higher but still moderate biases.
   Elasticnet and LASSO both had biases of -0.0079, reflecting slightly
   larger deviations compared to XGBoost but still within acceptable
   limits.
 \item
   \emph{Coverage}: Most methods achieved good coverage, with XGBoost,
-  Random Forest (RF), and Forward Selection each achieving a coverage
-  rate of 95.4\(\%\), indicating well-calibrated confidence intervals.
-  The GA method, however, had slightly lower coverage (91.8\(\%\)),
-  indicating that its confidence intervals might be narrower,
-  potentially excluding the true effect. Bross and the kitchen sink
-  model had slightly lower coverage values of 93.8\(\%\) and 93.4\(\%\),
-  respectively. After accounting for bias, the bias-eliminated coverage
-  for most methods, except GA, remained high, with values ranging from
-  98.4\(\%\) to 99.0\(\%\), indicating that most methods effectively
-  adjusted for bias in their coverage estimates. GA's bias-eliminated
-  coverage was lower at 93.4\(\%\), reflecting its higher inherent bias.
+  RF, and Forward Selection each achieving a coverage rate of 95.4\%,
+  indicating well-calibrated confidence intervals. The GA method,
+  however, had slightly lower coverage (91.8\%), indicating that its
+  confidence intervals might be narrower, potentially excluding the true
+  effect. Bross-based hdPS and the kitchen sink model had slightly lower
+  coverage values of 93.8\% and 93.4\%, respectively. After accounting
+  for bias, the bias-eliminated coverage for most methods, except GA,
+  remained high, with values ranging from 98.4\% to 99.0\%, indicating
+  that most methods effectively adjusted for bias in their coverage
+  estimates. GA's bias-eliminated coverage was lower at 93.4\%,
+  reflecting its higher inherent bias.
 \item
   \emph{Mean Squared Error (MSE)}: XGBoost exhibited the lowest MSE
   (0.0003), indicating it as the most accurate method overall in this
   scenario. GA had the highest MSE (0.0040), reflecting its substantial
-  bias and variability. The kitchen sink model (0.0005), Bross (0.0005),
-  and other methods like Hybrid (0.0004) and Elasticnet (0.0005) all had
-  relatively similar MSE values, indicating moderate accuracy.
+  bias and variability. The kitchen sink model (0.0005), Bross-based
+  hdPS (0.0005), and other methods like Hybrid hdPS (0.0004) and
+  Elasticnet (0.0005) all had relatively similar MSE values, indicating
+  moderate accuracy.
 \item
   \emph{Standard Error (SE)}: The lowest Empirical SE was observed with
   XGBoost (0.0152), reflecting high precision in its estimates. The GA
   method exhibited the highest Empirical SE (0.0523), indicating greater
-  variability and less precision. Methods like Hybrid (0.0184), Forward
-  (0.0187), and Elasticnet (0.0203) showed moderate variability, while
-  Bross (0.0206) and the kitchen sink model (0.0212) had slightly higher
-  variability. In terms of Model-based SE, XGBoost (0.0179) again showed
-  the lowest variability, consistent with its low Empirical SE,
-  indicating that it provided the most stable estimates. The kitchen
-  sink model had a slightly higher Model-based SE (0.0219), indicating
-  less precision in its estimates.
+  variability and less precision. Methods like Hybrid hdPS (0.0184),
+  Forward Selection (0.0187), and Elasticnet (0.0203) showed moderate
+  variability, while Bross-based hdPS (0.0206) and the kitchen sink
+  model (0.0212) had slightly higher variability. In terms of
+  Model-based SE, XGBoost (0.0179) again showed the lowest variability,
+  consistent with its low Empirical SE, indicating that it provided the
+  most stable estimates. The kitchen sink model had a slightly higher
+  Model-based SE (0.0219), indicating less precision in its estimates.
 \end{enumerate}
 
 \begin{figure}[th]
@@ -513,11 +554,7 @@ terms of bias and coverage, respectively.
 
 \section{Real-world analysis}\label{real-world-analysis}
 
-\emph{Here we include full data analysis (with some summary results like
-exposure and outcome prevalence, and sample size) and report OR and RD.
-Also mention how many proxies were chosen (add in the picture of RD and
-OR; side by side for each method, ordered my magnitude of RD), and how
-many were in common with hdPS (add table).}
+\textcolor{red}{*Here we include full data analysis (with some summary results like exposure and outcome prevalence, and sample size) and report OR and RD. Also mention how many proxies were chosen (add in the picture of RD and OR; side by side for each method, ordered my magnitude of RD), and how many were in common with hdPS (add table).*}
 
 See Figure \ref{fig:comparison-plot} for the results from analyzing the
 NHANES (2013-2018) dataset.
@@ -538,6 +575,8 @@ of common proxy variables selected by the method in the corresponding
 row and column. The diagonal cells, where the row and column methods are
 the same, represent the total number of proxy variables selected
 exclusively by each method.
+
+\textcolor{red}{*need to think about how to best present this proxy in common table.*}
 
 \begin{table}[htbp]
 \centering
@@ -562,31 +601,78 @@ exclusively by each method.
 
 \textbf{Computing time}:
 
-\emph{Report computing time for the Real-world analysis for each method.
-(add ordered table)}
+\textcolor{red}{*Report computing time for the Real-world analysis for each method. (add ordered table or figure)*}
 
 \section{Discussion}\label{discussion}
 
-XGBoost consistently outperformed other methods across all scenarios,
-demonstrating low bias, high coverage, and the lowest MSE. The GA, on
-the other hand, consistently underperformed with higher bias, lower
-coverage, and higher MSE, indicating less reliable estimates. The Bross
-method and the kitchen sink model generally provided moderate
-performance with low to moderate bias and reasonable coverage, but they
-were less accurate than XGBoost. Hybrid, Elasticnet, and LASSO methods
-showed competitive performance with moderate bias, good coverage, and
-acceptable MSE, making them reliable alternatives, though slightly less
-optimal than XGBoost.
+\subsection{Summary of the simulation
+findings}\label{summary-of-the-simulation-findings}
 
-\textbf{Contextualizing the literature}:
+\textbf{Comparison of methods}:
 
-\textbf{Summary of the simulation findings}:
+Across the three scenarios---Frequent Exposure and Outcome, Rare
+Exposure and Frequent Outcome, and Frequent Exposure and Rare
+Outcome---XGBoost consistently exhibited the lowest Mean Squared Error
+(MSE) and high coverage, making it one of the most reliable methods
+overall. However, XGBoost did not always have the lowest bias; in fact,
+methods such as the kitchen sink model, Bross-based hdPS, and Hybrid
+hdPS often showed lower bias. The GA, in contrast, consistently
+exhibited the highest bias and MSE, along with lower coverage and
+greater variability, indicating it was less reliable for accurate effect
+estimation. The kitchen sink model, while demonstrating low bias and
+reasonable MSE, generally had higher variability and lower precision
+compared to other methods like XGBoost. Methods such as Bross-based
+hdPS, Hybrid hdPS, and Elasticnet performed moderately well across all
+scenarios, balancing bias, coverage, and MSE, but they did not
+outperform XGBoost in overall accuracy and precision.
 
-\textbf{Data analysis findings}:
+\textbf{Comparison of scenarios}:
 
-\textbf{Future Direction}:
+Scenarios with rare exposure tended to produce higher bias, particularly
+for methods like GA and XGBoost, while frequent outcomes generally led
+to lower bias. Overcoverage was common in the frequent exposure and
+outcome scenario, while the other scenarios tended to have more balanced
+or slightly under-coverage. Frequent exposure scenarios had higher
+relative error, indicating more difficulty in precisely estimating
+effects compared to rare exposure scenarios, which had lower relative
+error. Rare outcome scenarios tended to have the lowest MSE, indicating
+more precise effect estimates under these conditions, whereas rare
+exposure scenarios had higher MSE, reflecting the challenges of
+estimating effects when exposure is uncommon.
 
-\textbf{Conclusion}:
+\subsection{Contextualizing the
+literature}\label{contextualizing-the-literature}
+
+\textcolor{red}{*need to write what hdps offers in the literature; what additional selection criteria was used so far*}
+
+\subsection{Data analysis findings}\label{data-analysis-findings}
+
+\textcolor{red}{*summarize real data analysis finding in 1 para*}
+
+\subsection{Future Direction}\label{future-direction}
+
+\textcolor{red}{*TMLE*}
+
+\subsection{Conclusion}\label{conclusion}
+
+In conclusion, this analysis highlights the importance of carefully
+selecting appropriate methods for hdPS analysis based on the specific
+characteristics of the data, particularly the prevalence of exposure and
+outcome. While XGBoost consistently demonstrated strong performance in
+terms of MSE and coverage, it did not always have the lowest bias,
+suggesting that it may be most suitable when precision is prioritized
+over bias minimization. GA, despite its potential, showed significant
+limitations with consistently high bias and MSE, making it less reliable
+for accurate effect estimation. The kitchen sink model, Bross-based
+hdPS, and Hybrid hdPS methods provided a balanced approach, often
+delivering low bias and moderate MSE, but with variability in coverage
+depending on the scenario. Scenario-specific trends revealed that rare
+outcomes generally yielded lower MSE and better precision, while rare
+exposures were associated with higher bias and MSE, emphasizing the
+challenges of accurately estimating effects in such contexts.
+Ultimately, the findings underscore the need to tailor method selection
+to the epidemiological scenario at hand, ensuring that the chosen
+approach aligns with the specific goals and challenges of the analysis.
 
 \section*{List of abbreviations}\label{list-of-abbreviations}
 \addcontentsline{toc}{section}{List of abbreviations}

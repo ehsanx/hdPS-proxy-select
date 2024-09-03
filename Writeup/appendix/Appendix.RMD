@@ -1,6 +1,6 @@
 ---
 title: Supplementary Content
-subtitle: Challenges of Univariate Proxy Variable Screening in High-Dimensional Propensity Score Analysis - An Argument for Multivariate Approaches
+subtitle: Understanding the role of different proxy selection methods in High-Dimensional Propensity Score Framework - A Plasmode simulation study
 output:
   pdf_document:
     citation_package: natbib
@@ -100,6 +100,8 @@ Simple count (1 variable) = sum of selected ICD-10 CM codes (converted to recurr
 Diabetes (outcome) =  Obese (exposure) + demographic/behaviour/health history variables + transformed lab variables + simple count with selected ICD-10 codes
 
 # SE comparison
+
+\textcolor{red}{*need to have a brief description of these figures.*}
 
 ```{r, echo=FALSE, out.width="100%", fig.cap="Standard Error Comparison for Different Methods (Overall) when outcome and exposure are frequent.", fig.align="center", fig.label="fig:se-comparison-overall"}
 knitr::include_graphics("se_comparison_plot.png")

@@ -1,0 +1,28 @@
+\begin{table}[!h]
+\centering
+\begin{tabular}{l|l|l|l|l|l|l}
+\hline
+  & Bias & Empirical SE & MSE & Model-based SE & Coverage & Bias-eliminated Coverage\\
+\hline
+\cellcolor{gray!10}{Kitchen sink} & \cellcolor{gray!10}{0.0002 (0.0014)} & \cellcolor{gray!10}{0.0305 (0.0010)} & \cellcolor{gray!10}{0.0009 (0.0001)} & \cellcolor{gray!10}{0.0333 (0.0007)} & \cellcolor{gray!10}{0.9720 (0.0074)} & \cellcolor{gray!10}{0.9720 (0.0074)}\\
+\hline
+Bross-based hdPS & -0.0001 (0.0013) & 0.0287 (0.0009) & 0.0008 (0.0001) & 0.0318 (0.0006) & 0.9780 (0.0066) & 0.9760 (0.0068)\\
+\hline
+\cellcolor{gray!10}{Hybrid hdPS} & \cellcolor{gray!10}{0.0016 (0.0012)} & \cellcolor{gray!10}{0.0278 (0.0009)} & \cellcolor{gray!10}{0.0008 (0.0001)} & \cellcolor{gray!10}{0.0306 (0.0007)} & \cellcolor{gray!10}{0.9820 (0.0059)} & \cellcolor{gray!10}{0.9800 (0.0063)}\\
+\hline
+Genetic Algorithm & 0.0287 (0.0012) & 0.0274 (0.0009) & 0.0016 (0.0001) & 0.0285 (0.0003) & 0.8380 (0.0165) & 0.9600 (0.0088)\\
+\hline
+\cellcolor{gray!10}{XGBoost} & \cellcolor{gray!10}{0.0074 (0.0010)} & \cellcolor{gray!10}{0.0229 (0.0007)} & \cellcolor{gray!10}{0.0006 (0.0000)} & \cellcolor{gray!10}{0.0268 (0.0002)} & \cellcolor{gray!10}{0.9740 (0.0071)} & \cellcolor{gray!10}{0.9760 (0.0068)}\\
+\hline
+Random Forest & 0.0034 (0.0012) & 0.0278 (0.0009) & 0.0008 (0.0001) & 0.0303 (0.0005) & 0.9780 (0.0066) & 0.9700 (0.0076)\\
+\hline
+\cellcolor{gray!10}{Forward Selection} & \cellcolor{gray!10}{0.0059 (0.0012)} & \cellcolor{gray!10}{0.0271 (0.0009)} & \cellcolor{gray!10}{0.0008 (0.0001)} & \cellcolor{gray!10}{0.0304 (0.0008)} & \cellcolor{gray!10}{0.9800 (0.0063)} & \cellcolor{gray!10}{0.9760 (0.0068)}\\
+\hline
+Backward Elimination & 0.0063 (0.0013) & 0.0288 (0.0009) & 0.0009 (0.0001) & 0.0309 (0.0009) & 0.9820 (0.0059) & 0.9800 (0.0063)\\
+\hline
+\cellcolor{gray!10}{LASSO} & \cellcolor{gray!10}{0.0043 (0.0013)} & \cellcolor{gray!10}{0.0299 (0.0009)} & \cellcolor{gray!10}{0.0009 (0.0001)} & \cellcolor{gray!10}{0.0319 (0.0010)} & \cellcolor{gray!10}{0.9820 (0.0059)} & \cellcolor{gray!10}{0.9780 (0.0066)}\\
+\hline
+Elasticnet & 0.0036 (0.0013) & 0.0294 (0.0009) & 0.0009 (0.0001) & 0.0319 (0.0009) & 0.9800 (0.0063) & 0.9760 (0.0068)\\
+\hline
+\end{tabular}
+\end{table}
