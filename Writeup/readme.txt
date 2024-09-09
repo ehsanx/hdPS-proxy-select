@@ -1,0 +1,1 @@
+https://www.sciencedirect.com/journal/healthcare-analytics/publish/guide-for-authors
