@@ -70,7 +70,11 @@ for (i in (b+1):a) {
   # found some id != idx
   data$idx <- data$id
 
-  stepwise_backward <- regsubsets(full.formula, data = data, method = "backward", nvmax = length(proxy.list), nbest = 10)
+  stepwise_backward <- regsubsets(full.formula, 
+                                  data = data, 
+                                  method = "backward", 
+                                  nvmax = length(covarsTfull)+1, 
+                                  nbest = 10)
   summary_stepwise <- summary(stepwise_backward)
   best_model <- which.max(summary_stepwise$adjr2)
   sel.variables <- names(summary_stepwise$which[best_model,])[summary_stepwise$which[best_model,]]
