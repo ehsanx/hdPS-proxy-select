@@ -101,8 +101,6 @@ Diabetes (outcome) =  Obese (exposure) + demographic/behaviour/health history va
 
 # SE comparison
 
-\textcolor{red}{*need to have a brief description of these figures.*}
-
 ```{r, echo=FALSE, out.width="100%", fig.cap="Standard Error Comparison for Different Methods (Overall) when outcome and exposure are frequent.", fig.align="center", fig.label="fig:se-comparison-overall"}
 knitr::include_graphics("se_comparison_plot.png")
 ```
