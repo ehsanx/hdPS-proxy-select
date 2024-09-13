@@ -100,9 +100,10 @@
 \begin{document}
 
 
-\title[High-Dimensional Propensity Score]{Understanding the role of
-different proxy selection methods in High-Dimensional Propensity Score
-Framework - A Plasmode simulation study}
+\title[High-Dimensional Propensity Score]{Is There a Competitive
+Advantage to Using Multivariate Statistical or Machine Learning Methods
+Over the Bross Formula in the hdPS Framework for Bias and Variance
+Estimation?}
 
 %%=============================================================%%
 %% Prefix	-> \pfx{Dr}
@@ -185,21 +186,78 @@ inference}
 
 \section{Background}\label{background}
 
-\textcolor{red}{*need to write what hdps is, and why alternatives are considered*}
+\textbf{High-dimensional Propensity Score (hdPS) Algorithm}: In
+epidemiology, proxy variables are commonly used as substitutes for
+confounders that are difficult or impossible to measure directly, such
+as socioeconomic status, lifestyle factors, or health behaviors
+\citep{vanderweele2019principles}. The high-dimensional propensity score
+(hdPS) is a pharmacoepidemiological method designed to reduce
+confounding bias in large healthcare databases
+\citep{schneeweiss2009high}. Unlike traditional propensity score models
+that rely on investigator-specified or manually selected covariates,
+hdPS automatically ranks a wide array of proxy variables from healthcare
+records---such as diagnosis codes, medications, and procedures---using
+the Bross formula \citep{wyss2018erratum, bross1966spurious}. The Bross
+formula ranks these variables based on their marginal associations with
+both exposure and outcome. These selected proxy variables serve as
+surrogates for unmeasured or poorly measured confounders, helping reduce
+bias in treatment effect estimates. The hdPS algorithm further refines
+the selection by prioritizing variables based on their prevalence and
+potential for confounding, defined by their association with both
+exposure and outcome \citep{schneeweiss2009high}.
 
-\textcolor{blue}{\textbf{Introduction of hdPS}: The use of medico-administrative datasets in research is frequently criticized due to the potential for the lack of key confounders. Estimating treatment effects utilizing such data sources may be subject to residual confounding. To address this issue, the high-dimensional propensity score (hdPS) algorithm was introduced in 2009. The hdPS method systematically incorporates some information that are associated with the unmeasured or mismeasured confounders as proxies, with the goal of reducing residual confounding bias.}
+\textbf{Multivariate Machine Learning Extensions}: Although the Bross
+formula performs well in certain contexts, it has limitations in
+capturing complex interactions, nonlinearities, and higher-order
+associations between variables, especially in high-dimensional settings
+where it does not account for the multivariate structure of other
+covariates \citep{karim2024high, karim2018can}. To address these
+limitations, multivariate machine learning methods such as LASSO,
+Elastic Net, and Random Forests have been applied within the hdPS
+framework. These methods are better suited for high-dimensional data,
+where they can more effectively handle complex relationships and improve
+the selection of proxy variables, thus enhancing the precision of
+treatment effect estimates
+\citep{karim2018can, schneeweiss2017variable, franklin2015regularized}.
+Simulation studies and empirical research have shown that these machine
+learning-based methods, or hybrid approaches combining the Bross formula
+with machine learning, can reduce confounding more effectively and
+increase efficiency compared to the Bross formula alone in certain
+settings
+\citep{karim2018can, schneeweiss2017variable, franklin2015regularized}.
 
-\textcolor{blue}{\textbf{Significance of alternatives}: Since the introduction of hdPS algorithm, numerous extensions, rooted in machine learning and semi-parametric techniques, have been developed in order to improve the selection of proxy variables. The study aims to compare and evaluate the hdPS methods alongside the alternative proxy selection approaches to identify the ones that provide superior confounder adjustment, reduce bias, and enhance the precision of treatment effect estimation.}
+\textbf{Assessing the Simulation Performance}: Previous studies have
+often focused on Mean Squared Error (MSE) as a primary metric for
+evaluating the performance of hdPS and its machine learning extensions
+\citep{karim2018can, franklin2015regularized}. However, in
+high-dimensional settings with singly robust methods, such as hdPS and
+machine learning approaches like LASSO, MSE may not always be the most
+reliable measure. MSE combines both bias and variance into a single
+metric, which makes interpretation challenging when variance estimation
+is unstable---a common issue in these methods. In contrast, coverage,
+which measures the proportion of confidence intervals that capture the
+true treatment effect, provides a more direct and meaningful assessment
+of a model's reliability. In realistic observational studies, where
+model misspecification is often inevitable, coverage---along with
+related metrics such as bias-eliminated coverage and relative error in
+standard error (which compares model-based SE with empirical SE)---can
+reveal whether confidence intervals or SEs are too narrow
+(underestimating uncertainty) or too wide (overestimating uncertainty).
+This insight is crucial in determining whether the model delivers valid
+estimates despite misspecification. Even a model with poor MSE but good
+coverage may still be valuable, as it produces realistic confidence
+intervals. By shifting the focus to coverage, rather than relying solely
+on MSE, we can achieve a more comprehensive understanding of method
+performance, especially in cases where unstable variance estimation
+might distort conclusions drawn from MSE alone.
 
-\textbf{Aim}: The aim of this research is to systematically evaluate and
-compare different proxy selection methods within the context of
-high-dimensional propensity score (hdPS) analysis. Specifically, the
-study focuses on assessing how these methods, including alternative
-variable selection approaches, perform in selecting proxy variables for
-confounding adjustment compared to the traditional Bross method within
-the hdPS framework. We seek to determine whether these alternative
-methods offer superior performance in estimating treatment effects
-compared to the default Bross formula.
+\textbf{Aim}: This research aims to systematically evaluate and compare
+various proxy selection methods within the hdPS framework, using a
+diverse range of simulation performance metrics, including bias, MSE,
+and coverage. The study focuses on assessing how these alternative
+statistical and machine leartning methods perform in selecting proxy
+variables for confounding adjustment, compared to the traditional Bross
+formula.
 
 \section{Methods}\label{methods}
 
