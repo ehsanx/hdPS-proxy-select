@@ -1,0 +1,13 @@
+name: hdPS-Alternatives
+title: hdPS-Alternatives
+username: ehsanx
+account: ehsanx
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12712737
+bundleId: 9101821
+url: https://ehsanx.shinyapps.io/hdPS-Alternatives/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: hdPS Feature Selection Methods & Results.docx|hdPS Feature Selection Methods & Results.pdf|performance.html|performance.Rmd|performanceER.html|performanceER.Rmd|performanceOR.html|performanceOR.Rmd|backupApps|images

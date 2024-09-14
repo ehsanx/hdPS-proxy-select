@@ -1,6 +1,6 @@
 ---
 title: Supplementary Content
-subtitle: Understanding the role of different proxy selection methods in High-Dimensional Propensity Score Framework - A Plasmode simulation study
+subtitle: Is There a Competitive Advantage to Using Multivariate Statistical or Machine Learning Methods Over the Bross Formula in the hdPS Framework for Bias and Variance Estimation?
 output:
   pdf_document:
     citation_package: natbib
@@ -95,11 +95,11 @@ geometry: margin=.8in
 
 Simple count (1 variable) = sum of selected ICD-10 CM codes (converted to recurrence covariates) who had less than 0.8 or greater than 1.2 compared to the outcome = $\sum_{s=1}^{94} R_s$
 
-# True outcome model for Plasmode Simulation Data Generation
+# True Outcome Model for Plasmode Simulation Data Generation
 
 Diabetes (outcome) =  Obese (exposure) + demographic/behaviour/health history variables + transformed lab variables + simple count with selected ICD-10 codes
 
-# SE comparison
+# Standard Error comparison
 
 ```{r, echo=FALSE, out.width="100%", fig.cap="Standard Error Comparison for Different Methods (Overall) when outcome and exposure are frequent.", fig.align="center", fig.label="fig:se-comparison-overall"}
 knitr::include_graphics("se_comparison_plot.png")

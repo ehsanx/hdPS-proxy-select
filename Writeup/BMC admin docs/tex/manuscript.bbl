@@ -1,0 +1,160 @@
+\begin{thebibliography}{10}
+\providecommand{\doi}[1]{\url{https://doi.org/#1}}
+\bibcommenthead
+
+\bibitem[\protect\citeauthoryear{VanderWeele}{2019}]{vanderweele2019principles}
+VanderWeele TJ.
+\newblock Principles of confounder selection.
+\newblock European journal of epidemiology. 2019;34:211--219.
+
+\bibitem[\protect\citeauthoryear{Schneeweiss et~al.}{2009}]{schneeweiss2009high}
+Schneeweiss S, Rassen JA, Glynn RJ, Avorn J, Mogun H, Brookhart MA.
+\newblock High-dimensional propensity score adjustment in studies of treatment effects using health care claims data.
+\newblock Epidemiology (Cambridge, Mass). 2009;20(4):512.
+
+\bibitem[\protect\citeauthoryear{Wyss et~al.}{2018}]{wyss2018erratum}
+Wyss R, Fireman B, Rassen JA, Schneeweiss S.
+\newblock Erratum: high-dimensional propensity score adjustment in studies of treatment effects using health care claims data.
+\newblock Epidemiology. 2018;29(6):e63--e64.
+
+\bibitem[\protect\citeauthoryear{Bross}{1966}]{bross1966spurious}
+Bross ID.
+\newblock Spurious effects from an extraneous variable.
+\newblock Journal of chronic diseases. 1966;19(6):637--647.
+
+\bibitem[\protect\citeauthoryear{Karim}{2024}]{karim2024high}
+Karim ME.
+\newblock High-dimensional propensity score and its machine learning extensions in residual confounding control.
+\newblock The American Statistician. 2024;(1):1--38.
+
+\bibitem[\protect\citeauthoryear{Karim et~al.}{2018}]{karim2018can}
+Karim ME, Pang M, Platt RW.
+\newblock Can we train machine learning methods to outperform the high-dimensional propensity score algorithm?
+\newblock Epidemiology. 2018;29(2):191--198.
+
+\bibitem[\protect\citeauthoryear{Schneeweiss et~al.}{2017}]{schneeweiss2017variable}
+Schneeweiss S, Eddings W, Glynn RJ, Patorno E, Rassen J, Franklin JM.
+\newblock Variable selection for confounding adjustment in high-dimensional covariate spaces when analyzing healthcare databases.
+\newblock Epidemiology. 2017;28(2):237--248.
+
+\bibitem[\protect\citeauthoryear{Franklin et~al.}{2015}]{franklin2015regularized}
+Franklin JM, Eddings W, Glynn RJ, Schneeweiss S.
+\newblock Regularized regression versus the high-dimensional propensity score for confounding adjustment in secondary database analyses.
+\newblock American journal of epidemiology. 2015;182(7):651--659.
+
+\bibitem[\protect\citeauthoryear{Pang et~al.}{2016}]{pang2016effect}
+Pang M, Schuster T, Filion KB, Schnitzer ME, Eberg M, Platt RW.
+\newblock Effect estimation in point-exposure studies with binary outcomes and high-dimensional covariate data--a comparison of targeted maximum likelihood estimation and inverse probability of treatment weighting.
+\newblock The international journal of biostatistics. 2016;12(2).
+
+\bibitem[\protect\citeauthoryear{Wyss et~al.}{2018}]{wyss2018using}
+Wyss R, Schneeweiss S, Van Der~Laan M, Lendle SD, Ju C, Franklin JM.
+\newblock Using super learner prediction modeling to improve high-dimensional propensity score estimation.
+\newblock Epidemiology. 2018;29(1):96--106.
+
+\bibitem[\protect\citeauthoryear{Simon and Vadel}{2023}]{simon2023evaluating}
+Simon V, Vadel J.
+\newblock Evaluating the Performance of High-Dimensional Propensity Scores Compared with Standard Propensity Scores for Comparing Antihypertensive Therapies in the CPRD GOLD Database.
+\newblock Cardiology and Therapy. 2023;12(2):393--408.
+
+\bibitem[\protect\citeauthoryear{Saydah et~al.}{2014}]{saydah2014trends}
+Saydah S, Bullard KM, Cheng Y, Ali MK, Gregg EW, Geiss L, et~al.
+\newblock Trends in cardiovascular disease risk factors by obesity level in adults in the United States, NHANES 1999-2010.
+\newblock Obesity. 2014;22(8):1888--1895.
+
+\bibitem[\protect\citeauthoryear{Liu et~al.}{2013}]{liu2013association}
+Liu J, Hay J, Faught BE, et~al.
+\newblock The association of sleep disorder, obesity status, and diabetes mellitus among US adults—The NHANES 2009-2010 survey results.
+\newblock International journal of endocrinology. 2013;2013.
+
+\bibitem[\protect\citeauthoryear{Kabadi et~al.}{2012}]{kabadi2012joint}
+Kabadi SM, Lee BK, Liu L.
+\newblock Joint effects of obesity and vitamin D insufficiency on insulin resistance and type 2 diabetes: results from the NHANES 2001--2006.
+\newblock Diabetes care. 2012;35(10):2048--2054.
+
+\bibitem[\protect\citeauthoryear{Ostchega et~al.}{2012}]{ostchega2012abdominal}
+Ostchega Y, Hughes JP, Terry A, Fakhouri TH, Miller I.
+\newblock Abdominal obesity, body mass index, and hypertension in US adults: NHANES 2007--2010.
+\newblock American journal of hypertension. 2012;25(12):1271--1278.
+
+\bibitem[\protect\citeauthoryear{Greenland et~al.}{1999}]{greenland1999causal}
+Greenland S, Pearl J, Robins JM.
+\newblock Causal diagrams for epidemiologic research.
+\newblock Epidemiology. 1999;p. 37--48.
+
+\bibitem[\protect\citeauthoryear{Franklin et~al.}{2014}]{franklin2014plasmode}
+Franklin JM, Schneeweiss S, Polinski JM, Rassen JA.
+\newblock Plasmode simulation for the evaluation of pharmacoepidemiologic methods in complex healthcare databases.
+\newblock Computational statistics and data analysis. 2014;72:219--226.
+
+\bibitem[\protect\citeauthoryear{Morris et~al.}{2019}]{morris2019using}
+Morris TP, White IR, Crowther MJ.
+\newblock Using simulation studies to evaluate statistical methods.
+\newblock Statistics in medicine. 2019;38(11):2074--2102.
+
+\bibitem[\protect\citeauthoryear{White et~al.}{2023}]{white2023check}
+White IR, Pham TM, Quartagno M, Morris TP.
+\newblock How to check a simulation study.
+\newblock International Journal of Epidemiology. 2023;p. dyad134.
+
+\bibitem[\protect\citeauthoryear{Breiman}{2001}]{breiman2001random}
+Breiman L.
+\newblock Random forests.
+\newblock Machine learning. 2001;45:5--32.
+
+\bibitem[\protect\citeauthoryear{Chen and Guestrin}{2016}]{chen2016xgboost}
+Chen T, Guestrin C.
+\newblock Xgboost: A scalable tree boosting system.
+\newblock In: Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining; 2016. p. 785--794.
+
+\bibitem[\protect\citeauthoryear{Xiao et~al.}{2024}]{xiao2024interpretable}
+Xiao Y, Chen Y, Huang R, Jiang F, Zhou J, Yang T.
+\newblock Interpretable machine learning in predicting drug-induced liver injury among tuberculosis patients: model development and validation study.
+\newblock BMC Medical Research Methodology. 2024;24(1):92.
+
+\bibitem[\protect\citeauthoryear{Holland}{1975}]{holland1975adaptation}
+Holland JH.
+\newblock Adaptation in Natural and Artificial Systems.
+\newblock University of Michigan Press; 1975.
+
+\bibitem[\protect\citeauthoryear{Pang et~al.}{2016}]{pang2016targeted}
+Pang M, Schuster T, Filion KB, Eberg M, Platt RW.
+\newblock Targeted maximum likelihood estimation for pharmacoepidemiologic research.
+\newblock Epidemiology (Cambridge, Mass). 2016;27(4):570.
+
+\bibitem[\protect\citeauthoryear{Benasseur et~al.}{2022}]{benasseur2022comparison}
+Benasseur I, Talbot D, Durand M, Holbrook A, Matteau A, Potter BJ, et~al.
+\newblock A comparison of confounder selection and adjustment methods for estimating causal effects using large healthcare databases.
+\newblock Pharmacoepidemiology and Drug Safety. 2022;31(4):424--433.
+
+\bibitem[\protect\citeauthoryear{Guertin et~al.}{2016}]{guertin2016head}
+Guertin JR, Rahme E, Dormuth CR, LeLorier J.
+\newblock Head to head comparison of the propensity score and the high-dimensional propensity score matching methods.
+\newblock BMC medical research methodology. 2016;16:1--10.
+
+\bibitem[\protect\citeauthoryear{Ju et~al.}{2019}]{ju2019propensity}
+Ju C, Combs M, Lendle SD, Franklin JM, Wyss R, Schneeweiss S, et~al.
+\newblock Propensity score prediction for electronic healthcare databases using super learner and high-dimensional propensity score methods.
+\newblock Journal of Applied Statistics. 2019;46(12):2216--2236.
+
+\bibitem[\protect\citeauthoryear{Karim}{2024}]{karim2024can}
+Karim ME.
+\newblock Can supervised deep learning architecture outperform autoencoders in building propensity score models for matching?
+\newblock BMC Medical Research Methodology. 2024;24(1):167.
+
+\bibitem[\protect\citeauthoryear{Hossain et~al.}{2023}]{hossain2023role}
+Hossain MB, Johnston JC, Cook VJ, Sadatsafavi M, Wong H, Romanowski K, et~al.
+\newblock Role of latent tuberculosis infection on elevated risk of cardiovascular disease: a population-based cohort study of immigrants in British Columbia, Canada, 1985--2019.
+\newblock Epidemiology \& Infection. 2023;151:e68.
+
+\bibitem[\protect\citeauthoryear{Basham et~al.}{2021}]{basham2021post}
+Basham CA, Karim ME, Cook VJ, Patrick DM, Johnston JC.
+\newblock Post-tuberculosis airway disease: a population-based cohort study of people immigrating to British Columbia, Canada, 1985--2015.
+\newblock EClinicalMedicine. 2021;33.
+
+\bibitem[\protect\citeauthoryear{Neugebauer et~al.}{2015}]{neugebauer2015high}
+Neugebauer R, Schmittdiel JA, Zhu Z, Rassen JA, Seeger JD, Schneeweiss S.
+\newblock High-dimensional propensity score algorithm in comparative effectiveness research with time-varying interventions.
+\newblock Statistics in medicine. 2015;34(5):753--781.
+
+\end{thebibliography}
