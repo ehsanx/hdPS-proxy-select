@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.10)  14 SEP 2024 10:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.10)  20 SEP 2024 07:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -643,55 +643,55 @@ Package hyperref Info: Link coloring ON on input line 100.
 \c@lstlisting=\count364
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Calculating math sizes for size <12.045> on input line 188.
+LaTeX Font Info:    Calculating math sizes for size <12.045> on input line 187.
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <8.43146> not available
-(Font)              size <8> substituted on input line 188.
+(Font)              size <8> substituted on input line 187.
 
 
 LaTeX Font Warning: Font shape `OML/cmm/b/it' in size <8.43146> not available
-(Font)              size <8> substituted on input line 188.
+(Font)              size <8> substituted on input line 187.
 
 
 LaTeX Font Warning: Font shape `OMS/cmsy/b/n' in size <8.43146> not available
-(Font)              size <8> substituted on input line 188.
+(Font)              size <8> substituted on input line 187.
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 188.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 187.
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 188.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 187.
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Trying to load font information for U+rsfs on input line 188.
+LaTeX Font Info:    Trying to load font information for U+rsfs on input line 187.
 (c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/jknapltx/ursfs.fd
 File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
 )
 
 LaTeX Font Warning: Font shape `U/rsfs/m/n' in size <8.43146> not available
-(Font)              size <8> substituted on input line 188.
+(Font)              size <8> substituted on input line 187.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <8.43146> not available
-(Font)              size <8> substituted on input line 188.
+(Font)              size <8> substituted on input line 187.
 
-LaTeX Font Info:    Calculating math sizes for size <11.04124> on input line 188.
+LaTeX Font Info:    Calculating math sizes for size <11.04124> on input line 187.
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <5.52061> not available
-(Font)              size <6> substituted on input line 188.
+(Font)              size <6> substituted on input line 187.
 
 
 LaTeX Font Warning: Font shape `OML/cmm/b/it' in size <5.52061> not available
-(Font)              size <6> substituted on input line 188.
+(Font)              size <6> substituted on input line 187.
 
 
 LaTeX Font Warning: Font shape `OMS/cmsy/b/n' in size <5.52061> not available
-(Font)              size <6> substituted on input line 188.
+(Font)              size <6> substituted on input line 187.
 
 
 LaTeX Font Warning: Font shape `U/rsfs/m/n' in size <5.52061> not available
-(Font)              size <6> substituted on input line 188.
+(Font)              size <6> substituted on input line 187.
 
 
 
@@ -701,7 +701,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 [1{c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 ]
-LaTeX Font Info:    Calculating math sizes for size <10.03749> on input line 188.
+LaTeX Font Info:    Calculating math sizes for size <10.03749> on input line 187.
 
 
 
@@ -713,22 +713,22 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [3]
-LaTeX Font Info:    Calculating math sizes for size <8.03> on input line 305.
+LaTeX Font Info:    Calculating math sizes for size <8.03> on input line 304.
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <4.015> not available
-(Font)              size <5> substituted on input line 305.
+(Font)              size <5> substituted on input line 304.
 
 
 LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <4.015> not available
-(Font)              size <5> substituted on input line 305.
+(Font)              size <5> substituted on input line 304.
 
 
 LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <4.015> not available
-(Font)              size <5> substituted on input line 305.
+(Font)              size <5> substituted on input line 304.
 
 
 LaTeX Font Warning: Font shape `U/rsfs/m/n' in size <4.015> not available
-(Font)              size <5> substituted on input line 305.
+(Font)              size <5> substituted on input line 304.
 
 
 
@@ -741,10 +741,10 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [5]
-<figures/metric_comparison_Bias.pdf, id=188, 578.16pt x 433.62pt>
+<figures/metric_comparison_Bias.pdf, id=192, 578.16pt x 433.62pt>
 File: figures/metric_comparison_Bias.pdf Graphic file (type pdf)
 <use figures/metric_comparison_Bias.pdf>
-Package pdftex.def Info: figures/metric_comparison_Bias.pdf  used on input line 460.
+Package pdftex.def Info: figures/metric_comparison_Bias.pdf  used on input line 459.
 (pdftex.def)             Requested size: 435.89626pt x 326.92125pt.
 
 
@@ -752,10 +752,10 @@ Package pdftex.def Info: figures/metric_comparison_Bias.pdf  used on input line 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [6]
-<figures/metric_comparison_Coverage.pdf, id=207, 578.16pt x 433.62pt>
+<figures/metric_comparison_Coverage.pdf, id=211, 578.16pt x 433.62pt>
 File: figures/metric_comparison_Coverage.pdf Graphic file (type pdf)
 <use figures/metric_comparison_Coverage.pdf>
-Package pdftex.def Info: figures/metric_comparison_Coverage.pdf  used on input line 469.
+Package pdftex.def Info: figures/metric_comparison_Coverage.pdf  used on input line 468.
 (pdftex.def)             Requested size: 435.89626pt x 326.92125pt.
 
 
@@ -778,10 +778,10 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [10]
-<manuscript_files/figure-latex/unnamed-chunk-3-1.pdf, id=252, 578.16pt x 433.62pt>
+<manuscript_files/figure-latex/unnamed-chunk-3-1.pdf, id=256, 578.16pt x 433.62pt>
 File: manuscript_files/figure-latex/unnamed-chunk-3-1.pdf Graphic file (type pdf)
 <use manuscript_files/figure-latex/unnamed-chunk-3-1.pdf>
-Package pdftex.def Info: manuscript_files/figure-latex/unnamed-chunk-3-1.pdf  used on input line 642.
+Package pdftex.def Info: manuscript_files/figure-latex/unnamed-chunk-3-1.pdf  used on input line 641.
 (pdftex.def)             Requested size: 435.89626pt x 326.92125pt.
 
 
@@ -789,14 +789,14 @@ Package pdftex.def Info: manuscript_files/figure-latex/unnamed-chunk-3-1.pdf  us
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [11 <./manuscript_files/figure-latex/unnamed-chunk-3-1.pdf>]
-Overfull \hbox (2.84349pt too wide) in paragraph at lines 662--682
+Overfull \hbox (2.84349pt too wide) in paragraph at lines 661--681
  [] 
  []
 
-<manuscript_files/figure-latex/unnamed-chunk-4-1.pdf, id=268, 578.16pt x 433.62pt>
+<manuscript_files/figure-latex/unnamed-chunk-4-1.pdf, id=272, 578.16pt x 433.62pt>
 File: manuscript_files/figure-latex/unnamed-chunk-4-1.pdf Graphic file (type pdf)
 <use manuscript_files/figure-latex/unnamed-chunk-4-1.pdf>
-Package pdftex.def Info: manuscript_files/figure-latex/unnamed-chunk-4-1.pdf  used on input line 735.
+Package pdftex.def Info: manuscript_files/figure-latex/unnamed-chunk-4-1.pdf  used on input line 734.
 (pdftex.def)             Requested size: 435.89626pt x 326.92125pt.
 
 
@@ -828,12 +828,12 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[17] (./manuscript.bbl
+[17]
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[18]
+[18] (./manuscript.bbl
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -858,24 +858,27 @@ LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.985pt have occurred.
 
 Package rerunfilecheck Info: File `manuscript.out' has not changed.
-(rerunfilecheck)             Checksum: E3E4761E6C5859E7A4EDB4F787338967;3318.
+(rerunfilecheck)             Checksum: 34E8491E72FD2367918C1D62648F3203;3485.
  ) 
 Here is how much of TeX's memory you used:
- 19114 strings out of 475496
- 351366 string characters out of 5774555
- 824816 words of memory out of 5000000
- 41383 multiletter control sequences out of 15000+600000
+ 19117 strings out of 475496
+ 351413 string characters out of 5774555
+ 824865 words of memory out of 5000000
+ 41385 multiletter control sequences out of 15000+600000
  575208 words of font info for 106 fonts, out of 8000000 for 9000
  46 hyphenation exceptions out of 8191
- 90i,10n,93p,547b,1092s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,10n,93p,547b,1088s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 pdfTeX warning (dest): name{cite.neugebauer2015high} has been referenced but does not exist, replaced by a fixed one
 
+
+pdfTeX warning (dest): name{cite.basham2021post} has been referenced but does not exist, replaced by a fixed one
+
  <c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1000.600pk><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb><c:/Users/wilds/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on manuscript.pdf (21 pages, 255197 bytes).
+Output written on manuscript.pdf (21 pages, 254807 bytes).
 PDF statistics:
- 431 PDF objects out of 1000 (max. 8388607)
- 374 compressed objects within 4 object streams
- 112 named destinations out of 1000 (max. 500000)
- 197 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 435 PDF objects out of 1000 (max. 8388607)
+ 378 compressed objects within 4 object streams
+ 113 named destinations out of 1000 (max. 500000)
+ 205 words of extra memory for PDF output out of 10000 (max. 10000000)
 

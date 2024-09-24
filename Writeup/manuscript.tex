@@ -158,24 +158,23 @@ However, it exhibited higher bias, particularly in rare exposure
 scenarios, suggesting it is less suited when minimizing bias is
 critical. In contrast, GA showed significant limitations, with
 consistently high bias and MSE, making it the least reliable method.
-Kitchen sink, Bross-based hdPS, and Hybrid hdPS methods provided a
-balanced approach, with low bias and moderate MSE, though coverage
-varied depending on the scenario. Rare outcome scenarios generally
-resulted in lower MSE and better precision, while rare exposure
-scenarios were associated with higher bias and MSE. Notably, traditional
-statistical approaches such as forward selection and backward
-elimination performed comparably to more sophisticated machine learning
-methods in terms of bias and coverage, suggesting that these simpler
-approaches may be viable alternatives due to their computational
-efficiency. \textbf{Conclusion:} The results highlight the importance of
-selecting hdPS methods based on the specific characteristics of the
-data, such as exposure and outcome prevalence. While advanced machine
-learning methods such as XGBoost can enhance precision, simpler methods
-such as forward selection or backward elimination may offer similar
-performance in terms of bias and coverage with fewer computational
-demands. Tailoring the choice of method to the epidemiological scenario
-is essential for optimizing the balance between bias reduction and
-precision.}
+Bross-based hdPS, and Hybrid hdPS methods provided a balanced approach,
+with low bias and moderate MSE, though coverage varied depending on the
+scenario. Rare outcome scenarios generally resulted in lower MSE and
+better precision, while rare exposure scenarios were associated with
+higher bias and MSE. Notably, traditional statistical approaches such as
+forward selection and backward elimination performed comparably to more
+sophisticated machine learning methods in terms of bias and coverage,
+suggesting that these simpler approaches may be viable alternatives due
+to their computational efficiency. \textbf{Conclusion:} The results
+highlight the importance of selecting hdPS methods based on the specific
+characteristics of the data, such as exposure and outcome prevalence.
+While advanced machine learning methods such as XGBoost can enhance
+precision, simpler methods such as forward selection or backward
+elimination may offer similar performance in terms of bias and coverage
+with fewer computational demands. Tailoring the choice of method to the
+epidemiological scenario is essential for optimizing the balance between
+bias reduction and precision.}
 
 \keywords{Machine learning, Propensity score, Deep learning, Causal
 inference}
@@ -980,6 +979,11 @@ are available in the NHANES repository:
 \url{https://www.cdc.gov/nchs/nhanes/index.htm}. Additionally, all
 simulation results can be interactively reviewed through a Shiny web
 application at \url{https://ehsanx.shinyapps.io/hdPS-Alternatives/}.
+
+\subsection*{Clinical trial number}\label{clinical-trial-number}
+\addcontentsline{toc}{subsection}{Clinical trial number}
+
+Not applicable.
 
 \subsection*{Competing interests}\label{competing-interests}
 \addcontentsline{toc}{subsection}{Competing interests}

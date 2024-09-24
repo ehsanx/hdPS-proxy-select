@@ -460,6 +460,10 @@ The National Health and Nutrition Examination Survey (NHANES), conducted by the 
 
 NHANES data is publicly accessible and can be retrieved from the NHANES website. The datasets generated and/or analyzed during the current study are available in the NHANES repository: https://www.cdc.gov/nchs/nhanes/index.htm. Additionally, all simulation results can be interactively reviewed through a Shiny web application at https://ehsanx.shinyapps.io/hdPS-Alternatives/.
 
+## Clinical trial number {-} 
+
+Not applicable.
+
 ## Competing interests {-}
 
 MEK is currently supported by grants from Canadian Institutes of Health Research and MS Canada. MEK has previously received consulting fees from Biogen Inc. for consulting unrelated to this current work. MEK was also previously supported by the Michael Smith Foundation for Health Research Scholar award. 
