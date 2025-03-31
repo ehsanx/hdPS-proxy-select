@@ -340,27 +340,33 @@ algorithm further refines the selection by prioritizing variables based
 on their prevalence and potential for confounding, defined by their
 association with both exposure and outcome {[}2{]}.
 
+\textcolor{red}{Importantly, hdPS has become a foundational method in modern epidemiologic research that uses healthcare databases, offering a scalable and reproducible approach to confounding control when traditional investigator-specified propensity score models are limited by unmeasured, mismeasured, or omitted variables. Unlike conventional PS methods that rely solely on expert knowledge and a fixed set of covariates, hdPS empirically identifies and prioritizes proxy variables from high-dimensional data, allowing it to adjust for latent confounding structures more effectively. This makes hdPS particularly valuable for improving causal inference in observational healthcare studies, including those evaluating drug safety, treatment effectiveness, and health system interventions}
+{[}5,6{]}.
+
 \textbf{Multivariate Machine Learning Extensions}: Although the Bross
 formula performs well in certain contexts, it has limitations in
 capturing complex interactions, nonlinearities, and higher-order
 associations between variables, especially in high-dimensional settings
 where it does not account for the multivariate structure of other
-covariates {[}5,6{]}. To address these model-specification-related
+covariates {[}5,7{]}. To address these model-specification-related
 limitations, multivariate machine learning methods such as LASSO,
 Elastic Net, and Random Forests have been applied within the hdPS
 framework. These methods are better suited for high-dimensional data,
 where they can more effectively handle complex relationships and improve
 the selection of proxy variables, thus enhancing the precision of
-treatment effect estimates {[}6--8{]}. Simulation studies and empirical
-research have shown that these machine learning-based methods, or hybrid
-approaches combining the Bross formula with machine learning, can reduce
-confounding more effectively and increase efficiency compared to the
-Bross formula alone in certain settings {[}6--8{]}.
+treatment effect estimates {[}7--9{]}.
+\textcolor{red}{Several studies have proposed hybrid approaches that combine machine learning and hdPS to enhance variable selection and bias reduction while maintaining interpretability}
+{[}6,7,9{]}. Simulation studies and empirical research have shown that
+these machine learning-based methods, or hybrid approaches combining the
+Bross formula with machine learning, can reduce confounding more
+effectively and increase efficiency compared to the Bross formula alone
+in certain settings {[}7--9{]}.
+\textcolor{red}{These efforts reflect a growing interest in refining hdPS with modern statistical learning tools to optimize proxy confounder adjustment in realistic, data-rich settings.}
 
 \textbf{Assessing the Simulation Performance}: Other than bias, previous
 studies have primarily focused on Mean Squared Error (MSE) as a key
 metric for evaluating the performance of hdPS and its machine learning
-extensions {[}6,8--11{]}. However, in high-dimensional settings with
+extensions {[}7,9--12{]}. However, in high-dimensional settings with
 singly robust methods, such as hdPS and machine learning approaches such
 as LASSO, MSE may not always be the most reliable measure. MSE combines
 both bias and variance into a single metric, which makes interpretation
@@ -381,6 +387,7 @@ the focus to coverage, rather than relying solely on MSE, we can achieve
 a more comprehensive understanding of method performance, especially in
 cases where unstable variance estimation might distort conclusions drawn
 from MSE alone.
+\textcolor{red}{To extend prior research, our study systematically compares multiple machine learning and hybrid hdPS approaches using plasmode simulations grounded in real-world data structure. Importantly, we expand beyond commonly reported metrics such as bias and MSE by incorporating underutilized diagnostics—namely, empirical coverage and relative error in standard error—to provide a more nuanced understanding of estimator performance.}
 
 \textbf{Aim}: This research aims to systematically evaluate and compare
 various proxy selection methods within the hdPS framework for inverse
@@ -400,8 +407,8 @@ obesity and the risk of diabetes using data from three cycles of the
 National Health and Nutrition Examination Survey (NHANES) covering the
 years 2013-2014, 2015-2016, and 2017-2018 {[}5{]}. To identify relevant
 investigator-specified covariates, we constructed a causal diagram based
-on literature {[}12--15{]} and established causal inference principles
-{[}16{]}. The covariates included in our analysis were carefully
+on literature {[}13--16{]} and established causal inference principles
+{[}17{]}. The covariates included in our analysis were carefully
 selected and categorized into demographic, behavioral, health history,
 access-related, and laboratory variables. While most of these variables
 were binary or categorical, the Laboratory variables were continuous.
@@ -414,7 +421,7 @@ publicly available, ensuring that individual privacy is protected.
 \textbf{Plasmode simulation}: To rigorously assess the performance of
 the methods under consideration, we employed a plasmode simulation
 framework, which is particularly well-suited for reflecting real-world
-data structures and complexities {[}17{]}. This approach was inspired by
+data structures and complexities {[}18{]}. This approach was inspired by
 the analytic dataset derived from NHANES and involved resampling from
 the observed covariates and exposure information (i.e., obesity) without
 altering them. By mirroring key aspects of an actual epidemiological
@@ -495,7 +502,7 @@ details):
 \end{enumerate}
 
 Out of 142 proxy covariates, 94 met this criterion and were summed in
-calculating a simple comorbidity burden measure {[}18{]}. This score
+calculating a simple comorbidity burden measure {[}19{]}. This score
 represents the individual's overall comorbidity burden, reflecting the
 cumulative presence of conditions. The remaining 48 covariates were
 excluded from this calculation and considered noise. This comorbidity
@@ -509,7 +516,7 @@ estimated SEs obtained from a model over repeated samples), (3)
 empirical SE (the standard deviation of estimated treatment effects
 across repeated samples), (4) MSE, (5) coverage probability of 95\%
 confidence intervals, (6) bias-corrected coverage, and (7) Zip plot
-{[}19,20{]}.
+{[}20,21{]}.
 
 \subsection*{Inverse probability weighted estimators under
 consideration}\label{inverse-probability-weighted-estimators-under-consideration}
@@ -540,7 +547,7 @@ had been exposed to either treatment condition.
   \textbf{Kitchen sink model}: This is a base model for comparison,
   where no variable selection approaches were used. All
   investigator-selected features and all proxy variables were used to
-  model {[}6{]}.
+  model {[}7{]}.
 \item
   \textbf{hdPS using Bross formula}: The Bross formula is a statistical
   method used to calculate the bias introduced by not adjusting for a
@@ -555,31 +562,31 @@ had been exposed to either treatment condition.
   variables by adding a penalty term to the regression model.
   Cross-validation (CV) is used in LASSO to identify variables with
   non-zero coefficients in the best model by optimizing the penalty
-  value {[}6--8{]}.
+  value {[}7--9{]}.
 \item
   \textbf{Hybrid of hdPS and LASSO}: Instead of relying solely on LASSO
   for variable selection, a hybrid approach combines the Bross formula
   and LASSO. First, proxy variables are selected using the hdPS
   algorithm (e.g., the top 100), and then LASSO is applied to further
-  refine the selection {[}6,8{]}.
+  refine the selection {[}7,9{]}.
 \item
   \textbf{Elastic Net}: Elastic Net is an extension of LASSO that
   includes an additional penalty term to handle multicollinearity by
   grouping correlated features and selecting the most representative
-  ones {[}6{]}.
+  ones {[}7{]}.
 \item
   \textbf{Random Forest}: The Random Forest algorithm is an ensemble
   learning method that constructs multiple decision trees to perform
-  classification {[}21{]}. It calculates the importance of each proxy
+  classification {[}22{]}. It calculates the importance of each proxy
   variable based on the decrease in impurity or Gini importance,
   providing a ranking of the proxies. The top 100 variables from this
-  ranking are manually selected for further modeling {[}7{]}.
+  ranking are manually selected for further modeling {[}8{]}.
 \item
   \textbf{XGBoost}: XGBoost is a gradient boosting algorithm used to
-  optimize machine learning models {[}22{]}. It builds decision trees
+  optimize machine learning models {[}23{]}. It builds decision trees
   that make splits based on maximum impurity reduction, and it assigns
   an importance score to each proxy variable by calculating the mean
-  decrease in impurity {[}23{]}.
+  decrease in impurity {[}24{]}.
 \item
   \textbf{Stepwise}: Stepwise selection is a progressive feature
   selection method that can proceed in two directions---forward or
@@ -592,7 +599,7 @@ had been exposed to either treatment condition.
   contribution to the model.
 \item
   \textbf{Genetic algorithm}: Genetic algorithm is an evolutionary
-  algorithm inspired by the theory of natural selection {[}24{]}. It
+  algorithm inspired by the theory of natural selection {[}25{]}. It
   operates by evolving offspring from a population of the fittest
   individuals over several generations, evaluating and selecting the
   best combination of features or variables that maximize prediction
@@ -941,17 +948,17 @@ precision for most methods.
 literature}\label{contextualizing-the-literature}
 
 Previous studies have shown that LASSO performs well within the hdPS
-framework, particularly in terms of bias reduction and MSE {[}6,8{]},
-with similar results for Elastic Net {[}6{]}. Our findings largely
+framework, particularly in terms of bias reduction and MSE {[}7,9{]},
+with similar results for Elastic Net {[}7{]}. Our findings largely
 support these conclusions, as both methods demonstrated moderate bias
 and MSE across the scenarios. However, their performance was
 inconsistent in some cases, with higher bias observed in rare exposure
-scenarios, as noted in previous studies {[}6,8{]}. MSE also increased in
+scenarios, as noted in previous studies {[}7,9{]}. MSE also increased in
 rare exposure scenarios. The Hybrid hdPS method, combining Bross-based
 hdPS and LASSO, showed promising results, especially in terms of MSE,
 suggesting it may serve as a suitable alternative to traditional hdPS
 methods. Random Forest also performed similarly in our study, yielding
-relatively low bias, which is consistent with previous findings {[}6{]}.
+relatively low bias, which is consistent with previous findings {[}7{]}.
 However, none of the earlier works emphasized coverage or examined
 methods such as GA, XGBoost, forward selection, or backward elimination,
 which were evaluated here.
@@ -973,7 +980,7 @@ had relatively fast computing times, with RF being significantly slower.
 \subsection{Strengths}\label{strengths}
 
 Previous studies on singly robust methods have mainly focused on hdPS
-performance using MSE as the primary evaluation metric {[}6,8--11{]}.
+performance using MSE as the primary evaluation metric {[}7,9--12{]}.
 Our study extends this body of work by incorporating a broader range of
 performance metrics, allowing researchers to compare results in terms of
 both bias and variance estimation. This comprehensive comparison of
@@ -987,7 +994,7 @@ sophisticated methods such as LASSO and Random Forest across scenarios,
 both in terms of bias and coverage.
 
 Our study also employed a complex plasmode simulation framework, closely
-replicating real-world data conditions {[}17{]}. This framework not only
+replicating real-world data conditions {[}18{]}. This framework not only
 accounted for model misspecification, where the true relationships
 between covariates and outcomes were unknown, but also introduced noise
 variables, addressing the challenge of dealing with irrelevant
@@ -1000,20 +1007,20 @@ strengthening the real-world relevance of our findings.
 \subsection{Future Direction}\label{future-direction}
 
 Double robust methods have demonstrated strong potential for achieving
-optimal statistical performance in hdPS analyses {[}9,25,26{]}. In
+optimal statistical performance in hdPS analyses {[}10,26,27{]}. In
 addition, single robust methods, such as ensemble learners such as super
 learners, have shown promise in improving bias, MSE, area under the
-curve (AUC), and covariate balance in other contexts {[}10,27,28{]}.
+curve (AUC), and covariate balance in other contexts {[}11,28,29{]}.
 Deep learning methods, particularly supervised architectures, offer
 significant potential for improving propensity score estimation in
 high-dimensional settings by capturing complex, non-linear relationships
 and performing well in scenarios with rare exposures, while maintaining
 comparable bias and superior variance estimation compared to traditional
-methods {[}29{]}. Despite their theoretical advantages, the complexity
+methods {[}30{]}. Despite their theoretical advantages, the complexity
 and computational demands of these methods, especially in
 high-dimensional settings, have limited their adoption by practitioners.
 On the other hand, the simpler singly robust machine learning methods
-evaluated here have been applied in clinical research {[}30,31{]}.
+evaluated here have been applied in clinical research {[}31,32{]}.
 
 Future research should explore the application of double robust methods
 and super learners in hdPS analyses, particularly for handling rare
@@ -1024,7 +1031,7 @@ optimize their performance in hdPS analysis. Finally, future simulation
 studies should focus on evaluating coverage and other metrics in
 epidemiological scenarios such as time-varying exposures, which would
 provide valuable insights into the generalizability of our findings
-{[}32{]}.
+{[}33{]}.
 
 \subsection{Conclusion}\label{conclusion}
 
@@ -1202,28 +1209,36 @@ Journal of chronic diseases. 1966;19: 637--647. }
 machine learning extensions in residual confounding control. The
 American Statistician. 2024; 1--38. }
 
-\bibitem[\citeproctext]{ref-karim2018can}
+\bibitem[\citeproctext]{ref-wyss2022machine}
 \CSLLeftMargin{6. }%
+\CSLRightInline{Wyss R, Yanover C, El-Hay T, Bennett D, Platt RW, Zullo
+AR, et al. Machine learning for improving high-dimensional proxy
+confounder adjustment in healthcare database studies: An overview of the
+current literature. Pharmacoepidemiology and Drug Safety. 2022;31:
+932--943. }
+
+\bibitem[\citeproctext]{ref-karim2018can}
+\CSLLeftMargin{7. }%
 \CSLRightInline{Karim ME, Pang M, Platt RW. Can we train machine
 learning methods to outperform the high-dimensional propensity score
 algorithm? Epidemiology. 2018;29: 191--198. }
 
 \bibitem[\citeproctext]{ref-schneeweiss2017variable}
-\CSLLeftMargin{7. }%
+\CSLLeftMargin{8. }%
 \CSLRightInline{Schneeweiss S, Eddings W, Glynn RJ, Patorno E, Rassen J,
 Franklin JM. Variable selection for confounding adjustment in
 high-dimensional covariate spaces when analyzing healthcare databases.
 Epidemiology. 2017;28: 237--248. }
 
 \bibitem[\citeproctext]{ref-franklin2015regularized}
-\CSLLeftMargin{8. }%
+\CSLLeftMargin{9. }%
 \CSLRightInline{Franklin JM, Eddings W, Glynn RJ, Schneeweiss S.
 Regularized regression versus the high-dimensional propensity score for
 confounding adjustment in secondary database analyses. American journal
 of epidemiology. 2015;182: 651--659. }
 
 \bibitem[\citeproctext]{ref-pang2016effect}
-\CSLLeftMargin{9. }%
+\CSLLeftMargin{10. }%
 \CSLRightInline{Pang M, Schuster T, Filion KB, Schnitzer ME, Eberg M,
 Platt RW. Effect estimation in point-exposure studies with binary
 outcomes and high-dimensional covariate data--a comparison of targeted
@@ -1231,135 +1246,135 @@ maximum likelihood estimation and inverse probability of treatment
 weighting. The international journal of biostatistics. 2016;12. }
 
 \bibitem[\citeproctext]{ref-wyss2018using}
-\CSLLeftMargin{10. }%
+\CSLLeftMargin{11. }%
 \CSLRightInline{Wyss R, Schneeweiss S, Van Der Laan M, Lendle SD, Ju C,
 Franklin JM. Using super learner prediction modeling to improve
 high-dimensional propensity score estimation. Epidemiology. 2018;29:
 96--106. }
 
 \bibitem[\citeproctext]{ref-simon2023evaluating}
-\CSLLeftMargin{11. }%
+\CSLLeftMargin{12. }%
 \CSLRightInline{Simon V, Vadel J. Evaluating the performance of
 high-dimensional propensity scores compared with standard propensity
 scores for comparing antihypertensive therapies in the CPRD GOLD
 database. Cardiology and Therapy. 2023;12: 393--408. }
 
 \bibitem[\citeproctext]{ref-saydah2014trends}
-\CSLLeftMargin{12. }%
+\CSLLeftMargin{13. }%
 \CSLRightInline{Saydah S, Bullard KM, Cheng Y, Ali MK, Gregg EW, Geiss
 L, et al. Trends in cardiovascular disease risk factors by obesity level
 in adults in the united states, NHANES 1999-2010. Obesity. 2014;22:
 1888--1895. }
 
 \bibitem[\citeproctext]{ref-liu2013association}
-\CSLLeftMargin{13. }%
+\CSLLeftMargin{14. }%
 \CSLRightInline{Liu J, Hay J, Faught BE, et al. The association of sleep
 disorder, obesity status, and diabetes mellitus among US adults---the
 NHANES 2009-2010 survey results. International journal of endocrinology.
 2013;2013. }
 
 \bibitem[\citeproctext]{ref-kabadi2012joint}
-\CSLLeftMargin{14. }%
+\CSLLeftMargin{15. }%
 \CSLRightInline{Kabadi SM, Lee BK, Liu L. Joint effects of obesity and
 vitamin d insufficiency on insulin resistance and type 2 diabetes:
 Results from the NHANES 2001--2006. Diabetes care. 2012;35: 2048--2054.
 }
 
 \bibitem[\citeproctext]{ref-ostchega2012abdominal}
-\CSLLeftMargin{15. }%
+\CSLLeftMargin{16. }%
 \CSLRightInline{Ostchega Y, Hughes JP, Terry A, Fakhouri TH, Miller I.
 Abdominal obesity, body mass index, and hypertension in US adults:
 NHANES 2007--2010. American journal of hypertension. 2012;25:
 1271--1278. }
 
 \bibitem[\citeproctext]{ref-greenland1999causal}
-\CSLLeftMargin{16. }%
+\CSLLeftMargin{17. }%
 \CSLRightInline{Greenland S, Pearl J, Robins JM. Causal diagrams for
 epidemiologic research. Epidemiology. 1999; 37--48. }
 
 \bibitem[\citeproctext]{ref-franklin2014plasmode}
-\CSLLeftMargin{17. }%
+\CSLLeftMargin{18. }%
 \CSLRightInline{Franklin JM, Schneeweiss S, Polinski JM, Rassen JA.
 Plasmode simulation for the evaluation of pharmacoepidemiologic methods
 in complex healthcare databases. Computational statistics and data
 analysis. 2014;72: 219--226. }
 
 \bibitem[\citeproctext]{ref-farley2006comparison}
-\CSLLeftMargin{18. }%
+\CSLLeftMargin{19. }%
 \CSLRightInline{Farley JF, Harley CR, Devine JW. A comparison of
 comorbidity measurements to predict healthcare expenditures. American
 Journal of Managed Care. 2006;12: 110--118. }
 
 \bibitem[\citeproctext]{ref-morris2019using}
-\CSLLeftMargin{19. }%
+\CSLLeftMargin{20. }%
 \CSLRightInline{Morris TP, White IR, Crowther MJ. Using simulation
 studies to evaluate statistical methods. Statistics in medicine.
 2019;38: 2074--2102. }
 
 \bibitem[\citeproctext]{ref-white2023check}
-\CSLLeftMargin{20. }%
+\CSLLeftMargin{21. }%
 \CSLRightInline{White IR, Pham TM, Quartagno M, Morris TP. How to check
 a simulation study. International Journal of Epidemiology. 2023;
 dyad134. }
 
 \bibitem[\citeproctext]{ref-breiman2001random}
-\CSLLeftMargin{21. }%
+\CSLLeftMargin{22. }%
 \CSLRightInline{Breiman L. Random forests. Machine learning. 2001;45:
 5--32. }
 
 \bibitem[\citeproctext]{ref-chen2016xgboost}
-\CSLLeftMargin{22. }%
+\CSLLeftMargin{23. }%
 \CSLRightInline{Chen T, Guestrin C. Xgboost: A scalable tree boosting
 system. Proceedings of the 22nd acm sigkdd international conference on
 knowledge discovery and data mining. 2016. pp. 785--794. }
 
 \bibitem[\citeproctext]{ref-xiao2024interpretable}
-\CSLLeftMargin{23. }%
+\CSLLeftMargin{24. }%
 \CSLRightInline{Xiao Y, Chen Y, Huang R, Jiang F, Zhou J, Yang T.
 Interpretable machine learning in predicting drug-induced liver injury
 among tuberculosis patients: Model development and validation study. BMC
 Medical Research Methodology. 2024;24: 92. }
 
 \bibitem[\citeproctext]{ref-holland1975adaptation}
-\CSLLeftMargin{24. }%
+\CSLLeftMargin{25. }%
 \CSLRightInline{Holland JH. Adaptation in natural and artificial
 systems. University of Michigan Press; 1975. }
 
 \bibitem[\citeproctext]{ref-pang2016targeted}
-\CSLLeftMargin{25. }%
+\CSLLeftMargin{26. }%
 \CSLRightInline{Pang M, Schuster T, Filion KB, Eberg M, Platt RW.
 Targeted maximum likelihood estimation for pharmacoepidemiologic
 research. Epidemiology (Cambridge, Mass). 2016;27: 570. }
 
 \bibitem[\citeproctext]{ref-benasseur2022comparison}
-\CSLLeftMargin{26. }%
+\CSLLeftMargin{27. }%
 \CSLRightInline{Benasseur I, Talbot D, Durand M, Holbrook A, Matteau A,
 Potter BJ, et al. A comparison of confounder selection and adjustment
 methods for estimating causal effects using large healthcare databases.
 Pharmacoepidemiology and Drug Safety. 2022;31: 424--433. }
 
 \bibitem[\citeproctext]{ref-guertin2016head}
-\CSLLeftMargin{27. }%
+\CSLLeftMargin{28. }%
 \CSLRightInline{Guertin JR, Rahme E, Dormuth CR, LeLorier J. Head to
 head comparison of the propensity score and the high-dimensional
 propensity score matching methods. BMC medical research methodology.
 2016;16: 1--10. }
 
 \bibitem[\citeproctext]{ref-ju2019propensity}
-\CSLLeftMargin{28. }%
+\CSLLeftMargin{29. }%
 \CSLRightInline{Ju C, Combs M, Lendle SD, Franklin JM, Wyss R,
 Schneeweiss S, et al. Propensity score prediction for electronic
 healthcare databases using super learner and high-dimensional propensity
 score methods. Journal of Applied Statistics. 2019;46: 2216--2236. }
 
 \bibitem[\citeproctext]{ref-karim2024can}
-\CSLLeftMargin{29. }%
+\CSLLeftMargin{30. }%
 \CSLRightInline{Karim ME. Can supervised deep learning architecture
 outperform autoencoders in building propensity score models for
 matching? BMC Medical Research Methodology. 2024;24: 167. }
 
 \bibitem[\citeproctext]{ref-hossain2023role}
-\CSLLeftMargin{30. }%
+\CSLLeftMargin{31. }%
 \CSLRightInline{Hossain MB, Johnston JC, Cook VJ, Sadatsafavi M, Wong H,
 Romanowski K, et al. Role of latent tuberculosis infection on elevated
 risk of cardiovascular disease: A population-based cohort study of
@@ -1367,14 +1382,14 @@ immigrants in british columbia, canada, 1985--2019. Epidemiology \&
 Infection. 2023;151: e68. }
 
 \bibitem[\citeproctext]{ref-basham2021post}
-\CSLLeftMargin{31. }%
+\CSLLeftMargin{32. }%
 \CSLRightInline{Basham CA, Karim ME, Cook VJ, Patrick DM, Johnston JC.
 Post-tuberculosis airway disease: A population-based cohort study of
 people immigrating to british columbia, canada, 1985--2015.
 EClinicalMedicine. 2021;33. }
 
 \bibitem[\citeproctext]{ref-neugebauer2015high}
-\CSLLeftMargin{32. }%
+\CSLLeftMargin{33. }%
 \CSLRightInline{Neugebauer R, Schmittdiel JA, Zhu Z, Rassen JA, Seeger
 JD, Schneeweiss S. High-dimensional propensity score algorithm in
 comparative effectiveness research with time-varying interventions.
