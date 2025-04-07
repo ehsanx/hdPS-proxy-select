@@ -22,6 +22,7 @@ library(caret)
 require(autoCovariateSelection)
 library(randomForest)
 library(leaps)
+library(grid)
 ```
 
 ```{r loading data, warning=FALSE, cache=TRUE, include=FALSE}
@@ -932,13 +933,101 @@ RD.plot <- RD.plot + annotation_custom(custom_legend)
 RD.plot
 ```
 
-```{r}
-save.image("RealDataAnalysisWorkspace.RData")
+```{r, cache=TRUE}
+# save.image("RealDataAnalysisWorkspace.RData")
 ```
 
-```{r}
-ggsave("OR_plot.png", plot = OR.plot, device = "png", width = 8, height = 6)
-ggsave("RD_plot.png", plot = RD.plot, device = "png", width = 8, height = 6)
+```{r, cache=TRUE}
+ggplot2::ggsave("OR_plot.png", plot = OR.plot, device = "png", width = 8, height = 6)
+ggplot2::ggsave("RD_plot.png", plot = RD.plot, device = "png", width = 8, height = 6)
+```
+
+```{r patchwork, warning=FALSE, cache=TRUE, echo=FALSE}
+library(patchwork)
+library(ggplot2)
+# Combine the two plots
+combined_plot <- OR.plot + RD.plot +
+  plot_layout(ncol = 2, guides = "collect") &
+  theme(legend.position = "none")
+combined_plot
 ```
 
 
+```{r patchworksave, warning=FALSE, cache=TRUE, echo=FALSE}
+# Save the combined plot
+ggplot2::ggsave("combined_OR_RD_plot0.png", plot = combined_plot, width = 12, height = 6, dpi = 300)
+
+```
+
+```{r, cache=TRUE}
+library(ggplot2)
+library(patchwork)
+
+# Example: define human-readable names (must match order in 'methods')
+method_names <- c(
+  "Kitchen Sink", "Bross", "Hybrid", "LASSO", "Elastic Net",
+  "Random Forest", "XGBoost", "Forward Selection",
+  "Backward Elimination", "Genetic Algorithm"
+)
+
+# Create composite labels using real number of proxies
+method_labels <- paste0(method_names, " [", num.proxy_all[, 1], "]")
+
+# Rank indices by proxy count (descending order)
+rank_idx <- order(num.proxy_all[, 1], decreasing = TRUE)
+
+# Reorder everything based on that rank
+method_labels <- method_labels[rank_idx]
+#OR_all$method <- factor(method_labels, levels = method_labels)
+#RD_all$method <- factor(method_labels, levels = method_labels)
+
+# Apply ordered factor with labels
+OR_all$method <- factor(method_labels, levels = rev(method_labels))
+RD_all$method <- factor(method_labels, levels = rev(method_labels))
+
+# Plot: OR
+OR_all
+
+OR.plot <- ggplot(OR_all, aes(y = method, x = OR)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.2, color = "black") +
+  geom_text(aes(label = round(OR, 2), x = OR + 0.015), vjust = -0.6, size = 3) +
+  labs(title = "", x = "Odds Ratio", y = "Method [Chosen number of proxies]") +
+  theme_bw() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.text.y = element_text(size = 9)
+  )
+
+
+
+# Plot: RD
+RD_all
+
+RD.plot <- ggplot(RD_all, aes(y = method, x = RD)) +
+  geom_point(size = 3, color = "black") +
+  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.2, color = "black") +
+  geom_text(aes(label = round(RD, 2), x = RD + 0.003), vjust = -0.6, size = 3) +
+  labs(title = "", x = "Risk Difference", y = NULL) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+
+# Combine plots side-by-side
+combined_plot2 <- OR.plot + RD.plot +
+  plot_layout(ncol = 2, widths = c(1.1, 1))
+
+# Display
+combined_plot2
+
+```
+
+```{r patchworksave2, warning=FALSE, echo=FALSE}
+# Save the combined plot
+ggplot2::ggsave("combined_OR_RD_plot.png", plot = combined_plot2, width = 12, height = 6, dpi = 300)
+
+```
