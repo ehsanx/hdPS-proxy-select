@@ -341,7 +341,7 @@ algorithm further refines the selection by prioritizing variables based
 on their prevalence and potential for confounding, defined by their
 association with both exposure and outcome {[}2{]}.
 
-\textcolor{red}{Importantly, hdPS has become a foundational method in modern epidemiologic research that uses healthcare databases, offering a scalable and reproducible approach to confounding control when traditional investigator-specified propensity score models are limited by unmeasured, mismeasured, or omitted variables. Unlike conventional PS methods that rely solely on expert knowledge and a fixed set of covariates, hdPS empirically identifies and prioritizes proxy variables from high-dimensional data, allowing it to adjust for latent confounding structures more effectively. This makes hdPS particularly valuable for improving causal inference in observational healthcare studies, including those evaluating drug safety, treatment effectiveness, and health system interventions}
+\textcolor{black}{Importantly, hdPS has become a foundational method in modern epidemiologic research that uses healthcare databases, offering a scalable and reproducible approach to confounding control when traditional investigator-specified propensity score models are limited by unmeasured, mismeasured, or omitted variables. Unlike conventional PS methods that rely solely on expert knowledge and a fixed set of covariates, hdPS empirically identifies and prioritizes proxy variables from high-dimensional data, allowing it to adjust for latent confounding structures more effectively. This makes hdPS particularly valuable for improving causal inference in observational healthcare studies, including those evaluating drug safety, treatment effectiveness, and health system interventions}
 {[}5,6{]}.
 
 \textbf{Multivariate Machine Learning Extensions}: Although the Bross
@@ -356,13 +356,13 @@ framework. These methods are better suited for high-dimensional data,
 where they can more effectively handle complex relationships and improve
 the selection of proxy variables, thus enhancing the precision of
 treatment effect estimates {[}7--9{]}.
-\textcolor{red}{Several studies have proposed hybrid approaches that combine machine learning and hdPS to enhance variable selection and bias reduction while maintaining interpretability}
+\textcolor{black}{Several studies have proposed hybrid approaches that combine machine learning and hdPS to enhance variable selection and bias reduction while maintaining interpretability}
 {[}6,7,9{]}. Simulation studies and empirical research have shown that
 these machine learning-based methods, or hybrid approaches combining the
 Bross formula with machine learning, can reduce confounding more
 effectively and increase efficiency compared to the Bross formula alone
 in certain settings {[}7--9{]}.
-\textcolor{red}{These efforts reflect a growing interest in refining hdPS with modern statistical learning tools to optimize proxy confounder adjustment in realistic, data-rich settings.}
+\textcolor{black}{These efforts reflect a growing interest in refining hdPS with modern statistical learning tools to optimize proxy confounder adjustment in realistic, data-rich settings.}
 
 \textbf{Assessing the Simulation Performance}: Other than bias, previous
 studies have primarily focused on Mean Squared Error (MSE) as a key
@@ -388,7 +388,7 @@ the focus to coverage, rather than relying solely on MSE, we can achieve
 a more comprehensive understanding of method performance, especially in
 cases where unstable variance estimation might distort conclusions drawn
 from MSE alone.
-\textcolor{red}{To extend prior research, our study systematically compares multiple machine learning and hybrid hdPS approaches using plasmode simulations grounded in real-world data structure. Importantly, we expand beyond commonly reported metrics such as bias and MSE by incorporating underutilized diagnostics—namely, empirical coverage and relative error in standard error—to provide a more nuanced understanding of estimator performance.}
+\textcolor{black}{To extend prior research, our study systematically compares multiple machine learning and hybrid hdPS approaches using plasmode simulations grounded in real-world data structure. Importantly, we expand beyond commonly reported metrics such as bias and MSE by incorporating underutilized diagnostics—namely, empirical coverage and relative error in standard error—to provide a more nuanced understanding of estimator performance.}
 
 \textbf{Aim}: This research aims to systematically evaluate and compare
 various proxy selection methods within the hdPS framework for inverse
@@ -519,15 +519,15 @@ across repeated samples), (4) MSE, (5) coverage probability of 95\%
 confidence intervals, (6) bias-corrected coverage, and (7) Zip plot
 {[}20,21{]}.
 
-\textbackslash textcolor\{red\}\{Bias-corrected coverage provides a more
-accurate reflection of model reliability when bias is present. By
+\textbackslash textcolor\{black\}\{Bias-corrected coverage provides a
+more accurate reflection of model reliability when bias is present. By
 adjusting for bias, we isolate the coverage performance attributable to
 variance estimation alone, allowing clearer comparisons of uncertainty
 calibration. This correction is crucial for distinguishing methods that
 produce narrow but biased intervals from those that offer valid
 inference under realistic misspecification.
 
-\textcolor{red}{While MSE is a commonly used metric, its interpretation becomes less reliable when variance estimates are unstable, as observed with singly robust machine learning models. In such cases, MSE may mask the trade-off between high variance and low bias (or vice versa), especially when confidence intervals are miscalibrated. Our inclusion of coverage and standard error diagnostics addresses this limitation by providing complementary insights into inference accuracy.}
+\textcolor{black}{While MSE is a commonly used metric, its interpretation becomes less reliable when variance estimates are unstable, as observed with singly robust machine learning models. In such cases, MSE may mask the trade-off between high variance and low bias (or vice versa), especially when confidence intervals are miscalibrated. Our inclusion of coverage and standard error diagnostics addresses this limitation by providing complementary insights into inference accuracy.}
 
 \subsection*{Inverse probability weighted estimators under
 consideration}\label{inverse-probability-weighted-estimators-under-consideration}
@@ -552,13 +552,13 @@ is the average treatment effect (ATE), which represents the difference
 in expected outcomes between treated and untreated individuals if all
 had been exposed to either treatment condition.
 
-\textcolor{red}{The selected machine learning models were chosen for their demonstrated ability to handle high-dimensional data and perform feature selection effectively. For example, XGBoost and Random Forest are tree-based ensemble methods known for capturing non-linear relationships and interactions. Genetic Algorithm (GA) offers a stochastic, optimization-based approach to variable selection, allowing exploration of complex covariate spaces. These models align with the goals of hdPS by enabling automated, multivariate proxy variable selection that may capture complex dependencies missed by univariate selection strategies like the Bross formula. Incorporating such models expands the flexibility and potential robustness of hdPS analyses in high-dimensional data settings.}
+\textcolor{black}{The selected machine learning models were chosen for their demonstrated ability to handle high-dimensional data and perform feature selection effectively. For example, XGBoost and Random Forest are tree-based ensemble methods known for capturing non-linear relationships and interactions. Genetic Algorithm (GA) offers a stochastic, optimization-based approach to variable selection, allowing exploration of complex covariate spaces. These models align with the goals of hdPS by enabling automated, multivariate proxy variable selection that may capture complex dependencies missed by univariate selection strategies like the Bross formula. Incorporating such models expands the flexibility and potential robustness of hdPS analyses in high-dimensional data settings.}
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
   \textbf{Kitchen sink model}:
-  \textcolor{red}{The kitchen sink model serves as a comprehensive baseline that includes all available covariates—both investigator-specified and proxy variables—without any variable selection. It is used to benchmark the performance of variable selection methods against a model that assumes complete adjustment}
+  \textcolor{black}{The kitchen sink model serves as a comprehensive baseline that includes all available covariates—both investigator-specified and proxy variables—without any variable selection. It is used to benchmark the performance of variable selection methods against a model that assumes complete adjustment}
   {[}7{]}.
 \item
   \textbf{hdPS using Bross formula}: The Bross formula is a statistical
@@ -568,9 +568,9 @@ had been exposed to either treatment condition.
   if the covariate were not adjusted for. In our analysis, the 100
   proxies with the highest bias rankings are selected for further
   modeling {[}2,3{]}.
-  \textcolor{red}{This threshold of 100 proxy variables has been used in the literature to balance model complexity and overfitting risk, while ensuring that a sufficient number of proxies are included to capture unmeasured confounding}
+  \textcolor{black}{This threshold of 100 proxy variables has been used in the literature to balance model complexity and overfitting risk, while ensuring that a sufficient number of proxies are included to capture unmeasured confounding}
   {[}22{]}.
-  \textcolor{red}{Our choice reflects a practical trade-off between dimensionality and computational feasibility.}
+  \textcolor{black}{Our choice reflects a practical trade-off between dimensionality and computational feasibility.}
 \item
   \textbf{Least Absolute Shrinkage and Selection Operator (LASSO)}:
   LASSO is a variable selection technique that limits the number of
@@ -604,7 +604,7 @@ had been exposed to either treatment condition.
   decrease in impurity {[}25{]}.
 \item
   \textbf{Stepwise}:
-  \textcolor{red}{Stepwise selection is a commonly used variable selection technique that builds or reduces models by adding or removing predictors based on statistical criteria—in our case, adjusted R-squared. We implemented two versions: (a) Forward selection (FS) begins with a minimal model, typically including only investigator-selected covariates. It then adds one proxy variable at a time—the one that most improves model performance at each step. This process continues until no additional variable meaningfully improves the fit. (b) Backward elimination (BE) takes the opposite approach. It starts with a full model containing all investigator-selected and proxy variables and removes the least informative variable at each step, based on its contribution to model fit. This continues until removing more variables no longer improves or begins to harm the model. These stepwise approaches are transparent, making them accessible alternatives for confounding adjustment in high-dimensional settings.}
+  \textcolor{black}{Stepwise selection is a commonly used variable selection technique that builds or reduces models by adding or removing predictors based on statistical criteria—in our case, adjusted R-squared. We implemented two versions: (a) Forward selection (FS) begins with a minimal model, typically including only investigator-selected covariates. It then adds one proxy variable at a time—the one that most improves model performance at each step. This process continues until no additional variable meaningfully improves the fit. (b) Backward elimination (BE) takes the opposite approach. It starts with a full model containing all investigator-selected and proxy variables and removes the least informative variable at each step, based on its contribution to model fit. This continues until removing more variables no longer improves or begins to harm the model. These stepwise approaches are transparent, making them accessible alternatives for confounding adjustment in high-dimensional settings.}
 \item
   \textbf{Genetic algorithm}: Genetic algorithm is an evolutionary
   algorithm inspired by the theory of natural selection {[}26{]}. It
@@ -614,10 +614,10 @@ had been exposed to either treatment condition.
   accuracy.
 \end{enumerate}
 
-\subsection*{\texorpdfstring{\textcolor{red}{Ethics approval and consent to participate}}{}}\label{section}
-\addcontentsline{toc}{subsection}{\textcolor{red}{Ethics approval and consent to participate}}
+\subsection*{\texorpdfstring{\textcolor{black}{Ethics approval and consent to participate}}{}}\label{section}
+\addcontentsline{toc}{subsection}{\textcolor{black}{Ethics approval and consent to participate}}
 
-\textcolor{red}{The analysis conducted on secondary and de-identified data is exempt from research ethics approval requirements. Ethics for this study was covered by item 7.10.3 in University of British Columbia's Policy no. 89: Research and Other Studies Involving Human Subjects 19 and Article 2.2 in of the Tri-Council Policy Statement- Ethical Conduct for Research Involving Humans (TCPS2).}
+\textcolor{black}{The analysis conducted on secondary and de-identified data is exempt from research ethics approval requirements. Ethics for this study was covered by item 7.10.3 in University of British Columbia's Policy no. 89: Research and Other Studies Involving Human Subjects 19 and Article 2.2 in of the Tri-Council Policy Statement- Ethical Conduct for Research Involving Humans (TCPS2).}
 
 \section{Results}\label{results}
 
@@ -802,7 +802,7 @@ the outcome is 23.7\%.
 
 See Fig \ref{fig:comparison-plot-updated} for the results from analyzing
 the NHANES (2013-2018) dataset.
-\textcolor{red}{The methods are arranged according to the number of selected proxy variables. Among all variable selection algorithms, Forward Selection and LASSO yield the highest ORs, with values of 1.56 and 1.55, respectively. The ORs for the remaining methods cluster around 1.50 to 1.54. Additionally, with the exception of a few methods such as Kitchen Sink and Genetic Algorithm, a general pattern emerges in which methods selecting a smaller number of proxy variables tend to produce higher ORs. For RD, Forward Selection again shows the highest value at 0.082, followed closely by LASSO (0.080). Most other methods yield RD values between 0.075 and 0.079, reflecting a similar pattern to that observed for the ORs. This consistency suggests that the relationship between variable selection method and effect size persists across different estimands.}
+\textcolor{black}{The methods are arranged according to the number of selected proxy variables. Among all variable selection algorithms, Forward Selection and LASSO yield the highest ORs, with values of 1.56 and 1.55, respectively. The ORs for the remaining methods cluster around 1.50 to 1.54. Additionally, with the exception of a few methods such as Kitchen Sink and Genetic Algorithm, a general pattern emerges in which methods selecting a smaller number of proxy variables tend to produce higher ORs. For RD, Forward Selection again shows the highest value at 0.082, followed closely by LASSO (0.080). Most other methods yield RD values between 0.075 and 0.079, reflecting a similar pattern to that observed for the ORs. This consistency suggests that the relationship between variable selection method and effect size persists across different estimands.}
 
 \begin{figure}
 \includegraphics[width=1\linewidth]{figures/combined_OR_RD_plot} \caption{Figure presenting a comparison of Risk Differences (RD) and Odds Ratios (OR) with 95\% confidence intervals for different methods used to evaluate the association between obesity and diabetes risk. The analysis is based on data from the National Health and Nutrition Examination Survey (NHANES) for the years 2013-2018. Methods are arranged by the number of variables used in the models.\label{fig:comparison-plot-updated}}\label{fig:unnamed-chunk-3}
@@ -825,7 +825,7 @@ variables selected by the method in the corresponding row.
 
 \begin{table}[htbp]
 \centering
-\caption{Comparison of variable overlap of selected proxies across different methods used to evaluate the association between obesity and diabetes from the National Health and Nutrition Examination Survey (NHANES) for the years 2013-2018. \textcolor{red}{Diagonal entries show the total number of proxies selected by each method, and off-diagonal entries represent the count of shared variables between method pairs. Most methods share a moderate number of proxies (typically 50–60 percent of the smaller set), indicating partial agreement in variable selection. Higher overlap is observed between closely related methods (e.g., LASSO and Elastic Net, or Hybrid with Bross/LASSO), while methods like XGBoost and Genetic Algorithm show lower overlap with others, reflecting divergent selection behavior in high-dimensional settings.}}
+\caption{Comparison of variable overlap of selected proxies across different methods used to evaluate the association between obesity and diabetes from the National Health and Nutrition Examination Survey (NHANES) for the years 2013-2018. \textcolor{black}{Diagonal entries show the total number of proxies selected by each method, and off-diagonal entries represent the count of shared variables between method pairs. Most methods share a moderate number of proxies (typically 50–60 percent of the smaller set), indicating partial agreement in variable selection. Higher overlap is observed between closely related methods (e.g., LASSO and Elastic Net, or Hybrid with Bross/LASSO), while methods like XGBoost and Genetic Algorithm show lower overlap with others, reflecting divergent selection behavior in high-dimensional settings.}}
 \label{tab:method-comparison-updated}
 \begin{tabular}{lcccccccccc}
 \toprule
@@ -869,7 +869,7 @@ displays the lowest common percentage at \(69\%\).
 
 \begin{table}[htbp]
 \centering
-\caption{Comparison of the count and percentage of proxy variables selected by each methods in common with that by the Bross formula-based high-dimensional propensity score to evaluate the association between obesity and diabetes from the National Health and Nutrition Examination Survey (NHANES) for the years 2013-2018. \textcolor{red}{The Hybrid method (Bross + LASSO) shows perfect agreement with the Bross-based hdPS by design. Other methods demonstrate overlap rates ranging from 0.69 to 0.79, indicating moderate consistency in variable selection. XGBoost shows the highest overlap (79 percent) among the non-hybrid methods, while the Genetic Algorithm shows the lowest (69 percent), reflecting greater divergence in selected proxies. These overlap patterns highlight methodological differences in how each approach prioritizes covariates in high-dimensional settings.}}
+\caption{Comparison of the count and percentage of proxy variables selected by each methods in common with that by the Bross formula-based high-dimensional propensity score to evaluate the association between obesity and diabetes from the National Health and Nutrition Examination Survey (NHANES) for the years 2013-2018. \textcolor{black}{The Hybrid method (Bross + LASSO) shows perfect agreement with the Bross-based hdPS by design. Other methods demonstrate overlap rates ranging from 0.69 to 0.79, indicating moderate consistency in variable selection. XGBoost shows the highest overlap (79 percent) among the non-hybrid methods, while the Genetic Algorithm shows the lowest (69 percent), reflecting greater divergence in selected proxies. These overlap patterns highlight methodological differences in how each approach prioritizes covariates in high-dimensional settings.}}
 \label{tab:proxy-common-pct-bross}
 \begin{tabular}{p{4cm}ccc}
 \toprule
@@ -896,12 +896,7 @@ method. All methods, aside from RF and GA, exhibit relatively fast
 computing times. RF and GA are generally much slower.
 
 \begin{figure}
-
-{\centering \includegraphics{plos_files/figure-latex/unnamed-chunk-5-1} 
-
-}
-
-\caption{Computing time for the real-world analysis for each algorithm under consideration. The analysis is based on data from the National Health and Nutrition Examination Survey (NHANES) for the years 2013-2018.\label{fig:computing-time}}\label{fig:unnamed-chunk-5}
+\includegraphics[width=1\linewidth]{figures/time} \caption{Computing time for the real-world analysis for each algorithm under consideration. The analysis is based on data from the National Health and Nutrition Examination Survey (NHANES) for the years 2013-2018.\label{fig:computing-time}}\label{fig:unnamed-chunk-6}
 \end{figure}
 
 \section{Discussion}\label{discussion}
@@ -926,9 +921,9 @@ precision, especially with respect to MSE, though they often resulted in
 lower bias. The kitchen sink model performed comparably to Bross-based
 hdPS in terms of bias and coverage but lagged in SE estimation and MSE.
 
-\textcolor{red}{While XGBoost consistently yielded the lowest MSE across scenarios—indicating high overall accuracy—this gain came at the cost of increased bias, particularly in rare exposure settings. This pattern suggests that while XGBoost is highly efficient in minimizing prediction error, it may over-prioritize variance reduction at the expense of bias, potentially due to aggressive regularization or suboptimal feature weighting in the context of non-linear, sparse exposure structures. In causal inference applications, such trade-offs warrant caution, as models with high precision but biased estimates can result in systematically misleading conclusions regarding treatment effects.}
+\textcolor{black}{While XGBoost consistently yielded the lowest MSE across scenarios—indicating high overall accuracy—this gain came at the cost of increased bias, particularly in rare exposure settings. This pattern suggests that while XGBoost is highly efficient in minimizing prediction error, it may over-prioritize variance reduction at the expense of bias, potentially due to aggressive regularization or suboptimal feature weighting in the context of non-linear, sparse exposure structures. In causal inference applications, such trade-offs warrant caution, as models with high precision but biased estimates can result in systematically misleading conclusions regarding treatment effects.}
 
-\textcolor{red}{GA exhibited consistently high bias and MSE, indicating substantial limitations in handling the dimensionality and noise characteristics inherent in the hdPS framework. One plausible explanation is that GA’s stochastic search process lacks the structure to efficiently navigate large covariate spaces with many weakly informative or correlated variables. Unlike regularized regression or tree-based methods, GA does not incorporate intrinsic mechanisms for managing multicollinearity or prioritizing marginally predictive features, which may lead to unstable or suboptimal variable subsets and subsequently poor confounding adjustment. Its computational intensity further compounds these limitations, making it less practical for high-dimensional epidemiologic analyses.}
+\textcolor{black}{GA exhibited consistently high bias and MSE, indicating substantial limitations in handling the dimensionality and noise characteristics inherent in the hdPS framework. One plausible explanation is that GA’s stochastic search process lacks the structure to efficiently navigate large covariate spaces with many weakly informative or correlated variables. Unlike regularized regression or tree-based methods, GA does not incorporate intrinsic mechanisms for managing multicollinearity or prioritizing marginally predictive features, which may lead to unstable or suboptimal variable subsets and subsequently poor confounding adjustment. Its computational intensity further compounds these limitations, making it less practical for high-dimensional epidemiologic analyses.}
 
 \textbf{Comparison of scenarios}:
 
@@ -947,7 +942,7 @@ exhibited the lowest MSE across most methods (except GA), indicating
 that these scenarios provided a better balance between bias and
 precision for most methods.
 
-\textcolor{red}{These findings have practical implications for selecting variable selection strategies in epidemiological research. For studies focused on rare exposures (e.g., occupational or genetic risk factors), methods that minimize bias—such as Bross-based hdPS, Hybrid hdPS, or forward/backward stepwise selection—may be more suitable, as they provide more stable effect estimates under sparse data conditions. In contrast, studies targeting common conditions or aiming to improve precision, such as evaluations of widely used treatments or lifestyle exposures, may benefit from machine learning method such as XGBoost, which consistently demonstrate lower MSE. However, trade-offs between bias and variance should be carefully considered in relation to the study’s primary inference goal.}
+\textcolor{black}{These findings have practical implications for selecting variable selection strategies in epidemiological research. For studies focused on rare exposures (e.g., occupational or genetic risk factors), methods that minimize bias—such as Bross-based hdPS, Hybrid hdPS, or forward/backward stepwise selection—may be more suitable, as they provide more stable effect estimates under sparse data conditions. In contrast, studies targeting common conditions or aiming to improve precision, such as evaluations of widely used treatments or lifestyle exposures, may benefit from machine learning method such as XGBoost, which consistently demonstrate lower MSE. However, trade-offs between bias and variance should be carefully considered in relation to the study’s primary inference goal.}
 
 \subsection{Contextualizing the
 literature}\label{contextualizing-the-literature}
@@ -972,14 +967,14 @@ which were evaluated here.
 
 The real-world dataset, with frequent exposure (48.8\%) and a moderate
 outcome rate (23.7\%), produced
-\textcolor{red}{ORs of 1.56 and 1.55 for Forward Selection and LASSO, respectively, while other methods clustered around OR values between 1.50 and 1.54. A general trend emerged, showing that methods selecting fewer proxy variables tended to yield higher ORs, with exceptions such as the Kitchen Sink and Genetic Algorithm, which selected more proxies but produced lower ORs. In terms of risk difference (RD), estimates were relatively stable across methods, with Forward Selection again yielding the highest RD (0.082), followed by LASSO (0.080), while others ranged from 0.075 to 0.079.}
+\textcolor{black}{ORs of 1.56 and 1.55 for Forward Selection and LASSO, respectively, while other methods clustered around OR values between 1.50 and 1.54. A general trend emerged, showing that methods selecting fewer proxy variables tended to yield higher ORs, with exceptions such as the Kitchen Sink and Genetic Algorithm, which selected more proxies but produced lower ORs. In terms of risk difference (RD), estimates were relatively stable across methods, with Forward Selection again yielding the highest RD (0.082), followed by LASSO (0.080), while others ranged from 0.075 to 0.079.}
 Regarding variable overlap, most methods shared around 74\% of their
 proxy variables with the Bross formula hdPS, with XGBoost showing the
 highest common rate (79\%) and GA the lowest (69\%). Computing time
 analysis showed that, aside from RF and GA, most methods had relatively
 fast computing times, with RF being significantly slower.
 
-\textcolor{red}{In applied research, particularly with large-scale electronic health records or claims data, computational efficiency is a critical consideration. While tree-based or stochastic optimization methods may offer performance gains, their longer runtime may be impractical in settings requiring rapid analyses or model updates. Simpler approaches such as stepwise selection or penalized regression offer viable alternatives when speed, transparency, or reproducibility are prioritized.}
+\textcolor{black}{In applied research, particularly with large-scale electronic health records or claims data, computational efficiency is a critical consideration. While tree-based or stochastic optimization methods may offer performance gains, their longer runtime may be impractical in settings requiring rapid analyses or model updates. Simpler approaches such as stepwise selection or penalized regression offer viable alternatives when speed, transparency, or reproducibility are prioritized.}
 
 \subsection{Strengths}\label{strengths}
 
@@ -1034,13 +1029,13 @@ hyperparameters on machine learning methods such as XGBoost could
 optimize their performance in hdPS analysis. Finally, future simulation
 studies should focus on evaluating coverage and other metrics in
 epidemiological scenarios such as time-varying exposures,
-\textcolor{red}{multiple treatment settings, and data with substantial measurement error,}
+\textcolor{black}{multiple treatment settings, and data with substantial measurement error,}
 which would provide valuable insights into the generalizability of our
 findings {[}34{]}.
 
-\textcolor{red}{One avenue for improving bias reduction in machine learning models within hdPS analysis is the incorporation of causal structure or prior knowledge into variable selection. Methods such as targeted maximum likelihood estimation, double machine learning, or feature engineering based on directed acyclic graphs can help align machine learning-based selection with the underlying causal model. Additionally, tuning hyperparameters to favor less aggressive regularization or ensemble weighting may reduce over-smoothing and improve bias performance, particularly in low-prevalence strata.}
+\textcolor{black}{One avenue for improving bias reduction in machine learning models within hdPS analysis is the incorporation of causal structure or prior knowledge into variable selection. Methods such as targeted maximum likelihood estimation, double machine learning, or feature engineering based on directed acyclic graphs can help align machine learning-based selection with the underlying causal model. Additionally, tuning hyperparameters to favor less aggressive regularization or ensemble weighting may reduce over-smoothing and improve bias performance, particularly in low-prevalence strata.}
 
-\textcolor{red}{Hybrid machine learning models—such as combinations of domain-informed methods (e.g., Bross or investigator-specified variables) with data-driven algorithms like LASSO or Random Forest—offer a promising balance between interpretability and predictive accuracy. Their application in health data science could enable more robust causal inference while accommodating real-world data challenges such as missingness, nonlinearity, and high dimensionality. Such models may help mitigate confounding bias without discarding variables of known clinical relevance, improving both validity and stakeholder trust in observational research findings.}
+\textcolor{black}{Hybrid machine learning models—such as combinations of domain-informed methods (e.g., Bross or investigator-specified variables) with data-driven algorithms like LASSO or Random Forest—offer a promising balance between interpretability and predictive accuracy. Their application in health data science could enable more robust causal inference while accommodating real-world data challenges such as missingness, nonlinearity, and high dimensionality. Such models may help mitigate confounding bias without discarding variables of known clinical relevance, improving both validity and stakeholder trust in observational research findings.}
 
 \subsection{Conclusion}\label{conclusion}
 
@@ -1072,7 +1067,7 @@ suggests that simpler approaches can still be viable, particularly in
 terms of bias and coverage, and might be preferred due to their
 computational efficiency.
 
-\textcolor{red}{In real-world healthcare settings—such as electronic health record-based cohort studies, claims data analysis, or comparative effectiveness research—these results offer concrete guidance on choosing hdPS-compatible variable selection strategies. For instance, institutions conducting routine surveillance or drug safety studies may benefit from hybrid or regularized regression approaches that balance scalability with confounding control. Meanwhile, traditional stepwise methods remain attractive for smaller studies or settings requiring transparent modeling. Overall, aligning method choice with data availability, computational resources, and inferential goals can improve the practical utility of hdPS analyses in healthcare.}
+\textcolor{black}{In real-world healthcare settings—such as electronic health record-based cohort studies, claims data analysis, or comparative effectiveness research—these results offer concrete guidance on choosing hdPS-compatible variable selection strategies. For instance, institutions conducting routine surveillance or drug safety studies may benefit from hybrid or regularized regression approaches that balance scalability with confounding control. Meanwhile, traditional stepwise methods remain attractive for smaller studies or settings requiring transparent modeling. Overall, aligning method choice with data availability, computational resources, and inferential goals can improve the practical utility of hdPS analyses in healthcare.}
 
 \section*{List of abbreviations}\label{list-of-abbreviations}
 \addcontentsline{toc}{section}{List of abbreviations}
@@ -1120,7 +1115,7 @@ computational efficiency.
 \subsection*{Acknowledgment}\label{acknowledgment}
 \addcontentsline{toc}{subsection}{Acknowledgment}
 
-\textcolor{red}{This research was supported in part through computational resources and services provided by Advanced Research Computing at the University of British Columbia.}
+\textcolor{black}{This research was supported in part through computational resources and services provided by Advanced Research Computing at the University of British Columbia.}
 
 \subsection*{Consent for publication}\label{consent-for-publication}
 \addcontentsline{toc}{subsection}{Consent for publication}
@@ -1143,7 +1138,7 @@ NHANES data is publicly accessible and can be retrieved from the NHANES
 website. The datasets generated and/or analyzed during the current study
 are available in the NHANES repository:
 https://www.cdc.gov/nchs/nhanes/index.htm.
-\textcolor{red}{Analysis data and codes are provided in https://github.com/ehsanx/hdPS-proxy-select-codes, with a stable, citable release archived at Zenodo (DOI: 10.5281/zenodo.15201233 and URL: https://doi.org/10.5281/zenodo.15201233)}.
+\textcolor{black}{Analysis data and codes are provided in https://github.com/ehsanx/hdPS-proxy-select-codes, with a stable, citable release archived at Zenodo (DOI: 10.5281/zenodo.15201233 and URL: https://doi.org/10.5281/zenodo.15201233)}.
 Additionally, all simulation results can be interactively reviewed
 through a Shiny web application at
 https://ehsanx.shinyapps.io/hdPS-Alternatives/.
@@ -1161,7 +1156,7 @@ Research and MS Canada. MEK has previously received consulting fees from
 Biogen Inc.~for consulting unrelated to this current work. MEK was also
 previously supported by the Michael Smith Foundation for Health Research
 Scholar award.
-\textcolor{red}{This does not alter our adherence to  PLOS ONE policies on sharing data and materials.}
+\textcolor{black}{This does not alter our adherence to  PLOS ONE policies on sharing data and materials.}
 
 \subsection*{Funding}\label{funding}
 \addcontentsline{toc}{subsection}{Funding}
@@ -1169,7 +1164,7 @@ Scholar award.
 This work was supported by MEK's Natural Sciences and Engineering
 Research Council of Canada (NSERC) Discovery Grant (PG\#: 20R01603) and
 Discovery Launch Supplement (PG\#: 20R12709).
-\textcolor{red}{The funders had no role in study design, data collection and analysis, decision to publish, or preparation of the manuscript.}
+\textcolor{black}{The funders had no role in study design, data collection and analysis, decision to publish, or preparation of the manuscript.}
 
 \subsection*{Authors' contributions}\label{authors-contributions}
 \addcontentsline{toc}{subsection}{Authors' contributions}
